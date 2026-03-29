@@ -1,0 +1,3 @@
+# Netlify redirects (optional)
+/plumbing-repair-Cleveland/* /plumbing-repair-cleveland/:splat 301
+/99drain https://book.housecallpro.com/book/Lakefront-Leak--Drain/ae2653195f4d42308810145d8ff8bf21?v2=true 301
