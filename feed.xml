@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<rss version="2.0" xmlns:media="http://search.yahoo.com/mrss/" xmlns:dc="http://purl.org/dc/elements/1.1/">
+<channel>
+    <title>Lakefront Leak & Drain Content Pipe</title>
+    <link>https://lakefrontleakanddrain.com/blog/</link>
+    <description>Automated Plumbing Leads for Cleveland &amp; Cuyahoga County</description>
+    <language>en-us</language>
+
+    <item>
+        <title>Why Cleveland Basements Flood</title>
+        <link>https://lakefrontleakanddrain.com/blog/why-cleveland-basements-flood/</link>
+        <description>🚨 CLEVELAND HOMEOWNERS: Is your basement ready for the spring thaw? Learn why local foundations fail and how to stay dry. 💧 #Cleveland #Plumbing</description>
+        <pubDate>Sun, 29 Mar 2026 12:00:00 EST</pubDate>
+        <media:content url="https://lakefrontleakanddrain.com/logo%20animated.mp4" medium="video" />
+    </item>
+
+    <item>
+        <title>Signs Your Sump Pump Is Failing</title>
+        <link>https://lakefrontleakanddrain.com/blog/signs-your-sump-pump-is-failing/</link>
+        <description>Don't wait for a flood to find out your pump is dead. Listen for these 3 warning signs today! 🛠️ #CuyahogaCounty #HomeMaintenance</description>
+        <pubDate>Mon, 30 Mar 2026 09:00:00 EST</pubDate>
+        <media:content url="https://lakefrontleakanddrain.com/logo%20animated.mp4" medium="video" />
+    </item>
+
+    <item>
+        <title>Preventing Clogs in Multifamily Buildings</title>
+        <link>https://lakefrontleakanddrain.com/blog/preventing-clogs-in-multifamily-buildings/</link>
+        <description>🏢 ATTN Property Managers: A single clog can ruin a whole stack. Here is your preventive maintenance checklist for Cleveland apartments.</description>
+        <pubDate>Tue, 31 Mar 2026 08:00:00 EST</pubDate>
+        <media:content url="https://lakefrontleakanddrain.com/logo%20animated.mp4" medium="video" />
+    </item>
+</channel>
+</rss>
