@@ -77,33 +77,102 @@
     </item>
 
     <item>
-        <title><![CDATA[Checking for Leaks After a Cleveland Winter]]></title>
+      <?xml version="1.0" encoding="UTF-8" ?>
+<rss version="2.0" xmlns:media="http://search.yahoo.com/mrss/">
+<channel>
+    <title>Lakefront Leak &amp; Drain Content Pipe</title>
+    <link>https://lakefrontleakanddrain.com/blog/</link>
+    <description>Automated Plumbing Leads for Cleveland and Cuyahoga County</description>
+    <language>en-us</language>
+
+    <item>
+        <title>Guide: Why Cleveland Basements Flood</title>
+        <link>https://lakefrontleakanddrain.com/blog/why-cleveland-basements-flood/</link>
+        <description>🚨 CLEVELAND: Is your basement ready for the spring thaw? Professional drain cleaning keeps your home flowing. 💧 #Cleveland #Plumbing</description>
+        <pubDate>Sun, 29 Mar 2026 12:00:00 EST</pubDate>
+        <media:content url="https://lakefrontleakanddrain.com/logo-animated.mp4" medium="video" />
+        <enclosure url="https://lakefrontleakanddrain.com/logo.jpg" length="0" type="image/jpeg" />
+    </item>
+
+    <item>
+        <title>Update: Signs Your Sump Pump Is Failing</title>
+        <link>https://lakefrontleakanddrain.com/blog/signs-your-sump-pump-is-failing/</link>
+        <description>Don't wait for a flood to find out your pump is dead. Listen for these warning signs today! 🛠️ #HomeMaintenance</description>
+        <pubDate>Mon, 30 Mar 2026 09:00:00 EST</pubDate>
+        <media:content url="https://lakefrontleakanddrain.com/logo-animated.mp4" medium="video" />
+        <enclosure url="https://lakefrontleakanddrain.com/logo.jpg" length="0" type="image/jpeg" />
+    </item>
+
+    <item>
+        <title>New: Preventing Clogs in Multifamily Buildings</title>
+        <link>https://lakefrontleakanddrain.com/blog/preventing-clogs-in-multifamily-buildings/</link>
+        <description>🏢 Property Managers: A single clog can ruin a whole stack. Here is your preventive checklist for Cleveland apartments. #PropertyManagement</description>
+        <pubDate>Tue, 31 Mar 2026 08:00:00 EST</pubDate>
+        <media:content url="https://lakefrontleakanddrain.com/logo-animated.mp4" medium="video" />
+        <enclosure url="https://lakefrontleakanddrain.com/logo.jpg" length="0" type="image/jpeg" />
+    </item>
+
+    <item>
+        <title>Water Heater Leaks: Repair vs. Replace</title>
+        <link>https://lakefrontleakanddrain.com/blog/water-heater-leaks-repair-vs-replace/</link>
+        <description>💧 Is that puddle around your tank a simple fix or a total replacement? We break down the warning signs. #PlumbingTips</description>
+        <pubDate>Wed, 01 Apr 2026 10:00:00 EST</pubDate>
+        <media:content url="https://lakefrontleakanddrain.com/logo-animated.mp4" medium="video" />
+        <enclosure url="https://lakefrontleakanddrain.com/logo.jpg" length="0" type="image/jpeg" />
+    </item>
+
+    <item>
+        <title>How to Fix Sewer Smells in Your Basement</title>
+        <link>https://lakefrontleakanddrain.com/blog/how-to-fix-sewer-smells-in-basement/</link>
+        <description>🤢 Basement smelling like a swamp? It might be a dry floor drain or a cracked vent. #ClevelandHome</description>
+        <pubDate>Thu, 02 Apr 2026 10:00:00 EST</pubDate>
+        <media:content url="https://lakefrontleakanddrain.com/logo-animated.mp4" medium="video" />
+        <enclosure url="https://lakefrontleakanddrain.com/logo.jpg" length="0" type="image/jpeg" />
+    </item>
+
+    <item>
+        <title>Hydro-Jetting vs. Snaking for Commercial Drains</title>
+        <link>https://lakefrontleakanddrain.com/blog/hydro-jetting-vs-snaking-for-commercial-drains/</link>
+        <description>🍳 Restaurant owners: Stop clearing the same clog twice. Learn why hydro-jetting is the only real fix. #ClevelandBusiness</description>
+        <pubDate>Fri, 03 Apr 2026 10:00:00 EST</pubDate>
+        <media:content url="https://lakefrontleakanddrain.com/logo-animated.mp4" medium="video" />
+        <enclosure url="https://lakefrontleakanddrain.com/logo.jpg" length="0" type="image/jpeg" />
+    </item>
+
+    <item>
+        <title>Benefits of Sewer Camera Inspections</title>
+        <link>https://lakefrontleakanddrain.com/blog/benefits-of-sewer-camera-inspections/</link>
+        <description>📸 Stop guessing what is in your pipes. Our cameras show you exactly where the roots and cracks are. #TechPlumbing</description>
+        <pubDate>Sat, 04 Apr 2026 10:00:00 EST</pubDate>
+        <media:content url="https://lakefrontleakanddrain.com/logo-animated.mp4" medium="video" />
+        <enclosure url="https://lakefrontleakanddrain.com/logo.jpg" length="0" type="image/jpeg" />
+    </item>
+
+    <item>
+        <title>Checking for Leaks After a Cleveland Winter</title>
         <link>https://lakefrontleakanddrain.com/blog/checking-for-leaks-after-winter/</link>
-        <description><![CDATA[❄️ The thaw is here. Check your spigots for hidden burst pipes today!]]></description>
+        <description>❄️ The thaw is here. Check your outdoor spigots for hidden burst pipes today! #Cleveland #SpringReady</description>
         <pubDate>Sun, 05 Apr 2026 10:00:00 EST</pubDate>
-        <enclosure url="https://lakefrontleakanddrain.com/logo.jpg" length="0" type="image/jpeg" />
         <media:content url="https://lakefrontleakanddrain.com/logo-animated.mp4" medium="video" />
-        <media:thumbnail url="https://lakefrontleakanddrain.com/logo.jpg" />
+        <enclosure url="https://lakefrontleakanddrain.com/logo.jpg" length="0" type="image/jpeg" />
     </item>
 
     <item>
-        <title><![CDATA[Signs of Main Sewer Line Clogs]]></title>
+        <title>Signs of Main Sewer Line Clogs</title>
         <link>https://lakefrontleakanddrain.com/blog/signs-of-main-sewer-line-clog/</link>
-        <description><![CDATA[🚽 Multiple drains backing up? You likely have a main line issue.]]></description>
+        <description>🚽 Multiple drains backing up? Gurgling toilets? You likely have a main line issue. #LakefrontLeakAndDrain</description>
         <pubDate>Mon, 06 Apr 2026 10:00:00 EST</pubDate>
-        <enclosure url="https://lakefrontleakanddrain.com/logo.jpg" length="0" type="image/jpeg" />
         <media:content url="https://lakefrontleakanddrain.com/logo-animated.mp4" medium="video" />
-        <media:thumbnail url="https://lakefrontleakanddrain.com/logo.jpg" />
+        <enclosure url="https://lakefrontleakanddrain.com/logo.jpg" length="0" type="image/jpeg" />
     </item>
 
     <item>
-        <title><![CDATA[DIY vs. Professional Drain Cleaning]]></title>
+        <title>DIY vs. Professional Drain Cleaning</title>
         <link>https://lakefrontleakanddrain.com/blog/diy-vs-professional-drain-cleaning/</link>
-        <description><![CDATA[🛠️ Before you buy chemicals, read why they might be eating your pipes.]]></description>
+        <description>🛠️ Before you buy that chemical cleaner, read why it might be eating your pipes instead of the clog. #PlumbingTips</description>
         <pubDate>Tue, 07 Apr 2026 10:00:00 EST</pubDate>
-        <enclosure url="https://lakefrontleakanddrain.com/logo.jpg" length="0" type="image/jpeg" />
         <media:content url="https://lakefrontleakanddrain.com/logo-animated.mp4" medium="video" />
-        <media:thumbnail url="https://lakefrontleakanddrain.com/logo.jpg" />
+        <enclosure url="https://lakefrontleakanddrain.com/logo.jpg" length="0" type="image/jpeg" />
     </item>
 </channel>
 </rss>
