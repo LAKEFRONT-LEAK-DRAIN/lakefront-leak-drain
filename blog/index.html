@@ -1,70 +1,111 @@
-<script>
-async function buildWordPressLayout() {
-    const main = document.getElementById('lakefront-feed-content');
-    const sidebar = document.getElementById('sidebar-links');
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plumbing Tips & News | Lakefront Leak & Drain</title>
+    <style>
+        body { margin: 0; padding: 0; background-color: #ffffff; }
+        article img { max-width: 100%; height: auto; border-radius: 8px; margin-bottom: 25px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        html { scroll-behavior: smooth; }
+        @media (max-width: 900px) {
+            .blog-container { grid-template-columns: 1fr !important; }
+            aside { display: none; }
+        }
+    </style>
+</head>
+<body>
 
-    if (!main || !sidebar) {
-        console.error("Required HTML elements not found.");
-        return;
-    }
+    <div class="blog-container" style="display: grid; grid-template-columns: 1fr 320px; gap: 50px; max-width: 1200px; margin: 40px auto; padding: 0 20px; font-family: 'Georgia', serif;">
 
-    try {
-        // Path fix: check root then relative
-        let response = await fetch('/feed.xml');
-        if (!response.ok) response = await fetch('../feed.xml');
-        
-        const text = await response.text();
-        const xml = new DOMParser().parseFromString(text, "text/xml");
-        const items = xml.querySelectorAll("item");
-        
-        main.innerHTML = '';
-        sidebar.innerHTML = '';
+        <main id="lakefront-feed-content" style="line-height: 1.8; color: #333;">
+            <div style="text-align: center; padding: 100px 0;">
+                <p style="font-family: Arial, sans-serif; color: #666;">Loading the latest Lakefront plumbing tips...</p>
+            </div>
+        </main>
 
-        items.forEach((item, index) => {
-            const title = item.querySelector("title").textContent;
-            const pubDate = item.querySelector("pubDate").textContent;
-            const content = item.querySelector("description").textContent;
-            const img = item.querySelector("enclosure")?.getAttribute("url");
-            const postId = `post-${index}`;
+        <aside style="font-family: 'Arial', sans-serif;">
+            <div style="position: sticky; top: 20px;">
+                <div style="background: #003366; color: white; padding: 25px; border-radius: 10px; margin-bottom: 30px;">
+                    <h3 style="margin-top: 0; font-size: 1.2rem;">Need Help Now?</h3>
+                    <a href="tel:2165057765" style="display: block; background: #d9534f; color: white; text-align: center; padding: 15px; border-radius: 5px; text-decoration: none; font-weight: bold;">(216) 505-7765</a>
+                </div>
 
-            // FALLBACK LOGIC: If image fails to load, use the logo
-            const fallbackImg = "https://lakefrontleakanddrain.com/logo.jpg";
-            const imgHtml = img 
-                ? `<img src="${img}" onerror="this.onerror=null;this.src='${fallbackImg}';" style="width: 100%; display: block; border-radius: 8px; margin-bottom: 30px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);" alt="${title}">` 
-                : '';
+                <div style="background: #fff; border: 1px solid #eee; padding: 25px; border-radius: 10px;">
+                    <h3 style="margin-top: 0; color: #003366; font-size: 1.1rem; border-bottom: 3px solid #d9534f; padding-bottom: 8px;">Recent Tips</h3>
+                    <ul id="sidebar-links" style="list-style: none; padding: 0; margin: 15px 0 0 0;">
+                        </ul>
+                </div>
+            </div>
+        </aside>
+    </div>
 
-            // Main Content Area
-            main.innerHTML += `
-                <article id="${postId}" style="margin-bottom: 100px; border-bottom: 1px solid #eee; padding-bottom: 60px;">
-                    <h1 style="font-family: Arial, sans-serif; color: #003366; font-size: 2.5rem; margin-bottom: 10px; line-height: 1.2;">${title}</h1>
-                    <div style="color: #999; font-size: 0.95rem; margin-bottom: 30px; font-style: italic; font-family: Arial, sans-serif;">Published: ${pubDate}</div>
-                    ${imgHtml}
-                    <div style="font-size: 1.25rem; line-height: 1.9; color: #333;">${content}</div>
-                    <div style="margin-top: 40px;">
-                        <a href="tel:2165057765" style="color: #d9534f; font-weight: bold; text-decoration: none; font-family: Arial, sans-serif;">Questions about this? Call the experts &rarr;</a>
-                    </div>
-                </article>
-            `;
+    <script>
+    async function buildWordPressLayout() {
+        // Re-locate the elements inside the function
+        const main = document.getElementById('lakefront-feed-content');
+        const sidebar = document.getElementById('sidebar-links');
 
-            // Sidebar Links (Top 10)
-            if (index < 10) {
-                sidebar.innerHTML += `
-                    <li style="margin-bottom: 18px; border-bottom: 1px solid #f7f7f7; padding-bottom: 12px;">
-                        <a href="#${postId}" style="text-decoration: none; color: #444; font-size: 0.95rem; font-weight: 500; display: block; line-height: 1.4;">${title}</a>
-                    </li>
+        if (!main || !sidebar) {
+            console.error("Critical Error: HTML IDs not found in the page.");
+            return;
+        }
+
+        try {
+            // Try fetching from root or up one level
+            let response = await fetch('/feed.xml');
+            if (!response.ok) response = await fetch('../feed.xml');
+            
+            const text = await response.text();
+            const xml = new DOMParser().parseFromString(text, "text/xml");
+            const items = xml.querySelectorAll("item");
+            
+            main.innerHTML = '';
+            sidebar.innerHTML = '';
+
+            items.forEach((item, index) => {
+                const title = item.querySelector("title").textContent;
+                const pubDate = item.querySelector("pubDate").textContent;
+                const content = item.querySelector("description").textContent;
+                const img = item.querySelector("enclosure")?.getAttribute("url");
+                const postId = `post-${index}`;
+
+                // Image logic with logo fallback
+                const fallbackImg = "https://lakefrontleakanddrain.com/logo.jpg";
+                const imgHtml = img 
+                    ? `<img src="${img}" onerror="this.onerror=null;this.src='${fallbackImg}';" alt="${title}">` 
+                    : '';
+
+                main.innerHTML += `
+                    <article id="${postId}" style="margin-bottom: 100px; border-bottom: 1px solid #eee; padding-bottom: 60px;">
+                        <h1 style="font-family: Arial, sans-serif; color: #003366; font-size: 2.5rem; margin-bottom: 10px;">${title}</h1>
+                        <p style="color: #999; font-style: italic; margin-bottom: 25px;">${pubDate}</p>
+                        ${imgHtml}
+                        <div style="font-size: 1.2rem; line-height: 1.9;">${content}</div>
+                    </article>
                 `;
-            }
-        });
-    } catch (e) {
-        console.error("Feed error:", e);
-        main.innerHTML = "<div style='text-align:center; padding:50px;'><h2>Unable to load feed.</h2><p>Please call (216) 505-7765</p></div>";
-    }
-}
 
-// Ensure the script waits for the page to be ready
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', buildWordPressLayout);
-} else {
-    buildWordPressLayout();
-}
-</script>
+                if (index < 10) {
+                    sidebar.innerHTML += `
+                        <li style="margin-bottom: 15px; border-bottom: 1px solid #f0f0f0; padding-bottom: 8px;">
+                            <a href="#${postId}" style="text-decoration: none; color: #333; font-size: 0.95rem;">${title}</a>
+                        </li>
+                    `;
+                }
+            });
+        } catch (e) {
+            console.error("Feed fail:", e);
+            main.innerHTML = "<p>Feed currently unavailable. Please call us at (216) 505-7765.</p>";
+        }
+    }
+
+    // This ensures the script fires even if the browser loads things out of order
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', buildWordPressLayout);
+    } else {
+        buildWordPressLayout();
+    }
+    </script>
+
+</body>
+</html>
