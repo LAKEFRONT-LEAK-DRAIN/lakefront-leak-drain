@@ -74,3 +74,16 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "Autonomous Update: New post with matching image"
+          # ... (keep the top of the script the same) ...
+          
+          final_resp = client.models.generate_content(model='gemini-2.5-flash', contents=xml_prompt)
+          new_item = final_resp.text.strip().replace('```xml', '').replace('```', '').strip()
+          
+          # THE FIX: Escape ampersands that the AI might have missed
+          # This converts any "&" to "&amp;" so XML doesn't crash
+          new_item = new_item.replace('& ', '&amp; ')
+          
+          # 4. Inject into feed.xml
+          with open('feed.xml', 'r', encoding='utf-8') as f:
+              feed = f.read()
+          # ... (keep the rest the same) ...
