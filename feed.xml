@@ -676,5 +676,13 @@
       <enclosure url="https://lakefrontleakanddrain.com/wp-content/uploads/2026/05/what-to-do-if-your-toilet-is-about-to-overflow.jpg" length="0" type="image/jpeg" />
     </item>
 
-  </channel>
+      <item>
+  <title>Cleveland Spring Sump Pump Check</title>
+  <link>https://lakefrontleakanddrain.com/</link>
+  <description>Cleveland residents, as spring approaches, now is the crucial time to ensure your sump pump is ready for heavy rains and melting snow. A proactive check can prevent basement flooding and costly damages, giving you peace of mind throughout the season.</description>
+  <enclosure url="https://images.pexels.com/photos/36557917/pexels-photo-36557917.jpeg?auto=compress&amp;cs=tinysrgb&amp;h=650&amp;w=940" type="image/jpeg"/>
+  <guid isPermaLink="false">https://lakefrontleakanddrain.com/cleveland-spring-sump-pump-check</guid>
+</item>
+
+</channel>
 </rss>
