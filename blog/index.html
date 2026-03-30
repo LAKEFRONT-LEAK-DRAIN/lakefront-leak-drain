@@ -40,7 +40,7 @@
         </aside>
     </div>
 
-    <script>
+<script>
 async function buildWordPressLayout() {
     const main = document.getElementById('lakefront-feed-content');
     const sidebar = document.getElementById('sidebar-links');
@@ -54,14 +54,14 @@ async function buildWordPressLayout() {
         const text = await response.text();
         const xml = new DOMParser().parseFromString(text, "text/xml");
         
-        // Convert the list of items to an array and REVERSE it
+        // We no longer reverse the items here because 
+        // the Python script now puts newest at the top of the XML file.
         const items = xml.querySelectorAll("item");
-        const itemsArray = Array.from(items).reverse();
         
         main.innerHTML = '';
         sidebar.innerHTML = '';
 
-        itemsArray.forEach((item, index) => {
+        items.forEach((item, index) => {
             try {
                 const titleNode = item.querySelector("title");
                 const descNode = item.querySelector("description");
