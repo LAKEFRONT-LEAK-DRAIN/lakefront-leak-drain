@@ -41,41 +41,44 @@
     </div>
 
     <script>
-    async function buildWordPressLayout() {
-        // Re-locate the elements inside the function
-        const main = document.getElementById('lakefront-feed-content');
-        const sidebar = document.getElementById('sidebar-links');
+async function buildWordPressLayout() {
+    const main = document.getElementById('lakefront-feed-content');
+    const sidebar = document.getElementById('sidebar-links');
 
-        if (!main || !sidebar) {
-            console.error("Critical Error: HTML IDs not found in the page.");
-            return;
-        }
+    if (!main || !sidebar) return;
 
-        try {
-            // Try fetching from root or up one level
-            let response = await fetch('/feed.xml');
-            if (!response.ok) response = await fetch('../feed.xml');
-            
-            const text = await response.text();
-            const xml = new DOMParser().parseFromString(text, "text/xml");
-            const items = xml.querySelectorAll("item");
-            
-            main.innerHTML = '';
-            sidebar.innerHTML = '';
+    try {
+        let response = await fetch('/feed.xml');
+        if (!response.ok) response = await fetch('../feed.xml');
+        
+        const text = await response.text();
+        const xml = new DOMParser().parseFromString(text, "text/xml");
+        const items = xml.querySelectorAll("item");
+        
+        main.innerHTML = '';
+        sidebar.innerHTML = '';
 
-            items.forEach((item, index) => {
-                const title = item.querySelector("title").textContent;
-                const pubDate = item.querySelector("pubDate").textContent;
-                const content = item.querySelector("description").textContent;
+        items.forEach((item, index) => {
+            try {
+                // DEFENSIVE CHECK: Make sure these exist before asking for .textContent
+                const titleNode = item.querySelector("title");
+                const descNode = item.querySelector("description");
+                const dateNode = item.querySelector("pubDate");
+
+                if (!titleNode || !descNode) return; // Skip this item if it's broken
+
+                const title = titleNode.textContent;
+                const pubDate = dateNode ? dateNode.textContent : "Recent Post";
+                const content = descNode.textContent;
                 const img = item.querySelector("enclosure")?.getAttribute("url");
                 const postId = `post-${index}`;
 
-                // Image logic with logo fallback
                 const fallbackImg = "https://lakefrontleakanddrain.com/logo.jpg";
                 const imgHtml = img 
                     ? `<img src="${img}" onerror="this.onerror=null;this.src='${fallbackImg}';" alt="${title}">` 
                     : '';
 
+                // Add to Main Column
                 main.innerHTML += `
                     <article id="${postId}" style="margin-bottom: 100px; border-bottom: 1px solid #eee; padding-bottom: 60px;">
                         <h1 style="font-family: Arial, sans-serif; color: #003366; font-size: 2.5rem; margin-bottom: 10px;">${title}</h1>
@@ -85,6 +88,7 @@
                     </article>
                 `;
 
+                // Add to Sidebar
                 if (index < 10) {
                     sidebar.innerHTML += `
                         <li style="margin-bottom: 15px; border-bottom: 1px solid #f0f0f0; padding-bottom: 8px;">
@@ -92,20 +96,22 @@
                         </li>
                     `;
                 }
-            });
-        } catch (e) {
-            console.error("Feed fail:", e);
-            main.innerHTML = "<p>Feed currently unavailable. Please call us at (216) 505-7765.</p>";
-        }
+            } catch (innerError) {
+                console.warn("Skipping a broken item:", innerError);
+            }
+        });
+    } catch (e) {
+        console.error("Feed fail:", e);
+        main.innerHTML = "<p>Feed currently unavailable. Please call us at (216) 505-7765.</p>";
     }
+}
 
-    // This ensures the script fires even if the browser loads things out of order
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', buildWordPressLayout);
-    } else {
-        buildWordPressLayout();
-    }
-    </script>
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', buildWordPressLayout);
+} else {
+    buildWordPressLayout();
+}
+</script>
 
 </body>
 </html>
