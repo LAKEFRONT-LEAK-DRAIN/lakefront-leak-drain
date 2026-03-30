@@ -475,6 +475,18 @@
   <enclosure url="https://lakefrontleakanddrain.com/logo.jpg" length="0" type="image/jpeg" />
 </item>
 
+    <item>
+  <title>Cleveland's Winter Pipe Watch</title>
+  <link>https://example.com/posts/clevelands-winter-pipe-watch</link>
+  <guid isPermaLink="true">https://example.com/posts/clevelands-winter-pipe-watch</guid>
+  <pubDate>Mon, 04 Mar 2024 10:30:00 GMT</pubDate>
+  <description><![CDATA[
+    <p>Stay informed about Cleveland's vital water infrastructure during the colder months. We're keeping an eye on everything from routine maintenance to unexpected freezes.</p>
+    <img src="https://images.pexels.com/photos/36168811/pexels-photo-36168811.jpeg?auto=compress&cs=tinysrgb&h=650&w=940" alt="Winter Pipes in Cleveland" />
+  ]]></description>
+  <enclosure url="https://images.pexels.com/photos/36168811/pexels-photo-36168811.jpeg?auto=compress&cs=tinysrgb&h=650&w=940" length="150000" type="image/jpeg" />
+</item>
+
 </channel>
 </rss>
 
