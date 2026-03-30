@@ -1,54 +1,100 @@
-<script>
-async function buildWordPressLayout() {
-    try {
-        // Try the root path first, then a relative path if that fails
-        let response = await fetch('/feed.xml');
-        if (!response.ok) response = await fetch('../feed.xml');
-        
-        const text = await response.text();
-        const xml = new DOMParser().parseFromString(text, "text/xml");
-        const items = xml.querySelectorAll("item");
-        
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plumbing Tips & News | Lakefront Leak & Drain</title>
+    <style>
+        body { margin: 0; padding: 0; background-color: #ffffff; }
+        article img { max-width: 100%; height: auto; border-radius: 8px; margin-bottom: 25px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        html { scroll-behavior: smooth; }
+        @media (max-width: 900px) {
+            .blog-container { grid-template-columns: 1fr !important; }
+            aside { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="blog-container" style="display: grid; grid-template-columns: 1fr 320px; gap: 50px; max-width: 1200px; margin: 40px auto; padding: 0 20px; font-family: 'Georgia', serif;">
+
+        <main id="lakefront-feed-content" style="line-height: 1.8; color: #333;">
+            <div style="text-align: center; padding: 100px 0;">
+                <p style="font-family: Arial, sans-serif; color: #666;">Loading the latest Lakefront plumbing tips...</p>
+            </div>
+        </main>
+
+        <aside style="font-family: 'Arial', sans-serif;">
+            <div style="position: sticky; top: 20px;">
+                <div style="background: #003366; color: white; padding: 25px; border-radius: 10px; margin-bottom: 30px;">
+                    <h3 style="margin-top: 0; font-size: 1.2rem;">Need Help Now?</h3>
+                    <a href="tel:2165057765" style="display: block; background: #d9534f; color: white; text-align: center; padding: 15px; border-radius: 5px; text-decoration: none; font-weight: bold;">(216) 505-7765</a>
+                </div>
+
+                <div style="background: #fff; border: 1px solid #eee; padding: 25px; border-radius: 10px;">
+                    <h3 style="margin-top: 0; color: #003366; font-size: 1.1rem; border-bottom: 3px solid #d9534f; padding-bottom: 8px;">Recent Tips</h3>
+                    <ul id="sidebar-links" style="list-style: none; padding: 0; margin: 15px 0 0 0;">
+                        </ul>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <script>
+    async function buildWordPressLayout() {
         const main = document.getElementById('lakefront-feed-content');
         const sidebar = document.getElementById('sidebar-links');
-        
-        if (items.length === 0) throw new Error("No items found");
 
-        main.innerHTML = '';
-        sidebar.innerHTML = '';
+        // Check if elements exist before proceeding
+        if (!main || !sidebar) {
+            console.error("Missing required HTML IDs: lakefront-feed-content or sidebar-links");
+            return;
+        }
 
-        items.forEach((item, index) => {
-            const title = item.querySelector("title").textContent;
-            const pubDate = item.querySelector("pubDate").textContent;
-            const content = item.querySelector("description").textContent;
-            const img = item.querySelector("enclosure")?.getAttribute("url");
-            const postId = `post-${index}`;
+        try {
+            // Path fix: try root first, then relative
+            let response = await fetch('/feed.xml');
+            if (!response.ok) response = await fetch('../feed.xml');
+            
+            const text = await response.text();
+            const xml = new DOMParser().parseFromString(text, "text/xml");
+            const items = xml.querySelectorAll("item");
+            
+            main.innerHTML = '';
+            sidebar.innerHTML = '';
 
-            main.innerHTML += `
-                <article id="${postId}" style="margin-bottom: 100px; border-bottom: 1px solid #eee; padding-bottom: 60px;">
-                    <h1 style="font-family: 'Arial', sans-serif; color: #003366; font-size: 2.8rem; margin-bottom: 10px; line-height: 1.2;">${title}</h1>
-                    <div style="color: #999; font-size: 0.95rem; margin-bottom: 30px; font-style: italic; font-family: Arial, sans-serif;">Published: ${pubDate}</div>
-                    ${img ? `<img src="${img}" style="width: 100%; border-radius: 8px; margin-bottom: 35px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);" alt="${title}">` : ''}
-                    <div style="font-size: 1.25rem; line-height: 1.9; color: #333;">${content}</div>
-                </article>
-            `;
+            items.forEach((item, index) => {
+                const title = item.querySelector("title").textContent;
+                const pubDate = item.querySelector("pubDate").textContent;
+                const content = item.querySelector("description").textContent;
+                const img = item.querySelector("enclosure")?.getAttribute("url");
+                const postId = `post-${index}`;
 
-            if (index < 10) {
-                sidebar.innerHTML += `
-                    <li style="margin-bottom: 18px; border-bottom: 1px solid #f7f7f7; padding-bottom: 12px;">
-                        <a href="#${postId}" style="text-decoration: none; color: #444; font-size: 0.95rem; font-weight: 500; display: block; line-height: 1.4;">${title}</a>
-                    </li>
+                main.innerHTML += `
+                    <article id="${postId}" style="margin-bottom: 100px; border-bottom: 1px solid #eee; padding-bottom: 60px;">
+                        <h1 style="font-family: Arial, sans-serif; color: #003366; font-size: 2.5rem; margin-bottom: 10px;">${title}</h1>
+                        <p style="color: #999; font-style: italic; margin-bottom: 25px;">${pubDate}</p>
+                        ${img ? `<img src="${img}" style="width: 100%; display: block;" alt="${title}">` : ''}
+                        <div style="font-size: 1.2rem; line-height: 1.9;">${content}</div>
+                    </article>
                 `;
-            }
-        });
-    } catch (e) {
-        console.error("Feed error:", e);
-        document.getElementById('lakefront-feed-content').innerHTML = `
-            <div style="text-align: center; padding: 50px; font-family: Arial, sans-serif;">
-                <h2>Expert Tips Temporarily Unavailable</h2>
-                <p>We're having trouble reaching the feed. Please call us at (216) 505-7765.</p>
-            </div>`;
+
+                if (index < 10) {
+                    sidebar.innerHTML += `
+                        <li style="margin-bottom: 15px; border-bottom: 1px solid #f0f0f0; padding-bottom: 8px;">
+                            <a href="#${postId}" style="text-decoration: none; color: #333; font-size: 0.95rem;">${title}</a>
+                        </li>
+                    `;
+                }
+            });
+        } catch (e) {
+            main.innerHTML = "<p>Please call (216) 505-7765 for plumbing tips.</p>";
+        }
     }
-}
-buildWordPressLayout();
-</script>
+    
+    // Ensures the code runs only after the full page is loaded
+    window.addEventListener('DOMContentLoaded', buildWordPressLayout);
+    </script>
+
+</body>
+</html>
