@@ -49,9 +49,9 @@ jobs:
           CRITICAL: Output ONLY the raw <item>...</item> XML block. Do not include markdown formatting like ```xml. Just the code.
           """
           
-          # Generate just the new post
+          # Generate just the new post using the upgraded model
           response = client.models.generate_content(
-              model='gemini-1.5-flash',
+              model='gemini-2.0-flash',
               contents=prompt
           )
           new_item = response.text.strip()
