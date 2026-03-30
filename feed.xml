@@ -484,7 +484,7 @@
     <p>Stay informed about Cleveland's vital water infrastructure during the colder months. We're keeping an eye on everything from routine maintenance to unexpected freezes.</p>
     <img src="https://images.pexels.com/photos/36168811/pexels-photo-36168811.jpeg?auto=compress&cs=tinysrgb&h=650&w=940" alt="Winter Pipes in Cleveland" />
   ]]></description>
-  <enclosure url="https://images.pexels.com/photos/36168811/pexels-photo-36168811.jpeg?auto=compress&cs=tinysrgb&h=650&w=940" length="150000" type="image/jpeg" />
+  <enclosure url="https://images.pexels.com/photos/36168811/pexels-photo-36168811.jpeg?auto=compress&amp;cs=tinysrgb&amp;h=650&amp;w=940" length="150000" type="image/jpeg" />
 </item>
 
     <item>
