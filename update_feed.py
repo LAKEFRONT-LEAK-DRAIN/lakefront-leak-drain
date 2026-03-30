@@ -1,0 +1,44 @@
+import os
+from google import genai
+
+client = genai.Client(api_key=os.environ['GEMINI_API_KEY'])
+
+prompt = f"""
+You are an AI assistant managing an RSS feed for a plumbing company.
+The user requested this update: {os.environ['COMMENT_BODY']}
+
+Write a valid RSS <item> block for this new post. 
+Use 'https://lakefrontleakanddrain.com/' for the link.
+Include <media:content url="https://drive.google.com/uc?export=download&id=1e8xTL1hnn37_a_XL9Dbi_glnrAWY6PV2" medium="video" />
+Include <enclosure url="https://lakefrontleakanddrain.com/logo.jpg" length="0" type="image/jpeg" />
+Make the pubDate somewhere around late May 2026.
+
+CRITICAL: Output ONLY the raw <item>...</item> XML block. Do not include markdown formatting like ```xml. Just the code.
+"""
+
+# Generate just the new post using the confirmed stable model
+response = client.models.generate_content(
+    model='gemini-2.5-flash',
+    contents=prompt
+)
+new_item = response.text.strip()
+
+# Clean up any markdown
+if new_item.startswith('```xml'):
+    new_item = new_item[6:]
+if new_item.startswith('```'):
+    new_item = new_item[3:]
+if new_item.endswith('```'):
+    new_item = new_item[:-3]
+new_item = new_item.strip()
+
+# Open the existing feed
+with open('feed.xml', 'r', encoding='utf-8') as f:
+    feed = f.read()
+    
+# Surgically inject the new post right before the </channel> closing tag
+insert_pos = feed.rfind('</channel>')
+if insert_pos != -1:
+    updated_feed = feed[:insert_pos] + '    ' + new_item + '\n\n' + feed[insert_pos:]
+    with open('feed.xml', 'w', encoding='utf-8') as f:
+        f.write(updated_feed)
