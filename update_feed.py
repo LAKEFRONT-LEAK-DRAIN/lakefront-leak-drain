@@ -5,7 +5,7 @@ from datetime import datetime
 
 client = genai.Client(api_key=os.environ['GEMINI_API_KEY'])
 
-# 1. Generate Topic & Search Term
+# 1. Generate Topic
 topic_prompt = "Invent a seasonal Cleveland plumbing blog topic. Output ONLY the Title and a 2-word image search keyword separated by a pipe. Example: Spring Sump Pump | sump pump"
 resp = client.models.generate_content(model='gemini-2.5-flash', contents=topic_prompt)
 
@@ -15,7 +15,7 @@ except:
     title = resp.text.strip()
     search_keyword = "plumbing"
 
-# 2. Get Image from Pexels
+# 2. Get Image
 image_url = "https://lakefrontleakanddrain.com/logo.jpg"
 try:
     headers = {"Authorization": os.environ['PEXELS_API_KEY']}
@@ -24,23 +24,17 @@ try:
 except:
     pass
 
-# 3. Create RSS Item with Ampersand Protection
+# 3. Create Item
 today_str = datetime.utcnow().strftime('%a, %d %b %Y 10:00:00 GMT')
-xml_prompt = f"""
-Write a valid RSS <item> block for a post titled '{title}'. 
-Use 'https://lakefrontleakanddrain.com/' for the link.
-Use {image_url} for the enclosure and media:content.
-Include a 2-sentence description for Cleveland residents.
-CRITICAL: Output ONLY raw XML. Do not include markdown or ```xml.
-"""
+xml_prompt = f"Write a valid RSS <item> block for a post titled '{title}'. Use 'https://lakefrontleakanddrain.com/' for link. Use {image_url} for enclosure. Include 2 sentences for Cleveland residents. Output ONLY raw XML."
 
 final_resp = client.models.generate_content(model='gemini-2.5-flash', contents=xml_prompt)
 new_item = final_resp.text.strip().replace('```xml', '').replace('```', '').strip()
 
-# THE FIX: Replace single ampersands with the XML-safe version
-new_item = new_item.replace(' & ', ' &amp; ')
+# SCRUBBER: This replaces bad characters that crash XML
+new_item = new_item.replace('& ', '&amp; ').replace(' &', ' &amp;')
 
-# 4. Inject into feed.xml
+# 4. Inject
 with open('feed.xml', 'r', encoding='utf-8') as f:
     feed = f.read()
 
