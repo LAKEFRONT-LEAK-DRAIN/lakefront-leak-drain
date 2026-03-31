@@ -7,7 +7,7 @@ from xml.sax.saxutils import escape
 client = genai.Client(api_key=os.environ['GEMINI_API_KEY'])
 
 FEED_PATH = 'feed.xml'
-DEFAULT_LINK = 'https://lakefrontleakanddrain.com/'
+DEFAULT_LINK = 'https://lakefrontleakanddrain.com/blog/'
 DEFAULT_IMAGE = 'https://lakefrontleakanddrain.com/logo.jpg'
 
 
