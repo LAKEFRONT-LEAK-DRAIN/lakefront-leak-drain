@@ -31,30 +31,15 @@ xml_prompt = f"Write a valid RSS <item> block for a post titled '{title}'. Use '
 final_resp = client.models.generate_content(model='gemini-2.5-flash', contents=xml_prompt)
 new_item = final_resp.text.strip().replace('```xml', '').replace('```', '').strip()
 
-# SCRUBBER: This fixes the 'EntityRef' error by encoding all ampersands properly
-# We do this twice to ensure we don't 'double-encode' existing entities
-new_item = new_item.replace('&amp;', '&') 
-new_item = new_item.replace('&', '&amp;')
+# SCRUBBER: This replaces bad characters that crash XML
+new_item = new_item.replace('& ', '&amp; ').replace(' &', ' &amp;')
 
-# 4. Inject (GUARANTEED TOP INSERTION)
+# 4. Inject
 with open('feed.xml', 'r', encoding='utf-8') as f:
     feed = f.read()
 
-# We look for the header tags to find the top of the list
-markers = ['</language>', '</description>', '</link>', '<channel>']
-insert_pos = -1
-
-for m in markers:
-    pos = feed.find(m)
-    if pos != -1:
-        insert_pos = pos + len(m)
-        break
-
+insert_pos = feed.rfind('</channel>')
 if insert_pos != -1:
-    # Build the feed: Metadata + New Post + Existing Posts
-    updated_feed = feed[:insert_pos] + '\n\n    ' + new_item + feed[insert_pos:]
+    updated_feed = feed[:insert_pos] + '    ' + new_item + '\n\n' + feed[insert_pos:]
     with open('feed.xml', 'w', encoding='utf-8') as f:
         f.write(updated_feed)
-    print(f"Success! Newest post '{title}' is now at the top.")
-else:
-    print("Error: Could not find a valid insertion point.")
