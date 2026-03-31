@@ -41,78 +41,56 @@
     </div>
 
 <script>
-async function buildWordPressLayout() {
-    const main = document.getElementById('lakefront-feed-content');
-    const sidebar = document.getElementById('sidebar-links');
+async function loadBlog() {
+    const response = await fetch('../feed.xml');
+    const text = await response.text();
+    const parser = new DOMParser();
+    const xml = parser.parseFromString(text, "text/xml");
+    const items = Array.from(xml.querySelectorAll("item"));
+    const container = document.getElementById('blog-container');
 
-    if (!main || !sidebar) return;
+    // 1. Check the URL for a specific post (e.g., ?post=spring-thaw)
+    const urlParams = new URLSearchParams(window.location.search);
+    const postSlug = urlParams.get('post');
 
-    try {
-        let response = await fetch('/feed.xml');
-        if (!response.ok) response = await fetch('../feed.xml');
-        
-        const text = await response.text();
-        const xml = new DOMParser().parseFromString(text, "text/xml");
-        
-        // We no longer reverse the items here because 
-        // the Python script now puts newest at the top of the XML file.
-        const items = xml.querySelectorAll("item");
-        
-        main.innerHTML = '';
-        sidebar.innerHTML = '';
-
-        items.forEach((item, index) => {
-            try {
-                const titleNode = item.querySelector("title");
-                const descNode = item.querySelector("description");
-                const dateNode = item.querySelector("pubDate");
-
-                if (!titleNode || !descNode) return; 
-
-                const title = titleNode.textContent;
-                const pubDate = dateNode ? dateNode.textContent : "Recent Post";
-                const content = descNode.textContent;
-                const img = item.querySelector("enclosure")?.getAttribute("url");
-                const postId = `post-${index}`;
-
-                const fallbackImg = "https://lakefrontleakanddrain.com/logo.jpg";
-                const imgHtml = img 
-                    ? `<img src="${img}" onerror="this.onerror=null;this.src='${fallbackImg}';" alt="${title}">` 
-                    : '';
-
-                // Building the main article
-                main.innerHTML += `
-                    <article id="${postId}" style="margin-bottom: 100px; border-bottom: 1px solid #eee; padding-bottom: 60px;">
-                        <h1 style="font-family: Arial, sans-serif; color: #003366; font-size: 2.5rem; margin-bottom: 10px;">${title}</h1>
-                        <p style="color: #999; font-style: italic; margin-bottom: 25px;">${pubDate}</p>
-                        ${imgHtml}
-                        <div style="font-size: 1.2rem; line-height: 1.9;">${content}</div>
-                    </article>
-                `;
-
-                // Building the sidebar link
-                if (index < 10) {
-                    sidebar.innerHTML += `
-                        <li style="margin-bottom: 15px; border-bottom: 1px solid #f0f0f0; padding-bottom: 8px;">
-                            <a href="#${postId}" style="text-decoration: none; color: #333; font-size: 0.95rem;">${title}</a>
-                        </li>
-                    `;
-                }
-            } catch (innerError) {
-                console.warn("Skipping broken item:", innerError);
-            }
+    // 2. Filter the items
+    let displayItems = items;
+    if (postSlug) {
+        displayItems = items.filter(item => {
+            const link = item.querySelector("link").textContent;
+            return link.includes(postSlug);
         });
-    } catch (e) {
-        console.error("Feed fail:", e);
-        main.innerHTML = "<p>Feed currently unavailable. Please call us at (216) 505-7765.</p>";
+    }
+
+    // 3. If we found a specific post (or if we are just loading the main blog)
+    if (displayItems.length > 0) {
+        container.innerHTML = ''; // Clear the "Loading" message
+        displayItems.forEach(item => {
+            const title = item.querySelector("title").textContent;
+            const description = item.querySelector("description").textContent;
+            const link = item.querySelector("link").textContent;
+            const pubDate = item.querySelector("pubDate").textContent;
+            const enclosure = item.querySelector("enclosure");
+            const imgUrl = enclosure ? enclosure.getAttribute('url') : '../logo.jpg';
+
+            const postHtml = `
+                <div class="blog-post">
+                    <img src="${imgUrl}" alt="${title}" style="width:100%; border-radius:8px;">
+                    <h2>${title}</h2>
+                    <p><small>${pubDate}</small></p>
+                    <p>${description}</p>
+                    <a href="${link}" class="read-more">View Post</a>
+                    <hr>
+                </div>
+            `;
+            container.innerHTML += postHtml;
+        });
+    } else {
+        container.innerHTML = '<p>Post not found. <a href="/blog/">Return to Blog</a></p>';
     }
 }
 
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', buildWordPressLayout);
-} else {
-    buildWordPressLayout();
-}
+loadBlog();
 </script>
 
 </body>
