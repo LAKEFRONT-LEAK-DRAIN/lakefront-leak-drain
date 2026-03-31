@@ -36,25 +36,41 @@ new_item = final_resp.text.strip().replace('```xml', '').replace('```', '').stri
 new_item = new_item.replace('&amp;', '&') 
 new_item = new_item.replace('&', '&amp;')
 
-# 4. Inject (GUARANTEED TOP INSERTION)
+# 4. Inject (PREPEND: Forces Newest to the Top)
 with open('feed.xml', 'r', encoding='utf-8') as f:
     feed = f.read()
 
-# We look for the header tags to find the top of the list
-markers = ['</language>', '</description>', '</link>', '<channel>']
-insert_pos = -1
-
-for m in markers:
-    pos = feed.find(m)
-    if pos != -1:
-        insert_pos = pos + len(m)
-        break
+# We look for the <language> tag specifically. 
+# We use .lower() to make sure we don't miss it due to capitalization.
+marker = '</language>'
+insert_pos = feed.lower().find(marker.lower())
 
 if insert_pos != -1:
+    # Add the length of the tag to move past it
+    insert_pos += len(marker)
+    
     # Build the feed: Metadata + New Post + Existing Posts
     updated_feed = feed[:insert_pos] + '\n\n    ' + new_item + feed[insert_pos:]
+    
     with open('feed.xml', 'w', encoding='utf-8') as f:
         f.write(updated_feed)
-    print(f"Success! Newest post '{title}' is now at the top.")
+    print(f"Success! Prepend complete.")
 else:
-    print("Error: Could not find a valid insertion point.")
+    # If </language> is missing, we look for the end of the channel header
+    # and insert right after the opening <channel> tag
+    fallback_marker = '<channel>'
+    fallback_pos = feed.lower().find(fallback_marker.lower())
+    
+    if fallback_pos != -1:
+        insert_pos = fallback_pos + len(fallback_marker)
+        updated_feed = feed[:insert_pos] + '\n\n    ' + new_item + feed[insert_pos:]
+        with open('feed.xml', 'w', encoding='utf-8') as f:
+            f.write(updated_feed)
+        print("Used fallback insertion point.")
+    else:
+        # Final emergency fallback: Append to bottom if the file is totally weird
+        print("Error: Could not find any valid markers. Appending to bottom.")
+        insert_pos = feed.rfind('</channel>')
+        updated_feed = feed[:insert_pos] + '    ' + new_item + '\n' + feed[insert_pos:]
+        with open('feed.xml', 'w', encoding='utf-8') as f:
+            f.write(updated_feed)
