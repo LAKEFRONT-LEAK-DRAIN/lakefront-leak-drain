@@ -107,4 +107,46 @@ async function loadBlog() {
                 const enclosure = item.querySelector("enclosure");
                 const imgUrl = enclosure ? enclosure.getAttribute('url') : '../logo.jpg';
 
-                main
+                mainContainer.innerHTML += `
+                    <article style="margin-bottom: 80px;">
+                        <img src="${imgUrl}" alt="${title}">
+                        <div class="pub-date">Published: ${pubDate}</div>
+                        <h1>${title}</h1>
+                        <div style="font-size: 1.25rem; line-height: 1.7;">${description}</div>
+                        <a href="/blog/" class="read-more">← Back to all tips</a>
+                        <hr style="border: 0; border-top: 1px solid #eee; margin-top: 50px;">
+                    </article>
+                `;
+            });
+        } else {
+            mainContainer.innerHTML = `
+                <div style="padding: 50px; text-align: center;">
+                    <h2>Post Not Found</h2>
+                    <p>Sorry, that specific tip isn't available right now.</p>
+                    <a href="/blog/" style="color: #d9534f; font-weight: bold;">View all Recent Tips</a>
+                </div>
+            `;
+        }
+
+        // 4. Fill Sidebar with top 10 most recent posts
+        sidebar.innerHTML = '';
+        items.slice(0, 10).forEach(item => {
+            const sTitle = item.querySelector("title").textContent;
+            const sLink = item.querySelector("link").textContent;
+            sidebar.innerHTML += `
+                <li><a href="${sLink}">${sTitle}</a></li>
+            `;
+        });
+
+    } catch (error) {
+        console.error("Feed Load Error:", error);
+        document.getElementById('lakefront-feed-content').innerHTML = "<p>Error loading plumbing tips. Please refresh or call us for help.</p>";
+    }
+}
+
+// Run the function when the page loads
+loadBlog();
+</script>
+
+</body>
+</html>
