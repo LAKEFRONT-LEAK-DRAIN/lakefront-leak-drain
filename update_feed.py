@@ -34,27 +34,12 @@ new_item = final_resp.text.strip().replace('```xml', '').replace('```', '').stri
 # SCRUBBER: This replaces bad characters that crash XML
 new_item = new_item.replace('& ', '&amp; ').replace(' &', ' &amp;')
 
-# 4. Inject (PREPEND: Adds to the top of the list)
+# 4. Inject
 with open('feed.xml', 'r', encoding='utf-8') as f:
     feed = f.read()
 
-# Locate the <language> tag to insert immediately after it
-marker = '</language>'
-insert_pos = feed.find(marker)
-
+insert_pos = feed.rfind('</channel>')
 if insert_pos != -1:
-    # Position the cursor right after the closing </language> tag
-    after_language = insert_pos + len(marker)
-    
-    # Construct the new feed: Metadata + New Post + Old Posts
-    updated_feed = (
-        feed[:after_language] + 
-        '\n\n    ' + new_item + 
-        feed[after_language:]
-    )
-    
+    updated_feed = feed[:insert_pos] + '    ' + new_item + '\n\n' + feed[insert_pos:]
     with open('feed.xml', 'w', encoding='utf-8') as f:
         f.write(updated_feed)
-    print(f"Success! Prepend complete for: {title}")
-else:
-    print("Error: Could not find <language> tag in feed.xml")
