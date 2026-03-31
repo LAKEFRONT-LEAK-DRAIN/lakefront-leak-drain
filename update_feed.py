@@ -29,24 +29,30 @@ def generate_topic():
     return title, search_keyword
 
 
+import random # Add this at the very top with your other imports
+
 def get_image_url(search_keyword):
     image_url = DEFAULT_IMAGE
     try:
         headers = {"Authorization": os.environ['PEXELS_API_KEY']}
+        # We ask for 15 photos instead of 1
         pexels_resp = requests.get(
             "https://api.pexels.com/v1/search",
-            params={"query": search_keyword.strip(), "per_page": 1},
+            params={"query": search_keyword.strip(), "per_page": 15}, 
             headers=headers,
             timeout=20,
         )
         pexels_resp.raise_for_status()
         data = pexels_resp.json()
-        photos = data.get('photos') or []
-        if photos:
-            image_url = photos[0]['src']['large']
-    except Exception:
-        pass
-
+        
+        if data.get('photos'):
+            # This line picks one random photo from the 15 results
+            random_photo = random.choice(data['photos'])
+            image_url = random_photo['src']['large']
+            
+    except Exception as e:
+        print(f"Image search failed: {e}")
+    
     return image_url
 
 
