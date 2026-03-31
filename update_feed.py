@@ -31,11 +31,10 @@ xml_prompt = f"Write a valid RSS <item> block for a post titled '{title}'. Use '
 final_resp = client.models.generate_content(model='gemini-2.5-flash', contents=xml_prompt)
 new_item = final_resp.text.strip().replace('```xml', '').replace('```', '').strip()
 
-# SCRUBBER: This fixes the 'EntityRef' error by encoding all ampersands properly
-# We do this twice to ensure we don't 'double-encode' existing entities
-new_item = new_item.replace('&amp;', '&') 
-new_item = new_item.replace('&', '&amp;')
+# SCRUBBER: This replaces bad characters that crash XML
+new_item = new_item.replace('& ', '&amp; ').replace(' &', ' &amp;')
 
+<<<<<<< HEAD
 # 4. Inject (PREPEND: Forces Newest to the Top)
 with open('feed.xml', 'r', encoding='utf-8') as f:
     feed = f.read()
@@ -74,3 +73,14 @@ else:
         updated_feed = feed[:insert_pos] + '    ' + new_item + '\n' + feed[insert_pos:]
         with open('feed.xml', 'w', encoding='utf-8') as f:
             f.write(updated_feed)
+=======
+# 4. Inject
+with open('feed.xml', 'r', encoding='utf-8') as f:
+    feed = f.read()
+
+insert_pos = feed.rfind('</channel>')
+if insert_pos != -1:
+    updated_feed = feed[:insert_pos] + '    ' + new_item + '\n\n' + feed[insert_pos:]
+    with open('feed.xml', 'w', encoding='utf-8') as f:
+        f.write(updated_feed)
+>>>>>>> 8a35b76eb174f89ded1d97a059cec21e27582ab9
