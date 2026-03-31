@@ -25,21 +25,32 @@ except:
     pass
 
 # 3. Create Item
-today_str = datetime.utcnow().strftime('%a, %d %b %Y 10:00:00 GMT')
 xml_prompt = f"Write a valid RSS <item> block for a post titled '{title}'. Use 'https://lakefrontleakanddrain.com/' for link. Use {image_url} for enclosure. Include 2 sentences for Cleveland residents. Output ONLY raw XML."
 
 final_resp = client.models.generate_content(model='gemini-2.5-flash', contents=xml_prompt)
 new_item = final_resp.text.strip().replace('```xml', '').replace('```', '').strip()
 
-# SCRUBBER: This replaces bad characters that crash XML
-new_item = new_item.replace('& ', '&amp; ').replace(' &', ' &amp;')
+# SCRUBBER: Fixes the & error that crashes the feed
+new_item = new_item.replace('&amp;', '&') 
+new_item = new_item.replace('&', '&amp;')
 
-# 4. Inject
+# 4. Inject (THE "FORCE-TO-TOP" FIX)
 with open('feed.xml', 'r', encoding='utf-8') as f:
     feed = f.read()
 
-insert_pos = feed.rfind('</channel>')
+# We look for the first existing <item> and put the new one right before it.
+marker = '<item>'
+insert_pos = feed.find(marker)
+
 if insert_pos != -1:
-    updated_feed = feed[:insert_pos] + '    ' + new_item + '\n\n' + feed[insert_pos:]
-    with open('feed.xml', 'w', encoding='utf-8') as f:
-        f.write(updated_feed)
+    # Insert new post ABOVE the first old post
+    updated_feed = feed[:insert_pos] + new_item + '\n\n    ' + feed[insert_pos:]
+else:
+    # If the file is somehow empty of items, put it after the header
+    insert_pos = feed.find('</language>') + len('</language>')
+    updated_feed = feed[:insert_pos] + '\n\n    ' + new_item + feed[insert_pos:]
+
+with open('feed.xml', 'w', encoding='utf-8') as f:
+    f.write(updated_feed)
+
+print("Successfully posted to the TOP of the feed.")
