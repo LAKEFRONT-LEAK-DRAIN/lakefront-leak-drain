@@ -65,7 +65,7 @@ def generate_description(title):
 
 def format_rss_item(title, image_url, description_text):
     """Formats the XML block with unique IDs and safe encoding"""
-    pub_date = datetime.utcnow().strftime('%a, %d %b %Y %H:%M:%S GMT')
+    pub_date = (datetime.utcnow() - timedelta(hours=6)).strftime('%a, %d %b %Y %H:%M:%S GMT')
     slug = create_slug(title)
     
     # UNIQUE LINK: Makes Metricool see this as a brand new page
