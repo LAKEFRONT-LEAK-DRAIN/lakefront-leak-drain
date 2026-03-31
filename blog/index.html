@@ -5,35 +5,65 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Plumbing Tips & News | Lakefront Leak & Drain</title>
     <style>
-        body { margin: 0; padding: 0; background-color: #ffffff; }
-        article img { max-width: 100%; height: auto; border-radius: 8px; margin-bottom: 25px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        html { scroll-behavior: smooth; }
+        body { margin: 0; padding: 0; background-color: #ffffff; color: #333; font-family: 'Georgia', serif; }
+        .blog-container { 
+            display: grid; 
+            grid-template-columns: 1fr 320px; 
+            gap: 50px; 
+            max-width: 1200px; 
+            margin: 40px auto; 
+            padding: 0 20px; 
+        }
+        main { line-height: 1.8; }
+        article img { 
+            width: 100%; 
+            height: auto; 
+            border-radius: 8px; 
+            margin-bottom: 25px; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1); 
+        }
+        h1 { font-size: 2.2rem; color: #003366; margin: 20px 0 10px 0; }
+        .pub-date { color: #999; font-family: Arial, sans-serif; font-size: 0.85rem; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px; }
+        .read-more { display: inline-block; margin-top: 20px; color: #d9534f; text-decoration: none; font-weight: bold; font-family: Arial, sans-serif; }
+        
+        /* Sidebar Styles */
+        aside { font-family: Arial, sans-serif; }
+        .sticky-sidebar { position: sticky; top: 20px; }
+        .cta-box { background: #003366; color: white; padding: 25px; border-radius: 10px; margin-bottom: 30px; }
+        .phone-btn { display: block; background: #d9534f; color: white; text-align: center; padding: 15px; border-radius: 5px; text-decoration: none; font-weight: bold; margin-top: 15px; }
+        .recent-box { background: #fff; border: 1px solid #eee; padding: 25px; border-radius: 10px; }
+        .recent-box h3 { margin-top: 0; color: #003366; font-size: 1.1rem; border-bottom: 3px solid #d9534f; padding-bottom: 8px; }
+        #sidebar-links { list-style: none; padding: 0; margin: 15px 0 0 0; }
+        #sidebar-links li { margin-bottom: 12px; border-bottom: 1px solid #f4f4f4; padding-bottom: 8px; }
+        #sidebar-links a { text-decoration: none; color: #444; font-size: 0.9rem; line-height: 1.4; display: block; }
+        #sidebar-links a:hover { color: #d9534f; }
+
         @media (max-width: 900px) {
-            .blog-container { grid-template-columns: 1fr !important; }
+            .blog-container { grid-template-columns: 1fr; }
             aside { display: none; }
         }
     </style>
 </head>
 <body>
 
-    <div class="blog-container" style="display: grid; grid-template-columns: 1fr 320px; gap: 50px; max-width: 1200px; margin: 40px auto; padding: 0 20px; font-family: 'Georgia', serif;">
-
-        <main id="lakefront-feed-content" style="line-height: 1.8; color: #333;">
+    <div class="blog-container">
+        <main id="lakefront-feed-content">
             <div style="text-align: center; padding: 100px 0;">
-                <p style="font-family: Arial, sans-serif; color: #666;">Loading the latest Lakefront plumbing tips...</p>
+                <p style="font-family: Arial, sans-serif; color: #666;">Loading the latest Cleveland plumbing tips...</p>
             </div>
         </main>
 
-        <aside style="font-family: 'Arial', sans-serif;">
-            <div style="position: sticky; top: 20px;">
-                <div style="background: #003366; color: white; padding: 25px; border-radius: 10px; margin-bottom: 30px;">
-                    <h3 style="margin-top: 0; font-size: 1.2rem;">Need Help Now?</h3>
-                    <a href="tel:2165057765" style="display: block; background: #d9534f; color: white; text-align: center; padding: 15px; border-radius: 5px; text-decoration: none; font-weight: bold;">(216) 505-7765</a>
+        <aside>
+            <div class="sticky-sidebar">
+                <div class="cta-box">
+                    <h3 style="margin: 0;">Need Help Now?</h3>
+                    <p style="font-size: 0.9rem; opacity: 0.9;">Available for emergencies in Cuyahoga County.</p>
+                    <a href="tel:2165057765" class="phone-btn">(216) 505-7765</a>
                 </div>
 
-                <div style="background: #fff; border: 1px solid #eee; padding: 25px; border-radius: 10px;">
-                    <h3 style="margin-top: 0; color: #003366; font-size: 1.1rem; border-bottom: 3px solid #d9534f; padding-bottom: 8px;">Recent Tips</h3>
-                    <ul id="sidebar-links" style="list-style: none; padding: 0; margin: 15px 0 0 0;">
+                <div class="recent-box">
+                    <h3>Recent Tips</h3>
+                    <ul id="sidebar-links">
                         </ul>
                 </div>
             </div>
@@ -42,56 +72,39 @@
 
 <script>
 async function loadBlog() {
-    const response = await fetch('../feed.xml');
-    const text = await response.text();
-    const parser = new DOMParser();
-    const xml = parser.parseFromString(text, "text/xml");
-    const items = Array.from(xml.querySelectorAll("item"));
-    const container = document.getElementById('blog-container');
+    try {
+        // Fetch the feed from the root directory
+        const response = await fetch('../feed.xml');
+        const text = await response.text();
+        const parser = new DOMParser();
+        const xml = parser.parseFromString(text, "text/xml");
+        const items = Array.from(xml.querySelectorAll("item"));
+        
+        const mainContainer = document.getElementById('lakefront-feed-content');
+        const sidebar = document.getElementById('sidebar-links');
 
-    // 1. Check the URL for a specific post (e.g., ?post=spring-thaw)
-    const urlParams = new URLSearchParams(window.location.search);
-    const postSlug = urlParams.get('post');
+        // 1. Check URL for specific post (?post=slug)
+        const urlParams = new URLSearchParams(window.location.search);
+        const postSlug = urlParams.get('post');
 
-    // 2. Filter the items
-    let displayItems = items;
-    if (postSlug) {
-        displayItems = items.filter(item => {
-            const link = item.querySelector("link").textContent;
-            return link.includes(postSlug);
-        });
-    }
+        // 2. Filter logic for Metricool links
+        let displayItems = items;
+        if (postSlug) {
+            displayItems = items.filter(item => {
+                const link = item.querySelector("link").textContent;
+                return link.toLowerCase().includes(postSlug.toLowerCase());
+            });
+        }
 
-    // 3. If we found a specific post (or if we are just loading the main blog)
-    if (displayItems.length > 0) {
-        container.innerHTML = ''; // Clear the "Loading" message
-        displayItems.forEach(item => {
-            const title = item.querySelector("title").textContent;
-            const description = item.querySelector("description").textContent;
-            const link = item.querySelector("link").textContent;
-            const pubDate = item.querySelector("pubDate").textContent;
-            const enclosure = item.querySelector("enclosure");
-            const imgUrl = enclosure ? enclosure.getAttribute('url') : '../logo.jpg';
+        // 3. Render Main Content
+        if (displayItems.length > 0) {
+            mainContainer.innerHTML = ''; 
+            displayItems.forEach(item => {
+                const title = item.querySelector("title").textContent;
+                const description = item.querySelector("description").textContent;
+                const link = item.querySelector("link").textContent;
+                const pubDate = item.querySelector("pubDate").textContent;
+                const enclosure = item.querySelector("enclosure");
+                const imgUrl = enclosure ? enclosure.getAttribute('url') : '../logo.jpg';
 
-            const postHtml = `
-                <div class="blog-post">
-                    <img src="${imgUrl}" alt="${title}" style="width:100%; border-radius:8px;">
-                    <h2>${title}</h2>
-                    <p><small>${pubDate}</small></p>
-                    <p>${description}</p>
-                    <a href="${link}" class="read-more">View Post</a>
-                    <hr>
-                </div>
-            `;
-            container.innerHTML += postHtml;
-        });
-    } else {
-        container.innerHTML = '<p>Post not found. <a href="/blog/">Return to Blog</a></p>';
-    }
-}
-
-loadBlog();
-</script>
-
-</body>
-</html>
+                main
