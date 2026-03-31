@@ -31,25 +31,15 @@ xml_prompt = f"Write a valid RSS <item> block for a post titled '{title}'. Use '
 final_resp = client.models.generate_content(model='gemini-2.5-flash', contents=xml_prompt)
 new_item = final_resp.text.strip().replace('```xml', '').replace('```', '').strip()
 
-# THE DOUBLE-LINE SCRUBBER
-new_item = new_item.replace('&amp;', '&') 
-new_item = new_item.replace('&', '&amp;')
+# SCRUBBER: This replaces bad characters that crash XML
+new_item = new_item.replace('& ', '&amp; ').replace(' &', ' &amp;')
 
-# 4. ✨ CORRECTED INJECTION LOGIC - Insert BEFORE first <item>
+# 4. Inject
 with open('feed.xml', 'r', encoding='utf-8') as f:
-    content = f.read()
+    feed = f.read()
 
-# Find the position of the first <item> tag
-first_item_pos = content.find('<item>')
-
-if first_item_pos != -1:
-    # Insert the new item right before the first <item>
-    new_content = content[:first_item_pos] + new_item + '\n\n' + content[first_item_pos:]
-else:
-    # Fallback: append at the end of channel if no item found
-    new_content = content.replace('</channel>', f'{new_item}\n\n</channel>')
-
-with open('feed.xml', 'w', encoding='utf-8') as f:
-    f.write(new_content)
-
-print(f"✅ Verified: '{title}' added to the TOP of the feed.")
+insert_pos = feed.rfind('</channel>')
+if insert_pos != -1:
+    updated_feed = feed[:insert_pos] + '    ' + new_item + '\n\n' + feed[insert_pos:]
+    with open('feed.xml', 'w', encoding='utf-8') as f:
+        f.write(updated_feed)
