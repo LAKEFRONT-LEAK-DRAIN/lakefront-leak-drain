@@ -34,12 +34,34 @@ new_item = final_resp.text.strip().replace('```xml', '').replace('```', '').stri
 # SCRUBBER: This replaces bad characters that crash XML
 new_item = new_item.replace('& ', '&amp; ').replace(' &', ' &amp;')
 
-# 4. Inject
+# 4. Inject (GUARANTEED TOP INSERTION)
 with open('feed.xml', 'r', encoding='utf-8') as f:
     feed = f.read()
 
-insert_pos = feed.rfind('</channel>')
+# We look for the <channel> tag, then skip past the metadata to the first item
+# If we can't find <language>, we'll look for <description> or <link>
+markers = ['</language>', '</description>', '</link>', '<channel>']
+insert_pos = -1
+
+for m in markers:
+    pos = feed.find(m)
+    if pos != -1:
+        insert_pos = pos + len(m)
+        break
+
 if insert_pos != -1:
-    updated_feed = feed[:insert_pos] + '    ' + new_item + '\n\n' + feed[insert_pos:]
+    # Construct the feed with the NEW post at the TOP
+    updated_feed = (
+        feed[:insert_pos] + 
+        '\n\n    ' + new_item + 
+        feed[insert_pos:]
+    )
+    
     with open('feed.xml', 'w', encoding='utf-8') as f:
         f.write(updated_feed)
+    print(f"Success! New post '{title}' inserted at the top.")
+else:
+    # Emergency fallback: if it can't find ANY tags, it appends (better than crashing)
+    print("Warning: Could not find header tags. Appending to bottom instead.")
+    with open('feed.xml', 'a', encoding='utf-8') as f:
+        f.write('\n' + new_item)
