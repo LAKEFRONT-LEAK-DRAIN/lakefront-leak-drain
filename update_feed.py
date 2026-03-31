@@ -35,38 +35,21 @@ new_item = final_resp.text.strip().replace('```xml', '').replace('```', '').stri
 new_item = new_item.replace('&amp;', '&') 
 new_item = new_item.replace('&', '&amp;')
 
-# 4. ✨ FIXED INJECTION LOGIC
+# 4. ✨ CORRECTED INJECTION LOGIC - Insert BEFORE first <item>
 with open('feed.xml', 'r', encoding='utf-8') as f:
-    lines = f.readlines()
+    content = f.read()
 
-new_content = []
-inserted = False
+# Find the position of the first <item> tag
+first_item_pos = content.find('<item>')
 
-for line in lines:
-    new_content.append(line)  # ⬅️ Add the current line FIRST
-    
-    # Insert AFTER <channel> tag or BEFORE first <item>
-    if not inserted:
-        # Option 1: Insert after opening <channel> tag
-        if '<channel>' in line:
-            new_content.append(f"{new_item}\n\n")
-            inserted = True
-        # Option 2: Insert before first <item> (backup method)
-        elif '<item>' in line:
-            # Remove the just-added line, insert new item, then re-add it
-            new_content.pop()
-            new_content.append(f"{new_item}\n\n")
-            new_content.append(line)
-            inserted = True
-
-# Fallback if no insertion point found
-if not inserted:
-    for i, line in enumerate(new_content):
-        if '</description>' in line or '</language>' in line:
-            new_content.insert(i + 1, f"{new_item}\n\n")
-            break
+if first_item_pos != -1:
+    # Insert the new item right before the first <item>
+    new_content = content[:first_item_pos] + new_item + '\n\n' + content[first_item_pos:]
+else:
+    # Fallback: append at the end of channel if no item found
+    new_content = content.replace('</channel>', f'{new_item}\n\n</channel>')
 
 with open('feed.xml', 'w', encoding='utf-8') as f:
-    f.writelines(new_content)
+    f.write(new_content)
 
 print(f"✅ Verified: '{title}' added to the TOP of the feed.")
