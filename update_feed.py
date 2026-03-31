@@ -25,41 +25,21 @@ except:
     pass
 
 # 3. Create Item
+today_str = datetime.utcnow().strftime('%a, %d %b %Y 10:00:00 GMT')
 xml_prompt = f"Write a valid RSS <item> block for a post titled '{title}'. Use 'https://lakefrontleakanddrain.com/' for link. Use {image_url} for enclosure. Include 2 sentences for Cleveland residents. Output ONLY raw XML."
 
 final_resp = client.models.generate_content(model='gemini-2.5-flash', contents=xml_prompt)
 new_item = final_resp.text.strip().replace('```xml', '').replace('```', '').strip()
 
-# IMPROVED SCRUBBER: This prevents the 'EntityRef' error (the & crash)
-# It fixes URLs and text so they are 100% XML safe
-new_item = new_item.replace('&amp;', '&') # First, revert any existing ones to avoid &&amp;
-new_item = new_item.replace('&', '&amp;') # Then, properly encode all ampersands
+# SCRUBBER: This replaces bad characters that crash XML
+new_item = new_item.replace('& ', '&amp; ').replace(' &', ' &amp;')
 
-# 4. THE "FORCE-TO-TOP" INJECTION
+# 4. Inject
 with open('feed.xml', 'r', encoding='utf-8') as f:
-    lines = f.readlines()
+    feed = f.read()
 
-new_content = []
-inserted = False
-
-for line in lines:
-    # As soon as we hit the first existing post...
-    if '<item>' in line and not inserted:
-        # We drop the new post right ABOVE it
-        new_content.append(f"    {new_item}\n\n")
-        inserted = True
-    new_content.append(line)
-
-# Fallback if the file is empty of posts
-if not inserted:
-    # Try to find the end of the header
-    for i, line in enumerate(new_content):
-        if '</language>' in line or '</description>' in line:
-            new_content.insert(i + 1, f"    {new_item}\n\n")
-            inserted = True
-            break
-
-with open('feed.xml', 'w', encoding='utf-8') as f:
-    f.writelines(new_content)
-
-print(f"Success: '{title}' added to the top of the feed with safe XML encoding.")
+insert_pos = feed.rfind('</channel>')
+if insert_pos != -1:
+    updated_feed = feed[:insert_pos] + '    ' + new_item + '\n\n' + feed[insert_pos:]
+    with open('feed.xml', 'w', encoding='utf-8') as f:
+        f.write(updated_feed)
