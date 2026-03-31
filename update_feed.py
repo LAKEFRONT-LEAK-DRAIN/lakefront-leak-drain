@@ -32,9 +32,7 @@ final_resp = client.models.generate_content(model='gemini-2.5-flash', contents=x
 new_item = final_resp.text.strip().replace('```xml', '').replace('```', '').strip()
 
 # SCRUBBER: This replaces bad characters that crash XML
-# It handles ampersands and ensures they are correctly formatted
-new_item = new_item.replace('&amp;', '&') # First, clean any double-encoding
-new_item = new_item.replace('&', '&amp;') # Then, encode all ampersands properly
+new_item = new_item.replace('& ', '&amp; ').replace(' &', ' &amp;')
 
 # 4. Inject
 with open('feed.xml', 'r', encoding='utf-8') as f:
