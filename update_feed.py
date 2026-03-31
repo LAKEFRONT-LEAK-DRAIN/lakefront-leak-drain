@@ -31,36 +31,15 @@ xml_prompt = f"Write a valid RSS <item> block for a post titled '{title}'. Use '
 final_resp = client.models.generate_content(model='gemini-2.5-flash', contents=xml_prompt)
 new_item = final_resp.text.strip().replace('```xml', '').replace('```', '').strip()
 
-# THE DOUBLE-LINE SCRUBBER (The one that works)
-new_item = new_item.replace('&amp;', '&') 
-new_item = new_item.replace('&', '&amp;')
+# SCRUBBER: This replaces bad characters that crash XML
+new_item = new_item.replace('& ', '&amp; ').replace(' &', ' &amp;')
 
-# 4. THE "FORCE-TO-TOP" INJECTION
-# This reads the file line-by-line and inserts the new post ABOVE the first old post
+# 4. Inject
 with open('feed.xml', 'r', encoding='utf-8') as f:
-    lines = f.readlines()
+    feed = f.read()
 
-new_content = []
-inserted = False
-
-for line in lines:
-    # As soon as the script finds the first existing blog post...
-    if '<item>' in line and not inserted:
-        # It shoves the new post right ABOVE it
-        new_content.append(f"    {new_item}\n\n")
-        inserted = True
-    new_content.append(line)
-
-# Fallback if the file is empty of posts or markers are weird
-if not inserted:
-    # Insert right after the header information (top of file)
-    for i, line in enumerate(new_content):
-        if '</language>' in line or '</description>' in line:
-            new_content.insert(i + 1, f"    {new_item}\n\n")
-            inserted = True
-            break
-
-with open('feed.xml', 'w', encoding='utf-8') as f:
-    f.writelines(new_content)
-
-print(f"Verified: '{title}' added to the TOP of the feed.")
+insert_pos = feed.rfind('</channel>')
+if insert_pos != -1:
+    updated_feed = feed[:insert_pos] + '    ' + new_item + '\n\n' + feed[insert_pos:]
+    with open('feed.xml', 'w', encoding='utf-8') as f:
+        f.write(updated_feed)
