@@ -34,6 +34,10 @@ PLUMBING_TERMS = [
     "plumbing",
 ]
 
+BLACKLIST_PEXELS_IDS = {
+    "8987409",
+}
+
 
 def generate_topic(existing_titles):
     recent_titles_text = "\n".join(f"- {t}" for t in existing_titles[:RECENT_TITLE_LOOKBACK]) or "- None"
@@ -76,19 +80,21 @@ def build_video_queries(title, search_keyword):
     matched_terms = [term for term in PLUMBING_TERMS if term in title_norm]
     strict_terms = " ".join(matched_terms[:2]).strip()
 
+    neg_keywords = "-car -auto -mechanic -person -people -workout -exercise -sports -gym -music"
+
     queries = []
     if strict_terms:
-        queries.append(f"{strict_terms} plumber repair")
-        queries.append(f"{strict_terms} plumbing")
+        queries.append(f"{strict_terms} plumber repair {neg_keywords}")
+        queries.append(f"{strict_terms} plumbing {neg_keywords}")
 
     queries.extend(
         [
-            f"{hook} plumbing repair",
-            f"{hook} plumber",
-            "drain cleaning plumber",
-            "pipe leak repair",
-            "sewer line repair",
-            hook,
+            f"{hook} plumbing repair {neg_keywords}",
+            f"{hook} plumber {neg_keywords}",
+            f"drain cleaning plumber {neg_keywords}",
+            f"pipe leak repair {neg_keywords}",
+            f"sewer line repair {neg_keywords}",
+            f"{hook} {neg_keywords}",
         ]
     )
 
@@ -116,9 +122,40 @@ def fetch_pexels_video_candidates(query):
 
     candidates = []
     for v in videos:
+        video_id = str(v.get("id", ""))
+        if video_id in BLACKLIST_PEXELS_IDS:
+            continue
         for vf in v.get("video_files") or []:
             if vf.get("file_type") == "video/mp4" and vf.get("link"):
                 candidates.append(vf.get("link"))
+    return candidates
+
+
+def fetch_pixabay_video_candidates(query):
+    params = {"q": query, "video_type": "all", "per_page": 15, "safesearch": "true"}
+    if "PIXABAY_API_KEY" in os.environ:
+        params["key"] = os.environ["PIXABAY_API_KEY"]
+    
+    resp = requests.get(
+        "https://pixabay.com/api/videos/",
+        params=params,
+        timeout=20,
+    )
+    resp.raise_for_status()
+    data = resp.json()
+    videos = data.get("hits") or []
+
+    candidates = []
+    for v in videos:
+        video_id = str(v.get("id", ""))
+        if video_id in BLACKLIST_PEXELS_IDS:
+            continue
+        videos_obj = v.get("videos") or {}
+        for quality_key in ["medium", "small", "large"]:
+            video_data = videos_obj.get(quality_key)
+            if video_data and video_data.get("url"):
+                candidates.append(video_data.get("url"))
+                break
     return candidates
 
 
@@ -159,14 +196,29 @@ def get_video_url(title, search_keyword, recent_video_ids=None):
                 fresh_candidates = [c for c in candidates if canonical_video_id(c) not in recent_video_ids]
                 chosen_pool = fresh_candidates if fresh_candidates else candidates
                 video_url = random.choice(chosen_pool)
-                print(f"Video selected using query: {query}")
+                print(f"Video selected via Pexels using query: {query}")
                 if fresh_candidates:
                     print("Selected a fresh (non-recent) video clip")
                 else:
                     print("No fresh candidates found for this query; reused an older clip")
                 return video_url
         except Exception as e:
-            print(f"Video search failed for '{query}': {e}")
+            print(f"Pexels search failed for '{query}': {e}")
+
+    print("Pexels exhausted, trying Pixabay fallback...")
+    safe_query = normalize_text(search_keyword or "plumbing repair").split()[0:2] 
+    safe_query = " ".join(safe_query)
+    
+    try:
+        candidates = fetch_pixabay_video_candidates(safe_query)
+        if candidates:
+            fresh_candidates = [c for c in candidates if canonical_video_id(c) not in recent_video_ids]
+            chosen_pool = fresh_candidates if fresh_candidates else candidates
+            video_url = random.choice(chosen_pool)
+            print(f"Video selected via Pixabay fallback")
+            return video_url
+    except Exception as e:
+        print(f"Pixabay fallback failed: {e}")
 
     print("Using default video fallback")
     return video_url
