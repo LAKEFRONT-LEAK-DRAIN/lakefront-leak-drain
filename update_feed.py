@@ -76,7 +76,7 @@ def generate_description(title):
 
 def get_next_post_id(lines):
     """Get the next post ID by finding the highest existing ID"""
-    max_id = 32  # Start from 33 like your WordPress (post 33 existed)
+    max_id = 32
     for line in lines:
         if '<wp:post_id>' in line:
             try:
@@ -87,23 +87,22 @@ def get_next_post_id(lines):
     return max_id + 1
 
 def format_rss_item(title, image_url, description_text, post_id):
-    """Formats XML block - EXACT WordPress format from your export"""
+    """Formats XML block - EXACT WordPress format with enclosure for images"""
     past_time = datetime.utcnow() - timedelta(hours=6)
     pub_date = past_time.strftime('%a, %d %b %Y %H:%M:%S +0000')
     post_date = past_time.strftime('%Y-%m-%d %H:%M:%S')
     
     slug = create_slug(title)
     
-    # WordPress-style GUID and link (matching your export exactly)
+    # WordPress-style GUID, but link to actual HTML page
     guid = f"https://lakefrontleakanddrain.com/?p={post_id}"
-    link = f"https://lakefrontleakanddrain.com/blog/?post={slug}"
+    link = f"https://lakefrontleakanddrain.com/blog/{slug}.html"
     
     safe_title = title.replace('&', '&amp;')
     safe_image = image_url.replace('&', '&amp;')
     
     image_length = get_image_length(image_url)
     
-    # Match WordPress block editor format in content:encoded
     content_html = f"""<!-- wp:paragraph -->
 <p>{description_text}</p>
 <!-- /wp:paragraph -->
@@ -116,7 +115,6 @@ def format_rss_item(title, image_url, description_text, post_id):
 <p>📞 216-505-7765</p>
 <!-- /wp:paragraph -->"""
     
-    # EXACT WordPress format from your export
     return f"""	<item>
 		<title><![CDATA[{safe_title}]]></title>
 		<link>{link}</link>
@@ -144,11 +142,67 @@ def format_rss_item(title, image_url, description_text, post_id):
 		<category domain="post_tag" nicename="plumbing-tips"><![CDATA[PLUMBING TIPS]]></category>
 		<category domain="post_tag" nicename="drain-cleaning"><![CDATA[DRAIN CLEANING]]></category>
 		<category domain="category" nicename="uncategorized"><![CDATA[Uncategorized]]></category>
-						<wp:postmeta>
+						<enclosure url="{safe_image}" length="{image_length}" type="image/jpeg" />
+		<wp:postmeta>
 		<wp:meta_key><![CDATA[_last_editor_used_jetpack]]></wp:meta_key>
 		<wp:meta_value><![CDATA[block-editor]]></wp:meta_value>
 		</wp:postmeta>
 							</item>"""
+
+def generate_blog_page(title, slug, image_url, description_text, post_id):
+    """Generate individual HTML page for blog post"""
+    
+    safe_title = escape(title.replace('&amp;', '&'))
+    safe_image = escape(image_url.replace('&amp;', '&'))
+    safe_description = escape(description_text.replace('&amp;', '&'))
+    
+    html_content = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{safe_title} - Lakefront Leak & Drain</title>
+    
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="{safe_title}">
+    <meta property="og:description" content="{safe_description}">
+    <meta property="og:image" content="{safe_image}">
+    <meta property="og:url" content="https://lakefrontleakanddrain.com/blog/{slug}.html">
+    <meta property="og:type" content="article">
+    
+    <!-- Twitter Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{safe_title}">
+    <meta name="twitter:description" content="{safe_description}">
+    <meta name="twitter:image" content="{safe_image}">
+</head>
+<body>
+    <header>
+        <a href="/">Lakefront Leak & Drain</a>
+    </header>
+    
+    <main>
+        <article>
+            <h1>{safe_title}</h1>
+            <img src="{safe_image}" alt="{safe_title}" style="max-width: 100%; height: auto;">
+            <p>{safe_description}</p>
+            <p>👉 Visit our website: <a href="https://lakefrontleakanddrain.com">lakefrontleakanddrain.com</a></p>
+            <p>📞 216-505-7765</p>
+        </article>
+        <a href="/blog/">← Back to all tips</a>
+    </main>
+</body>
+</html>"""
+    
+    # Write HTML file
+    blog_dir = 'blog'
+    if not os.path.exists(blog_dir):
+        os.makedirs(blog_dir)
+    
+    with open(f'{blog_dir}/{slug}.html', 'w', encoding='utf-8') as f:
+        f.write(html_content)
+    
+    print(f"Generated blog page: blog/{slug}.html")
 
 def main():
     title, search_keyword = generate_topic()
@@ -164,6 +218,12 @@ def main():
         return
 
     post_id = get_next_post_id(lines)
+    slug = create_slug(title)
+    
+    # Generate HTML blog page
+    generate_blog_page(title, slug, image_url, description_text, post_id)
+    
+    # Generate RSS item
     new_item_xml = format_rss_item(title, image_url, description_text, post_id)
 
     new_content = []
@@ -171,13 +231,11 @@ def main():
     
     for line in lines:
         new_content.append(line)
-        # Insert after <generator> tag to match WordPress structure
         if '<generator>' in line and not inserted:
             new_content.append(f"\n{new_item_xml}\n")
             inserted = True
 
     if not inserted:
-        # Fallback: insert before closing </channel>
         new_content = []
         for line in lines:
             if '</channel>' in line:
