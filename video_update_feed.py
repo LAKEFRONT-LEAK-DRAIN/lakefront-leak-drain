@@ -174,7 +174,7 @@ def canonical_video_id(video_url):
 def extract_recent_video_ids(feed_text, lookback=RECENT_VIDEO_LOOKBACK):
     recent_ids = []
     for item in extract_items(feed_text):
-        enclosure_match = re.search(r'<enclosure\\b[^>]*\\burl="([^"]+)"', item, flags=re.S | re.I)
+        enclosure_match = re.search(r'<enclosure\b[^>]*\burl="([^"]+)"', item, flags=re.S | re.I)
         if enclosure_match:
             video_id = canonical_video_id(enclosure_match.group(1))
             if video_id:
