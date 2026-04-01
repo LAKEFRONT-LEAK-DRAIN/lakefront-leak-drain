@@ -246,6 +246,28 @@ def canonical_video_id(video_url):
     return f"url:{url}"
 
 
+def extract_enclosure_url(item_text):
+    enclosure_match = re.search(r'<enclosure\b[^>]*\burl="([^"]+)"', item_text, flags=re.S | re.I)
+    return enclosure_match.group(1).strip() if enclosure_match else ""
+
+
+def should_drop_item(item_text):
+    enclosure_url = extract_enclosure_url(item_text)
+    if not enclosure_url:
+        return False
+
+    if enclosure_url.strip().lower() == DEFAULT_VIDEO.lower():
+        return True
+
+    video_id = canonical_video_id(enclosure_url)
+    if video_id and video_id.startswith("pexels:"):
+        pexels_id = video_id.split(":", 1)[1]
+        if pexels_id in BLACKLIST_PEXELS_IDS:
+            return True
+
+    return False
+
+
 def extract_recent_video_ids(feed_text, lookback=RECENT_VIDEO_LOOKBACK):
     recent_ids = []
     for item in extract_items(feed_text):
@@ -440,6 +462,8 @@ def prune_and_sort_items(feed_text):
     records = []
 
     for idx, item in enumerate(items):
+        if should_drop_item(item):
+            continue
         records.append(
             {
                 "item": normalize_indent(item),
