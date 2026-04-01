@@ -18,6 +18,21 @@ DEFAULT_VIDEO = "https://lakefrontleakanddrain.com/logo-animated.mp4"
 MAX_ITEMS = 20
 RECENT_TITLE_LOOKBACK = 12
 
+PLUMBING_TERMS = [
+    "drain",
+    "sewer",
+    "leak",
+    "pipe",
+    "sump",
+    "water heater",
+    "toilet",
+    "faucet",
+    "backup",
+    "flood",
+    "inspection",
+    "plumbing",
+]
+
 
 def generate_topic(existing_titles):
     recent_titles_text = "\n".join(f"- {t}" for t in existing_titles[:RECENT_TITLE_LOOKBACK]) or "- None"
@@ -49,31 +64,78 @@ Title | video keyword
     return title, search_keyword
 
 
-def get_video_url(search_keyword):
+def normalize_text(text):
+    return re.sub(r"\s+", " ", (text or "").strip().lower())
+
+
+def build_video_queries(title, search_keyword):
+    title_norm = normalize_text(title)
+    hook = normalize_text(search_keyword) or "plumbing repair"
+
+    matched_terms = [term for term in PLUMBING_TERMS if term in title_norm]
+    strict_terms = " ".join(matched_terms[:2]).strip()
+
+    queries = []
+    if strict_terms:
+        queries.append(f"{strict_terms} plumber repair")
+        queries.append(f"{strict_terms} plumbing")
+
+    queries.extend(
+        [
+            f"{hook} plumbing repair",
+            f"{hook} plumber",
+            "drain cleaning plumber",
+            "pipe leak repair",
+            "sewer line repair",
+            hook,
+        ]
+    )
+
+    seen = set()
+    unique_queries = []
+    for q in queries:
+        key = normalize_text(q)
+        if key and key not in seen:
+            seen.add(key)
+            unique_queries.append(q.strip())
+    return unique_queries
+
+
+def fetch_pexels_video_candidates(query):
+    headers = {"Authorization": os.environ["PEXELS_API_KEY"]}
+    resp = requests.get(
+        "https://api.pexels.com/videos/search",
+        params={"query": query, "per_page": 15, "orientation": "portrait", "size": "medium"},
+        headers=headers,
+        timeout=20,
+    )
+    resp.raise_for_status()
+    data = resp.json()
+    videos = data.get("videos") or []
+
+    candidates = []
+    for v in videos:
+        for vf in v.get("video_files") or []:
+            if vf.get("file_type") == "video/mp4" and vf.get("link"):
+                candidates.append(vf.get("link"))
+    return candidates
+
+
+def get_video_url(title, search_keyword):
     video_url = DEFAULT_VIDEO
-    try:
-        headers = {"Authorization": os.environ["PEXELS_API_KEY"]}
-        resp = requests.get(
-            "https://api.pexels.com/videos/search",
-            params={"query": search_keyword.strip(), "per_page": 15, "orientation": "portrait", "size": "medium"},
-            headers=headers,
-            timeout=20,
-        )
-        resp.raise_for_status()
-        data = resp.json()
-        videos = data.get("videos") or []
+    queries = build_video_queries(title, search_keyword)
 
-        candidates = []
-        for v in videos:
-            for vf in v.get("video_files") or []:
-                if vf.get("file_type") == "video/mp4" and vf.get("link"):
-                    candidates.append(vf.get("link"))
+    for query in queries:
+        try:
+            candidates = fetch_pexels_video_candidates(query)
+            if candidates:
+                video_url = random.choice(candidates)
+                print(f"Video selected using query: {query}")
+                return video_url
+        except Exception as e:
+            print(f"Video search failed for '{query}': {e}")
 
-        if candidates:
-            video_url = random.choice(candidates)
-    except Exception as e:
-        print(f"Video search failed: {e}")
-
+    print("Using default video fallback")
     return video_url
 
 
@@ -262,7 +324,7 @@ def main():
         print(f"Skipped duplicate title: {title}")
         return
 
-    video_url = get_video_url(search_keyword)
+    video_url = get_video_url(title, search_keyword)
     headline, description, cta = generate_post_copy(title)
 
     final_title = headline.strip() or title.strip()
