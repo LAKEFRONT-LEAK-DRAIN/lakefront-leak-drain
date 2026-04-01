@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:media="http://search.yahoo.com/mrss/" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Lakefront Leak &amp; Drain Content Pipe</title>
+    <link>https://lakefrontleakanddrain.com/</link>
+    <atom:link href="https://lakefrontleakanddrain.com/plumbing-tips.xml" rel="self" type="application/rss+xml" />
+    <description>Automated Plumbing Leads for Cleveland and Cuyahoga County</description>
+    <language>en-us</language>
+
+    <item>
+      <title>Snow Melt Mayhem: Cleveland Sump Pump Overload</title>
+      <link>https://lakefrontleakanddrain.com/blog/?post=snow-melt-mayhem-cleveland-sump-pump-overload</link>
+      <guid isPermaLink="false">snow-melt-mayhem-cleveland-sump-pump-overload-20260331</guid>
+      <pubDate>Tue, 31 Mar 2026 23:47:04 GMT</pubDate>
+      <description><![CDATA[Cleveland residents, heavy snowmelt can quickly overwhelm your sump pump, so regularly check and clear your sump basin and discharge line for any obstructions. To best prepare for "Snow Melt Mayhem," consider a battery backup sump pump system to protect your home from potential flooding during peak runoff or power outages.]]></description>
+      <enclosure url="https://images.pexels.com/photos/35258465/pexels-photo-35258465.jpeg" length="0" type="image/jpeg" />
+    </item>
+
+  </channel>
+</rss>
