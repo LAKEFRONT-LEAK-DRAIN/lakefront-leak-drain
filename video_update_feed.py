@@ -36,6 +36,7 @@ PLUMBING_TERMS = [
 
 BLACKLIST_PEXELS_IDS = {
     "8987409",
+    "4482373",
 }
 
 
@@ -108,6 +109,19 @@ def build_video_queries(title, search_keyword):
     return unique_queries
 
 
+def is_plumbing_relevant(video_tags):
+    if not video_tags:
+        return True
+    tags_lower = (video_tags or "").lower()
+    
+    bad_keywords = {"car", "auto", "mechanic", "person", "people", "workout", "exercise", "sports", "gym", "music", "dance", "performance"}
+    if any(bad in tags_lower for bad in bad_keywords):
+        return False
+    
+    good_keywords = {"plumb", "drain", "sewer", "leak", "pipe", "water", "repair", "fix", "house", "home", "bathroom", "kitchen", "basement"}
+    return any(good in tags_lower for good in good_keywords)
+
+
 def fetch_pexels_video_candidates(query):
     headers = {"Authorization": os.environ["PEXELS_API_KEY"]}
     resp = requests.get(
@@ -125,6 +139,11 @@ def fetch_pexels_video_candidates(query):
         video_id = str(v.get("id", ""))
         if video_id in BLACKLIST_PEXELS_IDS:
             continue
+        
+        tags = v.get("tags", "")
+        if not is_plumbing_relevant(tags):
+            continue
+        
         for vf in v.get("video_files") or []:
             if vf.get("file_type") == "video/mp4" and vf.get("link"):
                 candidates.append(vf.get("link"))
@@ -150,6 +169,11 @@ def fetch_pixabay_video_candidates(query):
         video_id = str(v.get("id", ""))
         if video_id in BLACKLIST_PEXELS_IDS:
             continue
+        
+        tags = v.get("tags", "")
+        if not is_plumbing_relevant(tags):
+            continue
+        
         videos_obj = v.get("videos") or {}
         for quality_key in ["medium", "small", "large"]:
             video_data = videos_obj.get(quality_key)
