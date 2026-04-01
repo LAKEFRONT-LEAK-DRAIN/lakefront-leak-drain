@@ -2,6 +2,7 @@ import os
 import requests
 import re
 import random
+from pathlib import Path
 from google import genai
 from datetime import datetime, timedelta
 from xml.sax.saxutils import escape
@@ -9,7 +10,8 @@ from xml.sax.saxutils import escape
 client = genai.Client(api_key=os.environ['GEMINI_API_KEY'])
 
 # CONFIGURATION
-FEED_PATH = 'feed.xml'
+BASE_DIR = Path(__file__).resolve().parent
+FEED_PATH = BASE_DIR / 'feed.xml'
 DEFAULT_LINK = 'https://lakefrontleakanddrain.com/'
 DEFAULT_IMAGE = 'https://lakefrontleakanddrain.com/logo.jpg'
 
@@ -195,11 +197,11 @@ def generate_blog_page(title, slug, image_url, description_text, post_id):
 </html>"""
     
     # Write HTML file
-    blog_dir = 'blog'
-    if not os.path.exists(blog_dir):
-        os.makedirs(blog_dir)
+    blog_dir = BASE_DIR / 'blog'
+    if not blog_dir.exists():
+        blog_dir.mkdir(parents=True, exist_ok=True)
     
-    with open(f'{blog_dir}/{slug}.html', 'w', encoding='utf-8') as f:
+    with open(blog_dir / f'{slug}.html', 'w', encoding='utf-8') as f:
         f.write(html_content)
     
     print(f"Generated blog page: blog/{slug}.html")
