@@ -199,7 +199,6 @@ def fetch_pixabay_video_candidates(query):
         "video_type": "all",
         "per_page": 20,
         "safesearch": "true",
-        "category": "industry",
         "order": "popular",
     }
     if "PIXABAY_API_KEY" in os.environ:
