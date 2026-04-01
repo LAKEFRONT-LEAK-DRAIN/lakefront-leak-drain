@@ -3,7 +3,7 @@ import requests
 import re
 import random
 from google import genai
-from datetime import datetime, timedelta # Fixed: Added timedelta here
+from datetime import datetime, timedelta
 from xml.sax.saxutils import escape
 
 client = genai.Client(api_key=os.environ['GEMINI_API_KEY'])
@@ -80,7 +80,8 @@ def generate_description(title):
     return resp.text.strip()
 
 def format_rss_item(title, image_url, description_text):
-    """Formats the XML block - TEST WITHOUT ENCLOSURE"""
+    """Formats the XML block with correct structure - BACK TO PEXELS IMAGES"""
+    # BACKDATE FIX: Subtract 6 hours so it's always in the past for Metricool
     past_time = datetime.utcnow() - timedelta(hours=6)
     pub_date = past_time.strftime('%a, %d %b %Y %H:%M:%S +0000')
     
@@ -91,15 +92,16 @@ def format_rss_item(title, image_url, description_text):
     safe_title = escape(title.replace('&amp;', '&'))
     safe_image = escape(image_url.replace('&amp;', '&'))
     
+    # Get actual image size
     image_length = get_image_length(image_url)
     
-    # TEST: Remove enclosure tag temporarily
     return f"""    <item>
       <title>{safe_title}</title>
       <link>{unique_link}</link>
       <guid isPermaLink="false">{guid}</guid>
       <pubDate>{pub_date}</pubDate>
       <description><![CDATA[{description_text}]]></description>
+      <enclosure url="{safe_image}" length="{image_length}" type="image/jpeg" />
     </item>"""
 
 def main():
@@ -119,18 +121,23 @@ def main():
 
     new_content = []
     inserted = False
+    
+    # FIXED: Insert new item AFTER <language> tag, maintaining proper RSS structure
     for line in lines:
-        if '<item>' in line and not inserted:
-            new_content.append(f"{new_item_xml}\n\n")
-            inserted = True
         new_content.append(line)
+        # Insert after language tag to maintain RSS spec order
+        if '<language>' in line and not inserted:
+            new_content.append(f"\n{new_item_xml}\n\n")
+            inserted = True
 
+    # Fallback: if no language tag found, insert after description
     if not inserted:
-        for i, line in enumerate(new_content):
-            if '</language>' in line or '</description>' in line:
-                new_content.insert(i + 1, f"\n{new_item_xml}\n")
+        new_content = []
+        for line in lines:
+            new_content.append(line)
+            if '</description>' in line and '<item>' not in "".join(lines[:lines.index(line)]):
+                new_content.append(f"    <language>en-us</language>\n\n{new_item_xml}\n\n")
                 inserted = True
-                break
 
     with open(FEED_PATH, 'w', encoding='utf-8') as f:
         f.writelines(new_content)

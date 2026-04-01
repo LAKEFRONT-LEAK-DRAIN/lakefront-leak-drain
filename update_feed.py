@@ -10,16 +10,12 @@ client = genai.Client(api_key=os.environ['GEMINI_API_KEY'])
 
 # CONFIGURATION
 FEED_PATH = 'feed.xml'
-DEFAULT_LINK = 'https://lakefrontleakanddrain.com/blog/'
+DEFAULT_LINK = 'https://lakefrontleakanddrain.com/'
 DEFAULT_IMAGE = 'https://lakefrontleakanddrain.com/logo.jpg'
 
 def get_image_length(image_url):
-    """
-    Try to get actual image file size, fallback to reasonable default.
-    Metricool requires length > 0.
-    """
+    """Get actual image file size, fallback to reasonable default."""
     try:
-        # Try to get actual file size from Content-Length header
         response = requests.head(image_url, timeout=5)
         content_length = response.headers.get('Content-Length')
         if content_length and int(content_length) > 0:
@@ -27,13 +23,12 @@ def get_image_length(image_url):
     except Exception as e:
         print(f"Could not fetch image size: {e}")
     
-    # Fallback: Use reasonable default for large images
-    return "150000"  # 150KB - Metricool's suggested default
+    return "150000"
 
 def create_slug(title):
     """Turns 'Spring Sump Pump!' into 'spring-sump-pump'"""
     slug = title.lower()
-    slug = re.sub(r'[^a-z0-9 ]', '', slug)  # Removes special chars
+    slug = re.sub(r'[^a-z0-9 ]', '', slug)
     slug = slug.strip().replace(' ', '-')
     return slug
 
@@ -79,30 +74,81 @@ def generate_description(title):
     resp = client.models.generate_content(model='gemini-2.5-flash', contents=prompt)
     return resp.text.strip()
 
-def format_rss_item(title, image_url, description_text):
-    """Formats the XML block with correct structure - BACK TO PEXELS IMAGES"""
-    # BACKDATE FIX: Subtract 6 hours so it's always in the past for Metricool
+def get_next_post_id(lines):
+    """Get the next post ID by finding the highest existing ID"""
+    max_id = 32  # Start from 33 like your WordPress (post 33 existed)
+    for line in lines:
+        if '<wp:post_id>' in line:
+            try:
+                post_id = int(line.split('<wp:post_id>')[1].split('</wp:post_id>')[0])
+                max_id = max(max_id, post_id)
+            except:
+                pass
+    return max_id + 1
+
+def format_rss_item(title, image_url, description_text, post_id):
+    """Formats XML block - EXACT WordPress format from your export"""
     past_time = datetime.utcnow() - timedelta(hours=6)
     pub_date = past_time.strftime('%a, %d %b %Y %H:%M:%S +0000')
+    post_date = past_time.strftime('%Y-%m-%d %H:%M:%S')
     
     slug = create_slug(title)
-    unique_link = f"{DEFAULT_LINK}?post={slug}"
-    guid = unique_link
     
-    safe_title = escape(title.replace('&amp;', '&'))
-    safe_image = escape(image_url.replace('&amp;', '&'))
+    # WordPress-style GUID and link (matching your export exactly)
+    guid = f"https://lakefrontleakanddrain.com/?p={post_id}"
+    link = f"https://lakefrontleakanddrain.com/?p={post_id}"
     
-    # Get actual image size
+    safe_title = title.replace('&', '&amp;')
+    safe_image = image_url.replace('&', '&amp;')
+    
     image_length = get_image_length(image_url)
     
-    return f"""    <item>
-      <title>{safe_title}</title>
-      <link>{unique_link}</link>
-      <guid isPermaLink="false">{guid}</guid>
-      <pubDate>{pub_date}</pubDate>
-      <description><![CDATA[{description_text}]]></description>
-      <enclosure url="{safe_image}" length="{image_length}" type="image/jpeg" />
-    </item>"""
+    # Match WordPress block editor format in content:encoded
+    content_html = f"""<!-- wp:paragraph -->
+<p>{description_text}</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>👉 Visit our website:<br><a href="https://lakefrontleakanddrain.com">https://lakefrontleakanddrain.com</a></p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>📞 216-505-7765</p>
+<!-- /wp:paragraph -->"""
+    
+    # EXACT WordPress format from your export
+    return f"""	<item>
+		<title><![CDATA[{safe_title}]]></title>
+		<link>{link}</link>
+		<pubDate>{pub_date}</pubDate>
+		<dc:creator><![CDATA[lakefrontleakanddrain]]></dc:creator>
+		<guid isPermaLink="false">{guid}</guid>
+		<description></description>
+		<content:encoded><![CDATA[{content_html}]]></content:encoded>
+		<excerpt:encoded><![CDATA[]]></excerpt:encoded>
+		<wp:post_id>{post_id}</wp:post_id>
+		<wp:post_date><![CDATA[{post_date}]]></wp:post_date>
+		<wp:post_date_gmt><![CDATA[{post_date}]]></wp:post_date_gmt>
+		<wp:post_modified><![CDATA[{post_date}]]></wp:post_modified>
+		<wp:post_modified_gmt><![CDATA[{post_date}]]></wp:post_modified_gmt>
+		<wp:comment_status><![CDATA[open]]></wp:comment_status>
+		<wp:ping_status><![CDATA[open]]></wp:ping_status>
+		<wp:post_name><![CDATA[{slug}]]></wp:post_name>
+		<wp:status><![CDATA[publish]]></wp:status>
+		<wp:post_parent>0</wp:post_parent>
+		<wp:menu_order>0</wp:menu_order>
+		<wp:post_type><![CDATA[post]]></wp:post_type>
+		<wp:post_password><![CDATA[]]></wp:post_password>
+		<wp:is_sticky>0</wp:is_sticky>
+										<category domain="post_tag" nicename="cleveland-plumbing"><![CDATA[CLEVELAND PLUMBING]]></category>
+		<category domain="post_tag" nicename="plumbing-tips"><![CDATA[PLUMBING TIPS]]></category>
+		<category domain="post_tag" nicename="drain-cleaning"><![CDATA[DRAIN CLEANING]]></category>
+		<category domain="category" nicename="uncategorized"><![CDATA[Uncategorized]]></category>
+						<wp:postmeta>
+		<wp:meta_key><![CDATA[_last_editor_used_jetpack]]></wp:meta_key>
+		<wp:meta_value><![CDATA[block-editor]]></wp:meta_value>
+		</wp:postmeta>
+							</item>"""
 
 def main():
     title, search_keyword = generate_topic()
@@ -113,36 +159,36 @@ def main():
         lines = f.readlines()
 
     full_text = "".join(lines)
-    if f"<title>{escape(title)}</title>" in full_text:
+    if f"<title><![CDATA[{title}]]></title>" in full_text:
         print(f"Skipped duplicate title: {title}")
         return
 
-    new_item_xml = format_rss_item(title, image_url, description_text)
+    post_id = get_next_post_id(lines)
+    new_item_xml = format_rss_item(title, image_url, description_text, post_id)
 
     new_content = []
     inserted = False
     
-    # FIXED: Insert new item AFTER <language> tag, maintaining proper RSS structure
     for line in lines:
         new_content.append(line)
-        # Insert after language tag to maintain RSS spec order
-        if '<language>' in line and not inserted:
-            new_content.append(f"\n{new_item_xml}\n\n")
+        # Insert after <generator> tag to match WordPress structure
+        if '<generator>' in line and not inserted:
+            new_content.append(f"\n{new_item_xml}\n")
             inserted = True
 
-    # Fallback: if no language tag found, insert after description
     if not inserted:
+        # Fallback: insert before closing </channel>
         new_content = []
         for line in lines:
-            new_content.append(line)
-            if '</description>' in line and '<item>' not in "".join(lines[:lines.index(line)]):
-                new_content.append(f"    <language>en-us</language>\n\n{new_item_xml}\n\n")
+            if '</channel>' in line:
+                new_content.append(f"{new_item_xml}\n\n")
                 inserted = True
+            new_content.append(line)
 
     with open(FEED_PATH, 'w', encoding='utf-8') as f:
         f.writelines(new_content)
 
-    print(f"Success! Added to top: {title}")
+    print(f"Success! Added: {title} (ID: {post_id})")
 
 if __name__ == "__main__":
     main()
