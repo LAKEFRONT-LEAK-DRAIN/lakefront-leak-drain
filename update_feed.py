@@ -33,7 +33,7 @@ def get_image_length(image_url):
 def create_slug(title):
     """Turns 'Spring Sump Pump!' into 'spring-sump-pump'"""
     slug = title.lower()
-    slug = re.sub(r'[^a-z0-9 ]', '', slug) 
+    slug = re.sub(r'[^a-z0-9 ]', '', slug)  # Removes special chars
     slug = slug.strip().replace(' ', '-')
     return slug
 
