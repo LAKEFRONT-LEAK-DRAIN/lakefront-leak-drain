@@ -3,7 +3,7 @@ import requests
 import re
 import random
 from google import genai
-from datetime import datetime
+from datetime import datetime, timedelta # Fixed: Added timedelta here
 from xml.sax.saxutils import escape
 
 client = genai.Client(api_key=os.environ['GEMINI_API_KEY'])
@@ -41,7 +41,6 @@ def get_image_url(search_keyword):
     image_url = DEFAULT_IMAGE
     try:
         headers = {"Authorization": os.environ['PEXELS_API_KEY']}
-        # We request 15 photos to pick a random one
         pexels_resp = requests.get(
             "https://api.pexels.com/v1/search",
             params={"query": search_keyword.strip(), "per_page": 15},
@@ -65,17 +64,16 @@ def generate_description(title):
 
 def format_rss_item(title, image_url, description_text):
     """Formats the XML block with unique IDs and safe encoding"""
-    pub_date = (datetime.utcnow() - timedelta(hours=6)).strftime('%a, %d %b %Y %H:%M:%S GMT')
-    slug = create_slug(title)
+    # BACKDATE FIX: Subtract 6 hours so it's always in the past for Metricool
+    past_time = datetime.utcnow() - timedelta(hours=6)
+    pub_date = past_time.strftime('%a, %d %b %Y %H:%M:%S GMT')
     
-    # UNIQUE LINK: Makes Metricool see this as a brand new page
+    slug = create_slug(title)
     unique_link = f"{DEFAULT_LINK}?post={slug}"
     
-    # UNIQUE GUID: The 'fingerprint' for this specific post
-    guid = f"{slug}-{datetime.utcnow().strftime('%Y%m%d')}"
+    # UNIQUE GUID: Added a version suffix to force Metricool to re-scan
+    guid = f"{slug}-{datetime.utcnow().strftime('%Y%m%d')}-v2"
     
-    # TWO-STEP SCRUBBER: Revert any &amp; then encode everything to &amp;
-    # This prevents double-encoding and crashes.
     safe_title = escape(title.replace('&amp;', '&'))
     safe_image = escape(image_url.replace('&amp;', '&'))
     
@@ -89,25 +87,20 @@ def format_rss_item(title, image_url, description_text):
     </item>"""
 
 def main():
-    # 1. Generate new content
     title, search_keyword = generate_topic()
     image_url = get_image_url(search_keyword)
     description_text = generate_description(title)
 
-    # 2. Read existing feed
     with open(FEED_PATH, 'r', encoding='utf-8') as f:
         lines = f.readlines()
 
-    # 3. Check for duplicates
     full_text = "".join(lines)
     if f"<title>{escape(title)}</title>" in full_text:
         print(f"Skipped duplicate title: {title}")
         return
 
-    # 4. Format the new item
     new_item_xml = format_rss_item(title, image_url, description_text)
 
-    # 5. Inject at the TOP (Above the first existing <item>)
     new_content = []
     inserted = False
     for line in lines:
@@ -116,7 +109,6 @@ def main():
             inserted = True
         new_content.append(line)
 
-    # 6. Fallback if feed was empty
     if not inserted:
         for i, line in enumerate(new_content):
             if '</language>' in line or '</description>' in line:
@@ -124,7 +116,6 @@ def main():
                 inserted = True
                 break
 
-    # 7. Write back to file
     with open(FEED_PATH, 'w', encoding='utf-8') as f:
         f.writelines(new_content)
 
