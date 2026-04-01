@@ -143,7 +143,7 @@ def extract_items(feed_text):
 
 
 def extract_tag(item_text, tag_name):
-    match = re.search(fr"<{tag_name}\\b[^>]*>(.*?)</{tag_name}>", item_text, flags=re.S)
+    match = re.search(fr"<{tag_name}\b[^>]*>(.*?)</{tag_name}>", item_text, flags=re.S)
     return match.group(1).strip() if match else None
 
 
@@ -163,7 +163,7 @@ def title_exists(feed_text, title):
 
 def split_feed(feed_text):
     first_item_match = re.search(r"<item>", feed_text)
-    end_match = re.search(r"</channel>\\s*</rss>\\s*$", feed_text, flags=re.S)
+    end_match = re.search(r"</channel>\s*</rss>\s*$", feed_text, flags=re.S)
 
     if not end_match:
         raise ValueError("Could not find </channel></rss> in video_feed.xml")
