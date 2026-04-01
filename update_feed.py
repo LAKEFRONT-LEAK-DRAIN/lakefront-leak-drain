@@ -80,21 +80,21 @@ def generate_description(title):
     return resp.text.strip()
 
 def format_rss_item(title, image_url, description_text):
-    """Formats the XML block with unique IDs and safe encoding"""
+    """Formats the XML block - FIXED VERSION matching TechCrunch format"""
     # BACKDATE FIX: Subtract 6 hours so it's always in the past for Metricool
     past_time = datetime.utcnow() - timedelta(hours=6)
-    pub_date = past_time.strftime('%a, %d %b %Y %H:%M:%S GMT')
+    pub_date = past_time.strftime('%a, %d %b %Y %H:%M:%S +0000')  # Changed GMT to +0000
     
     slug = create_slug(title)
     unique_link = f"{DEFAULT_LINK}?post={slug}"
     
-    # UNIQUE GUID: Added a version suffix to force Metricool to re-scan
-    guid = f"{slug}-{datetime.utcnow().strftime('%Y%m%d')}-v2"
+    # FIX: GUID should be full URL, just like TechCrunch
+    guid = unique_link
     
     safe_title = escape(title.replace('&amp;', '&'))
     safe_image = escape(image_url.replace('&amp;', '&'))
     
-    # FIX: Get actual image size or use reasonable default
+    # Get actual image size or use reasonable default
     image_length = get_image_length(image_url)
     
     return f"""    <item>
