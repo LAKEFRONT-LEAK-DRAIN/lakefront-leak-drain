@@ -39,6 +39,44 @@ BLACKLIST_PEXELS_IDS = {
     "8987409",
     "4482373",
     "18104090",
+    "36543596",
+}
+
+BAD_VIDEO_KEYWORDS = {
+    "car",
+    "auto",
+    "mechanic",
+    "vehicle",
+    "motorcycle",
+    "truck",
+    "workout",
+    "exercise",
+    "sports",
+    "gym",
+    "dance",
+    "music",
+    "dj",
+    "concert",
+}
+
+GOOD_VIDEO_KEYWORDS = {
+    "plumb",
+    "drain",
+    "sewer",
+    "leak",
+    "pipe",
+    "water",
+    "repair",
+    "fix",
+    "house",
+    "home",
+    "bathroom",
+    "kitchen",
+    "basement",
+    "sink",
+    "toilet",
+    "faucet",
+    "heater",
 }
 
 
@@ -115,13 +153,16 @@ def is_plumbing_relevant(video_tags):
     if not video_tags:
         return False
     tags_lower = (video_tags or "").lower()
-    
-    bad_keywords = {"car", "auto", "mechanic", "person", "people", "workout", "exercise", "sports", "gym", "music", "dance", "performance"}
-    if any(bad in tags_lower for bad in bad_keywords):
+
+    if any(bad in tags_lower for bad in BAD_VIDEO_KEYWORDS):
         return False
-    
-    good_keywords = {"plumb", "drain", "sewer", "leak", "pipe", "water", "repair", "fix", "house", "home", "bathroom", "kitchen", "basement"}
-    return any(good in tags_lower for good in good_keywords)
+
+    return any(good in tags_lower for good in GOOD_VIDEO_KEYWORDS)
+
+
+def is_likely_non_plumbing(video_tags):
+    tags_lower = (video_tags or "").lower()
+    return any(bad in tags_lower for bad in BAD_VIDEO_KEYWORDS)
 
 
 def fetch_pexels_video_candidates(query):
@@ -153,7 +194,14 @@ def fetch_pexels_video_candidates(query):
 
 
 def fetch_pixabay_video_candidates(query):
-    params = {"q": query, "video_type": "all", "per_page": 15, "safesearch": "true"}
+    params = {
+        "q": query,
+        "video_type": "all",
+        "per_page": 20,
+        "safesearch": "true",
+        "category": "industry",
+        "order": "popular",
+    }
     if "PIXABAY_API_KEY" in os.environ:
         params["key"] = os.environ["PIXABAY_API_KEY"]
     
@@ -171,11 +219,13 @@ def fetch_pixabay_video_candidates(query):
         video_id = str(v.get("id", ""))
         if video_id in BLACKLIST_PEXELS_IDS:
             continue
-        
+
         tags = v.get("tags", "")
-        if not is_plumbing_relevant(tags):
+        if is_likely_non_plumbing(tags):
             continue
-        
+
+        # Pixabay tags can be sparse. For primary-source mode, allow neutral tags
+        # and rely on bad-keyword rejection plus query quality.
         videos_obj = v.get("videos") or {}
         for quality_key in ["medium", "small", "large"]:
             video_data = videos_obj.get(quality_key)
@@ -216,14 +266,7 @@ def get_video_url(title, search_keyword, recent_video_ids=None):
     recent_video_ids = recent_video_ids or set()
 
     print("Trying Pixabay first (primary source)...")
-    pixabay_queries = []
-    title_terms = [t for t in normalize_text(title).split() if len(t) > 3][:3]
-    if title_terms:
-        pixabay_queries.append(" ".join(title_terms + ["plumbing"]))
-    safe_query = " ".join(normalize_text(search_keyword or "plumbing repair").split()[0:2])
-    if safe_query:
-        pixabay_queries.append(safe_query)
-    pixabay_queries.extend(["plumbing repair", "drain cleaning", "sewer pipe repair"])
+    pixabay_queries = ["plumbing"]
 
     seen_pixabay = set()
     for pq in pixabay_queries:
