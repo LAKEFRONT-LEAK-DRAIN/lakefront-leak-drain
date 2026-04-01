@@ -207,7 +207,9 @@ def generate_blog_page(title, slug, image_url, description_text, post_id):
     print(f"Generated blog page: blog/{slug}.html")
 
 def main():
+    print(f"Using feed path: {FEED_PATH}")
     title, search_keyword = generate_topic()
+    print(f"Generated title: {title}")
     image_url = get_image_url(search_keyword)
     description_text = generate_description(title)
 
