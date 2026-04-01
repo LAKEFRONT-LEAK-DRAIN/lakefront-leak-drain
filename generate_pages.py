@@ -2,7 +2,8 @@ from pathlib import Path
 import re
 from datetime import date
 
-root = Path('/tmp/lakefront')
+# Write generated files into this repository root by default.
+root = Path(__file__).resolve().parent
 book_url = 'https://book.housecallpro.com/book/Lakefront-Leak--Drain/ae2653195f4d42308810145d8ff8bf21?v2=true'
 portal_url = 'https://client.housecallpro.com/customer_portal/request-link?token=19d1b66af5ca4e928d038e6f3caa0f44'
 review_url = 'https://g.page/r/CclR-stJDa4UEBI/review'

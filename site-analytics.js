@@ -31,9 +31,13 @@
         var href = link.getAttribute('href');
         if (!href || href.startsWith('#') || href.startsWith('tel:') || href.startsWith('mailto:') || href.startsWith('javascript:')) return;
         var url = new URL(href, location.origin);
-        if (url.origin !== location.origin) return;
         keep.forEach(function(k){ if (params.has(k) && !url.searchParams.has(k)) url.searchParams.set(k, params.get(k)); });
-        link.setAttribute('href', url.pathname + url.search + url.hash);
+        // Keep local links relative, but preserve full URLs for external booking/portal destinations.
+        if (url.origin === location.origin) {
+          link.setAttribute('href', url.pathname + url.search + url.hash);
+        } else {
+          link.setAttribute('href', url.toString());
+        }
       } catch (e) {}
     });
   }
