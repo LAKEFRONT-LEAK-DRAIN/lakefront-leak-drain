@@ -1,0 +1,8 @@
+[build]
+  publish = "."
+
+[[headers]]
+  for = "/*.xml"
+  [headers.values]
+    Access-Control-Allow-Origin = "*"
+    Content-Type = "application/xml; charset=utf-8"
