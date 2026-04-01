@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title id="page-title">Cleveland Plumbing Tips - Lakefront Leak & Drain</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700;900&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
     
     <!-- Open Graph meta tags - will be populated by JavaScript -->
     <meta property="og:title" content="Cleveland Plumbing Tips" id="og-title">
@@ -12,17 +15,227 @@
     <meta property="og:url" content="https://lakefrontleakanddrain.com/blog/" id="og-url">
     <meta property="og:type" content="article">
     
-    <!-- Your existing styles here -->
+    <style>
+        :root {
+            --brand-900: #001030;
+            --brand-800: #002040;
+            --brand-700: #003060;
+            --brand-600: #004070;
+            --brand-100: #e0f0ff;
+            --brand-050: #f0ffff;
+            --surface: #ffffff;
+            --text: #152036;
+            --text-muted: #43546f;
+            --border: #c8d8ea;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: "Source Sans 3", "Segoe UI", sans-serif;
+            color: var(--text);
+            line-height: 1.65;
+            background:
+                radial-gradient(circle at 10% 10%, var(--brand-050), transparent 45%),
+                linear-gradient(180deg, #f8fcff 0%, #f3f8ff 100%);
+        }
+
+        header {
+            border-bottom: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.94);
+            backdrop-filter: blur(4px);
+        }
+
+        .header-inner {
+            max-width: 980px;
+            margin: 0 auto;
+            padding: 18px 20px;
+        }
+
+        .brand-link {
+            color: var(--brand-800);
+            text-decoration: none;
+            font-family: "Merriweather", Georgia, serif;
+            font-size: 1.2rem;
+            font-weight: 900;
+            letter-spacing: 0.2px;
+        }
+
+        .brand-link:hover {
+            color: var(--brand-600);
+        }
+
+        #blog-content {
+            max-width: 820px;
+            margin: 0 auto;
+            padding: 34px 20px 56px;
+        }
+
+        .page-intro {
+            margin-bottom: 24px;
+        }
+
+        h1,
+        h2,
+        h3 {
+            color: var(--brand-900);
+            font-family: "Merriweather", Georgia, serif;
+            line-height: 1.25;
+            margin-top: 0;
+        }
+
+        h1 {
+            font-size: clamp(1.9rem, 3.2vw, 2.4rem);
+            margin-bottom: 12px;
+        }
+
+        h2 {
+            font-size: clamp(1.25rem, 2vw, 1.5rem);
+            margin-bottom: 8px;
+        }
+
+        p {
+            margin: 0 0 16px;
+            font-size: 1.05rem;
+        }
+
+        .loading-state,
+        .status-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 24px;
+            box-shadow: 0 8px 24px rgba(0, 32, 64, 0.06);
+        }
+
+        .post-list {
+            display: grid;
+            gap: 16px;
+        }
+
+        .post-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 18px 20px;
+            box-shadow: 0 8px 24px rgba(0, 32, 64, 0.05);
+        }
+
+        .post-card-title {
+            margin: 0 0 8px;
+        }
+
+        .post-link {
+            color: var(--brand-700);
+            text-decoration: none;
+        }
+
+        .post-link:hover {
+            color: var(--brand-600);
+            text-decoration: underline;
+            text-underline-offset: 3px;
+        }
+
+        .post-excerpt {
+            color: var(--text-muted);
+            margin-bottom: 10px;
+        }
+
+        .read-more {
+            color: var(--brand-800);
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .read-more:hover {
+            text-decoration: underline;
+            text-underline-offset: 3px;
+        }
+
+        .post-page {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 24px;
+            box-shadow: 0 8px 24px rgba(0, 32, 64, 0.06);
+        }
+
+        .post-hero {
+            width: 100%;
+            max-height: 420px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin: 6px 0 18px;
+            border: 1px solid #d6e4f2;
+            background: var(--brand-050);
+        }
+
+        .post-body {
+            overflow-wrap: anywhere;
+        }
+
+        .post-body img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .post-body iframe {
+            max-width: 100%;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 18px;
+            color: var(--brand-800);
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+            text-underline-offset: 3px;
+        }
+
+        @media (max-width: 700px) {
+            .header-inner {
+                padding: 16px;
+            }
+
+            #blog-content {
+                padding: 24px 14px 42px;
+            }
+
+            .post-card,
+            .post-page,
+            .loading-state,
+            .status-card {
+                border-radius: 12px;
+                padding: 16px;
+            }
+
+            p {
+                font-size: 1rem;
+            }
+        }
+    </style>
 </head>
 <body>
     <!-- Header -->
     <header>
-        <a href="/">Lakefront Leak & Drain</a>
+        <div class="header-inner">
+            <a href="/" class="brand-link">Lakefront Leak & Drain</a>
+        </div>
     </header>
     
     <!-- Blog content - dynamically populated -->
     <main id="blog-content">
-        <h1>Loading...</h1>
+        <section class="loading-state">
+            <h1>Loading plumbing tips...</h1>
+            <p>Gathering the latest advice for Cleveland homeowners.</p>
+        </section>
     </main>
     
     <script>
@@ -44,6 +257,15 @@
                     // Show post list
                     showPostList(items);
                 }
+            })
+            .catch(() => {
+                document.getElementById('blog-content').innerHTML = `
+                    <section class="status-card">
+                        <h1>Unable to load blog posts right now</h1>
+                        <p>Please try again in a moment.</p>
+                        <a href="/" class="back-link">Return to homepage</a>
+                    </section>
+                `;
             });
         
         function showSinglePost(items, slug) {
@@ -62,11 +284,11 @@
                     // Update page content
                     document.getElementById('page-title').textContent = title + " - Lakefront Leak & Drain";
                     document.getElementById('blog-content').innerHTML = `
-                        <article>
+                        <article class="post-page">
                             <h1>${title}</h1>
-                            <img src="${image}" alt="${title}" style="max-width: 100%; height: auto;">
-                            <div>${content}</div>
-                            <a href="/blog/">← Back to all tips</a>
+                            <img src="${image}" alt="${title}" class="post-hero">
+                            <div class="post-body">${content}</div>
+                            <a href="/blog/" class="back-link">← Back to all tips</a>
                         </article>
                     `;
                     
@@ -80,14 +302,23 @@
             
             if (!found) {
                 document.getElementById('blog-content').innerHTML = `
-                    <h1>Post Not Found</h1>
-                    <a href="/blog/">← Back to all tips</a>
+                    <section class="status-card">
+                        <h1>Post not found</h1>
+                        <p>The tip you are looking for may have moved or been removed.</p>
+                        <a href="/blog/" class="back-link">← Back to all tips</a>
+                    </section>
                 `;
             }
         }
         
         function showPostList(items) {
-            let html = '<h1>Cleveland Plumbing Tips</h1><div class="post-list">';
+            let html = `
+                <section class="page-intro">
+                    <h1>Cleveland Plumbing Tips</h1>
+                    <p>Simple, practical advice to protect your home year-round.</p>
+                </section>
+                <div class="post-list">
+            `;
             
             items.forEach(item => {
                 const title = item.querySelector("title").textContent;
@@ -96,9 +327,10 @@
                 
                 if (postName) {
                     html += `
-                        <article>
-                            <h2><a href="/blog/?post=${postName}">${title}</a></h2>
-                            <p>${description}</p>
+                        <article class="post-card">
+                            <h2 class="post-card-title"><a href="/blog/?post=${postName}" class="post-link">${title}</a></h2>
+                            <p class="post-excerpt">${description}</p>
+                            <a href="/blog/?post=${postName}" class="read-more">Read article</a>
                         </article>
                     `;
                 }
