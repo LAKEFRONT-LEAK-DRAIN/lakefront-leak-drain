@@ -13,6 +13,23 @@ FEED_PATH = 'feed.xml'
 DEFAULT_LINK = 'https://lakefrontleakanddrain.com/blog/'
 DEFAULT_IMAGE = 'https://lakefrontleakanddrain.com/logo.jpg'
 
+def get_image_length(image_url):
+    """
+    Try to get actual image file size, fallback to reasonable default.
+    Metricool requires length > 0.
+    """
+    try:
+        # Try to get actual file size from Content-Length header
+        response = requests.head(image_url, timeout=5)
+        content_length = response.headers.get('Content-Length')
+        if content_length and int(content_length) > 0:
+            return content_length
+    except Exception as e:
+        print(f"Could not fetch image size: {e}")
+    
+    # Fallback: Use reasonable default for large images
+    return "150000"  # 150KB - Metricool's suggested default
+
 def create_slug(title):
     """Turns 'Spring Sump Pump!' into 'spring-sump-pump'"""
     slug = title.lower()
@@ -77,13 +94,16 @@ def format_rss_item(title, image_url, description_text):
     safe_title = escape(title.replace('&amp;', '&'))
     safe_image = escape(image_url.replace('&amp;', '&'))
     
+    # FIX: Get actual image size or use reasonable default
+    image_length = get_image_length(image_url)
+    
     return f"""    <item>
       <title>{safe_title}</title>
       <link>{unique_link}</link>
       <guid isPermaLink="false">{guid}</guid>
       <pubDate>{pub_date}</pubDate>
       <description><![CDATA[{description_text}]]></description>
-      <enclosure url="{safe_image}" length="0" type="image/jpeg" />
+      <enclosure url="{safe_image}" length="{image_length}" type="image/jpeg" />
     </item>"""
 
 def main():
