@@ -1,2 +1,11 @@
 [build]
   ignore = "git diff --quiet HEAD^ HEAD ."
+
+[[headers]]
+  for = "/feed.xml"
+  [headers.values]
+    Access-Control-Allow-Origin = "*"
+    Access-Control-Allow-Methods = "GET, OPTIONS"
+    Access-Control-Allow-Headers = "*"
+    Content-Type = "application/rss+xml; charset=UTF-8"
+    X-Content-Type-Options = "nosniff"
