@@ -213,23 +213,7 @@ def get_video_url(title, search_keyword, recent_video_ids=None):
     queries = build_video_queries(title, search_keyword)
     recent_video_ids = recent_video_ids or set()
 
-    for query in queries:
-        try:
-            candidates = fetch_pexels_video_candidates(query)
-            if candidates:
-                fresh_candidates = [c for c in candidates if canonical_video_id(c) not in recent_video_ids]
-                chosen_pool = fresh_candidates if fresh_candidates else candidates
-                video_url = random.choice(chosen_pool)
-                print(f"Video selected via Pexels using query: {query}")
-                if fresh_candidates:
-                    print("Selected a fresh (non-recent) video clip")
-                else:
-                    print("No fresh candidates found for this query; reused an older clip")
-                return video_url
-        except Exception as e:
-            print(f"Pexels search failed for '{query}': {e}")
-
-    print("Pexels exhausted, trying Pixabay fallback...")
+    print("Trying Pixabay first (primary source)...")
     safe_query = normalize_text(search_keyword or "plumbing repair").split()[0:2] 
     safe_query = " ".join(safe_query)
     
@@ -239,10 +223,31 @@ def get_video_url(title, search_keyword, recent_video_ids=None):
             fresh_candidates = [c for c in candidates if canonical_video_id(c) not in recent_video_ids]
             chosen_pool = fresh_candidates if fresh_candidates else candidates
             video_url = random.choice(chosen_pool)
-            print(f"Video selected via Pixabay fallback")
+            print(f"Video selected via Pixabay (primary)")
+            if fresh_candidates:
+                print("Selected a fresh (non-recent) video clip")
+            else:
+                print("No fresh candidates found; reused an older clip")
             return video_url
     except Exception as e:
-        print(f"Pixabay fallback failed: {e}")
+        print(f"Pixabay search failed: {e}")
+
+    print("Pixabay exhausted, trying Pexels fallback...")
+    for query in queries:
+        try:
+            candidates = fetch_pexels_video_candidates(query)
+            if candidates:
+                fresh_candidates = [c for c in candidates if canonical_video_id(c) not in recent_video_ids]
+                chosen_pool = fresh_candidates if fresh_candidates else candidates
+                video_url = random.choice(chosen_pool)
+                print(f"Video selected via Pexels (fallback) using query: {query}")
+                if fresh_candidates:
+                    print("Selected a fresh (non-recent) video clip")
+                else:
+                    print("No fresh candidates found for this query; reused an older clip")
+                return video_url
+        except Exception as e:
+            print(f"Pexels search failed for '{query}': {e}")
 
     print("Using default video fallback")
     return video_url
