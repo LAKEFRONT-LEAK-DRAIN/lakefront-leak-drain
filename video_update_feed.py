@@ -3,6 +3,7 @@ import random
 import re
 from datetime import datetime, timezone
 from email.utils import parsedate_to_datetime
+from html import escape as html_escape
 from pathlib import Path
 from xml.sax.saxutils import escape
 
@@ -12,6 +13,7 @@ from google import genai
 client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
 
 BASE_DIR = Path(__file__).resolve().parent
+SITE_BASE_URL = "https://lakefrontleakanddrain.com"
 VIDEO_FEED_PATH = BASE_DIR / "video_feed.xml"
 DEFAULT_LINK = "https://lakefrontleakanddrain.com/"
 DEFAULT_VIDEO = "https://lakefrontleakanddrain.com/logo-animated.mp4"
@@ -110,6 +112,13 @@ Title | video keyword
     return title, search_keyword
 
 
+def create_slug(title):
+    slug = title.lower()
+    slug = re.sub(r"[^a-z0-9 ]", "", slug)
+    slug = slug.strip().replace(" ", "-")
+    return slug or "video-tip"
+
+
 def normalize_text(text):
     return re.sub(r"\s+", " ", (text or "").strip().lower())
 
@@ -186,10 +195,18 @@ def fetch_pexels_video_candidates(query):
         tags = v.get("tags", "")
         if not is_plumbing_relevant(tags):
             continue
+
+        thumb_url = (v.get("image") or "").strip()
         
         for vf in v.get("video_files") or []:
             if vf.get("file_type") == "video/mp4" and vf.get("link"):
-                candidates.append(vf.get("link"))
+                candidates.append(
+                    {
+                        "video_url": vf.get("link"),
+                        "thumb_url": thumb_url,
+                        "id": f"pexels:{video_id}" if video_id else "",
+                    }
+                )
     return candidates
 
 
@@ -229,7 +246,13 @@ def fetch_pixabay_video_candidates(query):
         for quality_key in ["medium", "small", "large"]:
             video_data = videos_obj.get(quality_key)
             if video_data and video_data.get("url"):
-                candidates.append(video_data.get("url"))
+                candidates.append(
+                    {
+                        "video_url": video_data.get("url"),
+                        "thumb_url": (video_data.get("thumbnail") or "").strip(),
+                        "id": f"pixabay:{video_id}" if video_id else "",
+                    }
+                )
                 break
     return candidates
 
@@ -283,6 +306,7 @@ def extract_recent_video_ids(feed_text, lookback=RECENT_VIDEO_LOOKBACK):
 
 def get_video_url(title, search_keyword, recent_video_ids=None):
     video_url = DEFAULT_VIDEO
+    thumb_url = ""
     queries = build_video_queries(title, search_keyword)
     recent_video_ids = recent_video_ids or set()
 
@@ -299,41 +323,97 @@ def get_video_url(title, search_keyword, recent_video_ids=None):
         try:
             candidates = fetch_pixabay_video_candidates(q)
             if candidates:
-                fresh_candidates = [c for c in candidates if canonical_video_id(c) not in recent_video_ids]
+                fresh_candidates = [c for c in candidates if canonical_video_id(c.get("video_url")) not in recent_video_ids]
                 chosen_pool = fresh_candidates if fresh_candidates else candidates
-                video_url = random.choice(chosen_pool)
+                selected = random.choice(chosen_pool)
+                video_url = selected.get("video_url") or DEFAULT_VIDEO
+                thumb_url = selected.get("thumb_url") or ""
                 print(f"Video selected via Pixabay (primary) using query: {q}")
                 if fresh_candidates:
                     print("Selected a fresh (non-recent) video clip")
                 else:
                     print("No fresh candidates found; reused an older clip")
-                return video_url
+                return video_url, thumb_url
         except Exception as e:
             print(f"Pixabay search failed for '{q}': {e}")
 
     if not ALLOW_PEXELS_FALLBACK:
         print("Pixabay exhausted and Pexels fallback is disabled. Using default video fallback")
-        return video_url
+        return video_url, thumb_url
 
     print("Pixabay exhausted, trying Pexels fallback...")
     for query in queries:
         try:
             candidates = fetch_pexels_video_candidates(query)
             if candidates:
-                fresh_candidates = [c for c in candidates if canonical_video_id(c) not in recent_video_ids]
+                fresh_candidates = [c for c in candidates if canonical_video_id(c.get("video_url")) not in recent_video_ids]
                 chosen_pool = fresh_candidates if fresh_candidates else candidates
-                video_url = random.choice(chosen_pool)
+                selected = random.choice(chosen_pool)
+                video_url = selected.get("video_url") or DEFAULT_VIDEO
+                thumb_url = selected.get("thumb_url") or ""
                 print(f"Video selected via Pexels (fallback) using query: {query}")
                 if fresh_candidates:
                     print("Selected a fresh (non-recent) video clip")
                 else:
                     print("No fresh candidates found for this query; reused an older clip")
-                return video_url
+                return video_url, thumb_url
         except Exception as e:
             print(f"Pexels search failed for '{query}': {e}")
 
     print("Using default video fallback")
-    return video_url
+    return video_url, thumb_url
+
+
+def generate_video_page(title, slug, description_text, video_url, thumb_url):
+    video_dir = BASE_DIR / "video"
+    if not video_dir.exists():
+        video_dir.mkdir(parents=True, exist_ok=True)
+
+    page_url = f"{SITE_BASE_URL}/video/{slug}.html"
+    safe_title = html_escape(title)
+    safe_desc = html_escape(description_text)
+    safe_video = html_escape(video_url)
+    safe_thumb = html_escape(thumb_url)
+
+    og_image_tag = f'<meta property="og:image" content="{safe_thumb}">' if safe_thumb else ""
+    twitter_image_tag = f'<meta name="twitter:image" content="{safe_thumb}">' if safe_thumb else ""
+
+    html_content = f"""<!doctype html>
+<html lang=\"en\">
+<head>
+    <meta charset=\"utf-8\">
+    <meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">
+    <title>{safe_title} | Lakefront Leak & Drain</title>
+    <meta name=\"description\" content=\"{safe_desc}\">
+    <meta property=\"og:title\" content=\"{safe_title}\">
+    <meta property=\"og:description\" content=\"{safe_desc}\">
+    <meta property=\"og:type\" content=\"video.other\">
+    <meta property=\"og:url\" content=\"{page_url}\">
+    {og_image_tag}
+    <meta property=\"og:video\" content=\"{safe_video}\">
+    <meta property=\"og:video:secure_url\" content=\"{safe_video}\">
+    <meta property=\"og:video:type\" content=\"video/mp4\">
+    <meta name=\"twitter:card\" content=\"summary_large_image\">
+    <meta name=\"twitter:title\" content=\"{safe_title}\">
+    <meta name=\"twitter:description\" content=\"{safe_desc}\">
+    {twitter_image_tag}
+</head>
+<body>
+    <main>
+        <h1>{safe_title}</h1>
+        <p>{safe_desc}</p>
+        <video controls playsinline preload=\"metadata\" style=\"max-width:100%;height:auto;\">
+            <source src=\"{safe_video}\" type=\"video/mp4\">
+        </video>
+    </main>
+</body>
+</html>
+"""
+
+    with open(video_dir / f"{slug}.html", "w", encoding="utf-8") as f:
+        f.write(html_content)
+
+    return page_url
 
 
 def generate_post_copy(title):
@@ -379,7 +459,7 @@ def make_description(description, cta):
     return f"{description} {cta}".strip()
 
 
-def build_item_xml(title, description_text, video_url):
+def build_item_xml(title, description_text, video_url, post_link):
     now = datetime.now(timezone.utc)
     pub_date = now.strftime("%a, %d %b %Y %H:%M:%S GMT")
     guid = f"lakefrontleakanddrain.com/video/{now.strftime('%Y%m%d%H%M%S')}"
@@ -389,7 +469,7 @@ def build_item_xml(title, description_text, video_url):
 
     return f"""    <item>
       <title>{safe_title}</title>
-      <link>{DEFAULT_LINK}</link>
+            <link>{post_link}</link>
       <guid isPermaLink=\"false\">{guid}</guid>
       <pubDate>{pub_date}</pubDate>
       <description><![CDATA[{description_text}]]></description>
@@ -404,6 +484,50 @@ def extract_items(feed_text):
 def extract_tag(item_text, tag_name):
     match = re.search(fr"<{tag_name}\b[^>]*>(.*?)</{tag_name}>", item_text, flags=re.S)
     return match.group(1).strip() if match else None
+
+
+def strip_cdata(text):
+    if not text:
+        return ""
+    m = re.match(r"<!\[CDATA\[(.*)\]\]>", text, flags=re.S)
+    return m.group(1).strip() if m else text.strip()
+
+
+def backfill_video_pages_and_links(feed_text):
+    items = extract_items(feed_text)
+    updated_feed = feed_text
+    updated_count = 0
+
+    for item in items:
+        title_raw = extract_tag(item, "title") or ""
+        if not title_raw:
+            continue
+        title = strip_cdata(title_raw)
+
+        description_raw = extract_tag(item, "description") or ""
+        description_text = strip_cdata(description_raw)
+
+        video_url = extract_enclosure_url(item)
+        if not video_url:
+            continue
+
+        slug = create_slug(title)
+        page_url = f"{SITE_BASE_URL}/video/{slug}.html"
+        generate_video_page(title, slug, description_text, video_url, "")
+
+        old_link_match = re.search(r"<link>(.*?)</link>", item, flags=re.S)
+        if not old_link_match:
+            continue
+        old_link = old_link_match.group(1).strip()
+        if old_link == page_url:
+            continue
+
+        updated_item = re.sub(r"<link>.*?</link>", f"<link>{page_url}</link>", item, count=1, flags=re.S)
+        if updated_item != item:
+            updated_feed = updated_feed.replace(item, updated_item, 1)
+            updated_count += 1
+
+    return updated_feed, updated_count
 
 
 def extract_titles(feed_text):
@@ -516,6 +640,10 @@ def main():
     with open(VIDEO_FEED_PATH, "r", encoding="utf-8") as f:
         feed = f.read()
 
+    feed, backfilled = backfill_video_pages_and_links(feed)
+    if backfilled:
+        print(f"Backfilled video pages/links for {backfilled} existing items")
+
     existing_titles = extract_titles(feed)
     title, search_keyword = generate_topic(existing_titles)
 
@@ -524,7 +652,7 @@ def main():
         return
 
     recent_video_ids = extract_recent_video_ids(feed)
-    video_url = get_video_url(title, search_keyword, recent_video_ids)
+    video_url, thumb_url = get_video_url(title, search_keyword, recent_video_ids)
     headline, description, cta = generate_post_copy(title)
 
     final_title = headline.strip() or title.strip()
@@ -533,7 +661,9 @@ def main():
         return
 
     description_text = make_description(description, cta)
-    new_item = build_item_xml(final_title, description_text, video_url)
+    slug = create_slug(final_title)
+    post_link = generate_video_page(final_title, slug, description_text, video_url, thumb_url)
+    new_item = build_item_xml(final_title, description_text, video_url, post_link)
 
     header, items_blob, footer = split_feed(feed)
     updated_feed = header + new_item + "\n\n" + items_blob.lstrip() + footer
