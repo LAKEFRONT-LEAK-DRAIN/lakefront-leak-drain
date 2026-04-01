@@ -80,7 +80,7 @@ def generate_description(title):
     return resp.text.strip()
 
 def format_rss_item(title, image_url, description_text):
-    """Formats the XML block - TEST WITHOUT ENCLOSURE"""
+    """TEST VERSION - Use local logo instead of Pexels"""
     past_time = datetime.utcnow() - timedelta(hours=6)
     pub_date = past_time.strftime('%a, %d %b %Y %H:%M:%S +0000')
     
@@ -89,17 +89,20 @@ def format_rss_item(title, image_url, description_text):
     guid = unique_link
     
     safe_title = escape(title.replace('&amp;', '&'))
-    safe_image = escape(image_url.replace('&amp;', '&'))
     
-    image_length = get_image_length(image_url)
+    # TEST: Use your logo instead of Pexels image
+    safe_image = DEFAULT_IMAGE  # Your logo, no query strings
     
-    # TEST: Remove enclosure tag temporarily
+    # Get size of your logo
+    image_length = get_image_length(safe_image)
+    
     return f"""    <item>
       <title>{safe_title}</title>
       <link>{unique_link}</link>
       <guid isPermaLink="false">{guid}</guid>
       <pubDate>{pub_date}</pubDate>
       <description><![CDATA[{description_text}]]></description>
+      <enclosure url="{safe_image}" length="{image_length}" type="image/jpeg" />
     </item>"""
 
 def main():
