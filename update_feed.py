@@ -80,7 +80,7 @@ def generate_description(title):
     return resp.text.strip()
 
 def format_rss_item(title, image_url, description_text):
-    """Formats the XML block with correct structure for Metricool"""
+    """Formats the XML block with correct structure - BACK TO PEXELS IMAGES"""
     # BACKDATE FIX: Subtract 6 hours so it's always in the past for Metricool
     past_time = datetime.utcnow() - timedelta(hours=6)
     pub_date = past_time.strftime('%a, %d %b %Y %H:%M:%S +0000')
@@ -90,12 +90,10 @@ def format_rss_item(title, image_url, description_text):
     guid = unique_link
     
     safe_title = escape(title.replace('&amp;', '&'))
+    safe_image = escape(image_url.replace('&amp;', '&'))
     
-    # Use logo instead of Pexels for simplicity and reliability
-    safe_image = DEFAULT_IMAGE
-    
-    # Get size of your logo
-    image_length = get_image_length(safe_image)
+    # Get actual image size
+    image_length = get_image_length(image_url)
     
     return f"""    <item>
       <title>{safe_title}</title>
