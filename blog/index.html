@@ -140,6 +140,19 @@
             text-underline-offset: 3px;
         }
 
+        .post-link:visited {
+            color: #2f4668;
+        }
+
+        .post-link:focus-visible,
+        .read-more:focus-visible,
+        .back-link:focus-visible,
+        .brand-link:focus-visible {
+            outline: 2px solid var(--brand-600);
+            outline-offset: 2px;
+            border-radius: 4px;
+        }
+
         .post-excerpt {
             color: var(--text-muted);
             margin-bottom: 10px;
@@ -154,6 +167,11 @@
         .read-more:hover {
             text-decoration: underline;
             text-underline-offset: 3px;
+        }
+
+        .read-more:visited,
+        .back-link:visited {
+            color: #2b3f5f;
         }
 
         .post-page {
