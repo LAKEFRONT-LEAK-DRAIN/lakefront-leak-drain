@@ -96,7 +96,7 @@ def format_rss_item(title, image_url, description_text, post_id):
     
     # WordPress-style GUID and link (matching your export exactly)
     guid = f"https://lakefrontleakanddrain.com/?p={post_id}"
-    link = f"https://lakefrontleakanddrain.com/?p={post_id}"
+    link = f"https://lakefrontleakanddrain.com/blog/?post={slug}"
     
     safe_title = title.replace('&', '&amp;')
     safe_image = image_url.replace('&', '&amp;')
