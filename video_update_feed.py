@@ -17,6 +17,7 @@ DEFAULT_LINK = "https://lakefrontleakanddrain.com/"
 DEFAULT_VIDEO = "https://lakefrontleakanddrain.com/logo-animated.mp4"
 MAX_ITEMS = 20
 RECENT_TITLE_LOOKBACK = 12
+RECENT_VIDEO_LOOKBACK = 12
 
 PLUMBING_TERMS = [
     "drain",
@@ -121,16 +122,48 @@ def fetch_pexels_video_candidates(query):
     return candidates
 
 
-def get_video_url(title, search_keyword):
+def canonical_video_id(video_url):
+    url = (video_url or "").strip().lower()
+    if not url:
+        return None
+
+    pexels_match = re.search(r"/video-files/(\d+)/", url)
+    if pexels_match:
+        return f"pexels:{pexels_match.group(1)}"
+
+    return f"url:{url}"
+
+
+def extract_recent_video_ids(feed_text, lookback=RECENT_VIDEO_LOOKBACK):
+    recent_ids = []
+    for item in extract_items(feed_text):
+        enclosure_match = re.search(r'<enclosure\\b[^>]*\\burl="([^"]+)"', item, flags=re.S | re.I)
+        if enclosure_match:
+            video_id = canonical_video_id(enclosure_match.group(1))
+            if video_id:
+                recent_ids.append(video_id)
+        if len(recent_ids) >= lookback:
+            break
+    return set(recent_ids)
+
+
+def get_video_url(title, search_keyword, recent_video_ids=None):
     video_url = DEFAULT_VIDEO
     queries = build_video_queries(title, search_keyword)
+    recent_video_ids = recent_video_ids or set()
 
     for query in queries:
         try:
             candidates = fetch_pexels_video_candidates(query)
             if candidates:
-                video_url = random.choice(candidates)
+                fresh_candidates = [c for c in candidates if canonical_video_id(c) not in recent_video_ids]
+                chosen_pool = fresh_candidates if fresh_candidates else candidates
+                video_url = random.choice(chosen_pool)
                 print(f"Video selected using query: {query}")
+                if fresh_candidates:
+                    print("Selected a fresh (non-recent) video clip")
+                else:
+                    print("No fresh candidates found for this query; reused an older clip")
                 return video_url
         except Exception as e:
             print(f"Video search failed for '{query}': {e}")
@@ -324,7 +357,8 @@ def main():
         print(f"Skipped duplicate title: {title}")
         return
 
-    video_url = get_video_url(title, search_keyword)
+    recent_video_ids = extract_recent_video_ids(feed)
+    video_url = get_video_url(title, search_keyword, recent_video_ids)
     headline, description, cta = generate_post_copy(title)
 
     final_title = headline.strip() or title.strip()
