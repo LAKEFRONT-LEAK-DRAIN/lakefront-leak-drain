@@ -14,7 +14,6 @@ BASE_DIR = Path(__file__).resolve().parent
 FEED_PATH = BASE_DIR / 'feed.xml'
 DEFAULT_LINK = 'https://lakefrontleakanddrain.com/'
 DEFAULT_IMAGE = 'https://lakefrontleakanddrain.com/logo.jpg'
-RECENT_IMAGE_LOOKBACK = 40
 
 def get_image_length(image_url):
     """Get actual image file size, fallback to reasonable default."""
@@ -25,7 +24,7 @@ def get_image_length(image_url):
             return content_length
     except Exception as e:
         print(f"Could not fetch image size: {e}")
-
+    
     return "150000"
 
 def create_slug(title):
@@ -51,56 +50,22 @@ def generate_topic():
         search_keyword = "plumbing"
     return title, search_keyword
 
-def extract_pexels_photo_id(url):
-    if not url:
-        return None
-    match = re.search(r'/photos/(\d+)/', url)
-    return match.group(1) if match else None
-
-def get_recent_pexels_ids_from_feed(feed_path, lookback=RECENT_IMAGE_LOOKBACK):
-    recent_ids = []
-    try:
-        with open(feed_path, 'r', encoding='utf-8') as f:
-            feed_text = f.read()
-
-        enclosure_urls = re.findall(r'<enclosure\s+url="([^"]+)"', feed_text)
-        for url in reversed(enclosure_urls):
-            pid = extract_pexels_photo_id(url)
-            if pid:
-                recent_ids.append(pid)
-            if len(recent_ids) >= lookback:
-                break
-    except Exception as e:
-        print(f"Could not read recent image IDs from feed: {e}")
-
-    return set(recent_ids)
-
-def get_image_url(search_keyword, recent_pexels_ids):
-    """Picks a random image from Pexels while avoiding recently used photos."""
+def get_image_url(search_keyword):
+    """Picks a random image from Pexels to ensure variety"""
     image_url = DEFAULT_IMAGE
     try:
         headers = {"Authorization": os.environ['PEXELS_API_KEY']}
         pexels_resp = requests.get(
             "https://api.pexels.com/v1/search",
-            params={"query": search_keyword.strip(), "per_page": 30},
+            params={"query": search_keyword.strip(), "per_page": 15},
             headers=headers,
             timeout=20,
         )
         pexels_resp.raise_for_status()
         data = pexels_resp.json()
-        photos = data.get('photos') or []
-
-        candidates = []
-        for photo in photos:
-            photo_id = str(photo.get('id', ''))
-            if photo_id and photo_id not in recent_pexels_ids:
-                candidates.append(photo)
-
-        if candidates:
-            image_url = random.choice(candidates)['src']['large']
-        elif photos:
-            # If all results were recently used, still return a valid image.
-            image_url = random.choice(photos)['src']['large']
+        if data.get('photos'):
+            random_photo = random.choice(data['photos'])
+            image_url = random_photo['src']['large']
     except Exception as e:
         print(f"Image search failed: {e}")
     return image_url
@@ -128,36 +93,36 @@ def format_rss_item(title, image_url, description_text, post_id):
     past_time = datetime.utcnow() - timedelta(hours=6)
     pub_date = past_time.strftime('%a, %d %b %Y %H:%M:%S +0000')
     post_date = past_time.strftime('%Y-%m-%d %H:%M:%S')
-
+    
     slug = create_slug(title)
-
+    
     # WordPress-style GUID, but link to actual HTML page
     guid = f"https://lakefrontleakanddrain.com/?p={post_id}"
     link = f"https://lakefrontleakanddrain.com/blog/{slug}.html"
-
+    
     safe_title = title.replace('&', '&amp;')
     safe_image = image_url.replace('&', '&amp;')
-
+    
     image_length = get_image_length(image_url)
-
+    
     content_html = f"""<!-- wp:paragraph -->
 <p>{description_text}</p>
 <!-- /wp:paragraph -->
 
 <!-- wp:paragraph -->
-<p>👉 Visit our website:<br><a href=\"https://lakefrontleakanddrain.com\">https://lakefrontleakanddrain.com</a></p>
+<p>👉 Visit our website:<br><a href="https://lakefrontleakanddrain.com">https://lakefrontleakanddrain.com</a></p>
 <!-- /wp:paragraph -->
 
 <!-- wp:paragraph -->
 <p>📞 216-505-7765</p>
 <!-- /wp:paragraph -->"""
-
+    
     return f"""	<item>
 		<title><![CDATA[{safe_title}]]></title>
 		<link>{link}</link>
 		<pubDate>{pub_date}</pubDate>
 		<dc:creator><![CDATA[lakefrontleakanddrain]]></dc:creator>
-		<guid isPermaLink=\"false\">{guid}</guid>
+		<guid isPermaLink="false">{guid}</guid>
 		<description></description>
 		<content:encoded><![CDATA[{content_html}]]></content:encoded>
 		<excerpt:encoded><![CDATA[]]></excerpt:encoded>
@@ -175,11 +140,11 @@ def format_rss_item(title, image_url, description_text, post_id):
 		<wp:post_type><![CDATA[post]]></wp:post_type>
 		<wp:post_password><![CDATA[]]></wp:post_password>
 		<wp:is_sticky>0</wp:is_sticky>
-										<category domain=\"post_tag\" nicename=\"cleveland-plumbing\"><![CDATA[CLEVELAND PLUMBING]]></category>
-		<category domain=\"post_tag\" nicename=\"plumbing-tips\"><![CDATA[PLUMBING TIPS]]></category>
-		<category domain=\"post_tag\" nicename=\"drain-cleaning\"><![CDATA[DRAIN CLEANING]]></category>
-		<category domain=\"category\" nicename=\"uncategorized\"><![CDATA[Uncategorized]]></category>
-						<enclosure url=\"{safe_image}\" length=\"{image_length}\" type=\"image/jpeg\" />
+										<category domain="post_tag" nicename="cleveland-plumbing"><![CDATA[CLEVELAND PLUMBING]]></category>
+		<category domain="post_tag" nicename="plumbing-tips"><![CDATA[PLUMBING TIPS]]></category>
+		<category domain="post_tag" nicename="drain-cleaning"><![CDATA[DRAIN CLEANING]]></category>
+		<category domain="category" nicename="uncategorized"><![CDATA[Uncategorized]]></category>
+						<enclosure url="{safe_image}" length="{image_length}" type="image/jpeg" />
 		<wp:postmeta>
 		<wp:meta_key><![CDATA[_last_editor_used_jetpack]]></wp:meta_key>
 		<wp:meta_value><![CDATA[block-editor]]></wp:meta_value>
@@ -188,65 +153,64 @@ def format_rss_item(title, image_url, description_text, post_id):
 
 def generate_blog_page(title, slug, image_url, description_text, post_id):
     """Generate individual HTML page for blog post"""
-
+    
     safe_title = escape(title.replace('&amp;', '&'))
     safe_image = escape(image_url.replace('&amp;', '&'))
     safe_description = escape(description_text.replace('&amp;', '&'))
-
+    
     html_content = f"""<!DOCTYPE html>
-<html lang=\"en\">
+<html lang="en">
 <head>
-    <meta charset=\"UTF-8\">
-    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{safe_title} - Lakefront Leak & Drain</title>
-
+    
     <!-- Open Graph Meta Tags -->
-    <meta property=\"og:title\" content=\"{safe_title}\">
-    <meta property=\"og:description\" content=\"{safe_description}\">
-    <meta property=\"og:image\" content=\"{safe_image}\">
-    <meta property=\"og:url\" content=\"https://lakefrontleakanddrain.com/blog/{slug}.html\">
-    <meta property=\"og:type\" content=\"article\">
-
+    <meta property="og:title" content="{safe_title}">
+    <meta property="og:description" content="{safe_description}">
+    <meta property="og:image" content="{safe_image}">
+    <meta property="og:url" content="https://lakefrontleakanddrain.com/blog/{slug}.html">
+    <meta property="og:type" content="article">
+    
     <!-- Twitter Meta Tags -->
-    <meta name=\"twitter:card\" content=\"summary_large_image\">
-    <meta name=\"twitter:title\" content=\"{safe_title}\">
-    <meta name=\"twitter:description\" content=\"{safe_description}\">
-    <meta name=\"twitter:image\" content=\"{safe_image}\">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{safe_title}">
+    <meta name="twitter:description" content="{safe_description}">
+    <meta name="twitter:image" content="{safe_image}">
 </head>
 <body>
     <header>
-        <a href=\"/\">Lakefront Leak & Drain</a>
+        <a href="/">Lakefront Leak & Drain</a>
     </header>
-
+    
     <main>
         <article>
             <h1>{safe_title}</h1>
-            <img src=\"{safe_image}\" alt=\"{safe_title}\" style=\"max-width: 100%; height: auto;\">
+            <img src="{safe_image}" alt="{safe_title}" style="max-width: 100%; height: auto;">
             <p>{safe_description}</p>
-            <p>👉 Visit our website: <a href=\"https://lakefrontleakanddrain.com\">lakefrontleakanddrain.com</a></p>
+            <p>👉 Visit our website: <a href="https://lakefrontleakanddrain.com">lakefrontleakanddrain.com</a></p>
             <p>📞 216-505-7765</p>
         </article>
-        <a href=\"/blog/\">← Back to all tips</a>
+        <a href="/blog/">← Back to all tips</a>
     </main>
 </body>
 </html>"""
-
+    
     # Write HTML file
     blog_dir = BASE_DIR / 'blog'
     if not blog_dir.exists():
         blog_dir.mkdir(parents=True, exist_ok=True)
-
+    
     with open(blog_dir / f'{slug}.html', 'w', encoding='utf-8') as f:
         f.write(html_content)
-
+    
     print(f"Generated blog page: blog/{slug}.html")
 
 def main():
     print(f"Using feed path: {FEED_PATH}")
     title, search_keyword = generate_topic()
     print(f"Generated title: {title}")
-    recent_pexels_ids = get_recent_pexels_ids_from_feed(FEED_PATH)
-    image_url = get_image_url(search_keyword, recent_pexels_ids)
+    image_url = get_image_url(search_keyword)
     description_text = generate_description(title)
 
     with open(FEED_PATH, 'r', encoding='utf-8') as f:
@@ -259,16 +223,16 @@ def main():
 
     post_id = get_next_post_id(lines)
     slug = create_slug(title)
-
+    
     # Generate HTML blog page
     generate_blog_page(title, slug, image_url, description_text, post_id)
-
+    
     # Generate RSS item
     new_item_xml = format_rss_item(title, image_url, description_text, post_id)
 
     new_content = []
     inserted = False
-
+    
     for line in lines:
         new_content.append(line)
         if '<generator>' in line and not inserted:
