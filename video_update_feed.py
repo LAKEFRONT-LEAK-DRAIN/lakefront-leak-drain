@@ -18,6 +18,7 @@ DEFAULT_VIDEO = "https://lakefrontleakanddrain.com/logo-animated.mp4"
 MAX_ITEMS = 20
 RECENT_TITLE_LOOKBACK = 12
 RECENT_VIDEO_LOOKBACK = 12
+ALLOW_PEXELS_FALLBACK = os.environ.get("ALLOW_PEXELS_FALLBACK", "false").strip().lower() == "true"
 
 PLUMBING_TERMS = [
     "drain",
@@ -37,6 +38,7 @@ PLUMBING_TERMS = [
 BLACKLIST_PEXELS_IDS = {
     "8987409",
     "4482373",
+    "18104090",
 }
 
 
@@ -111,7 +113,7 @@ def build_video_queries(title, search_keyword):
 
 def is_plumbing_relevant(video_tags):
     if not video_tags:
-        return True
+        return False
     tags_lower = (video_tags or "").lower()
     
     bad_keywords = {"car", "auto", "mechanic", "person", "people", "workout", "exercise", "sports", "gym", "music", "dance", "performance"}
@@ -214,23 +216,40 @@ def get_video_url(title, search_keyword, recent_video_ids=None):
     recent_video_ids = recent_video_ids or set()
 
     print("Trying Pixabay first (primary source)...")
-    safe_query = normalize_text(search_keyword or "plumbing repair").split()[0:2] 
-    safe_query = " ".join(safe_query)
-    
-    try:
-        candidates = fetch_pixabay_video_candidates(safe_query)
-        if candidates:
-            fresh_candidates = [c for c in candidates if canonical_video_id(c) not in recent_video_ids]
-            chosen_pool = fresh_candidates if fresh_candidates else candidates
-            video_url = random.choice(chosen_pool)
-            print(f"Video selected via Pixabay (primary)")
-            if fresh_candidates:
-                print("Selected a fresh (non-recent) video clip")
-            else:
-                print("No fresh candidates found; reused an older clip")
-            return video_url
-    except Exception as e:
-        print(f"Pixabay search failed: {e}")
+    pixabay_queries = []
+    title_terms = [t for t in normalize_text(title).split() if len(t) > 3][:3]
+    if title_terms:
+        pixabay_queries.append(" ".join(title_terms + ["plumbing"]))
+    safe_query = " ".join(normalize_text(search_keyword or "plumbing repair").split()[0:2])
+    if safe_query:
+        pixabay_queries.append(safe_query)
+    pixabay_queries.extend(["plumbing repair", "drain cleaning", "sewer pipe repair"])
+
+    seen_pixabay = set()
+    for pq in pixabay_queries:
+        q = pq.strip()
+        q_key = normalize_text(q)
+        if not q_key or q_key in seen_pixabay:
+            continue
+        seen_pixabay.add(q_key)
+        try:
+            candidates = fetch_pixabay_video_candidates(q)
+            if candidates:
+                fresh_candidates = [c for c in candidates if canonical_video_id(c) not in recent_video_ids]
+                chosen_pool = fresh_candidates if fresh_candidates else candidates
+                video_url = random.choice(chosen_pool)
+                print(f"Video selected via Pixabay (primary) using query: {q}")
+                if fresh_candidates:
+                    print("Selected a fresh (non-recent) video clip")
+                else:
+                    print("No fresh candidates found; reused an older clip")
+                return video_url
+        except Exception as e:
+            print(f"Pixabay search failed for '{q}': {e}")
+
+    if not ALLOW_PEXELS_FALLBACK:
+        print("Pixabay exhausted and Pexels fallback is disabled. Using default video fallback")
+        return video_url
 
     print("Pixabay exhausted, trying Pexels fallback...")
     for query in queries:
