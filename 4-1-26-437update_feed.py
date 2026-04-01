@@ -57,109 +57,50 @@ def extract_pexels_photo_id(url):
     match = re.search(r'/photos/(\d+)/', url)
     return match.group(1) if match else None
 
-def extract_unsplash_photo_key(url):
-    if not url:
-        return None
-    match = re.search(r'images\.unsplash\.com/photo-([^?&/]+)', url)
-    return match.group(1) if match else None
-
-def get_recent_image_keys_from_feed(feed_path, lookback=RECENT_IMAGE_LOOKBACK):
-    recent_keys = []
+def get_recent_pexels_ids_from_feed(feed_path, lookback=RECENT_IMAGE_LOOKBACK):
+    recent_ids = []
     try:
         with open(feed_path, 'r', encoding='utf-8') as f:
             feed_text = f.read()
 
         enclosure_urls = re.findall(r'<enclosure\s+url="([^"]+)"', feed_text)
         for url in reversed(enclosure_urls):
-            pexels_id = extract_pexels_photo_id(url)
-            if pexels_id:
-                recent_keys.append(f'pexels:{pexels_id}')
-            else:
-                unsplash_key = extract_unsplash_photo_key(url)
-                if unsplash_key:
-                    recent_keys.append(f'unsplash:{unsplash_key}')
-            if len(recent_keys) >= lookback:
+            pid = extract_pexels_photo_id(url)
+            if pid:
+                recent_ids.append(pid)
+            if len(recent_ids) >= lookback:
                 break
     except Exception as e:
-        print(f"Could not read recent image keys from feed: {e}")
+        print(f"Could not read recent image IDs from feed: {e}")
 
-    return set(recent_keys)
+    return set(recent_ids)
 
-def get_pexels_candidates(search_keyword, recent_image_keys):
-    headers = {"Authorization": os.environ['PEXELS_API_KEY']}
-    pexels_resp = requests.get(
-        "https://api.pexels.com/v1/search",
-        params={"query": search_keyword.strip(), "per_page": 30},
-        headers=headers,
-        timeout=20,
-    )
-    pexels_resp.raise_for_status()
-    data = pexels_resp.json()
-    photos = data.get('photos') or []
-
-    fresh = []
-    any_candidates = []
-    for photo in photos:
-        photo_id = str(photo.get('id', ''))
-        image_url = photo.get('src', {}).get('large')
-        if not photo_id or not image_url:
-            continue
-        candidate = {'url': image_url, 'key': f'pexels:{photo_id}'}
-        any_candidates.append(candidate)
-        if candidate['key'] not in recent_image_keys:
-            fresh.append(candidate)
-
-    return fresh, any_candidates
-
-def get_unsplash_candidates(search_keyword, recent_image_keys):
-    access_key = os.environ.get('UNSPLASH_ACCESS_KEY')
-    if not access_key:
-        return [], []
-
-    headers = {"Authorization": f"Client-ID {access_key}"}
-    unsplash_resp = requests.get(
-        "https://api.unsplash.com/search/photos",
-        params={"query": search_keyword.strip(), "per_page": 30, "orientation": "landscape"},
-        headers=headers,
-        timeout=20,
-    )
-    unsplash_resp.raise_for_status()
-    data = unsplash_resp.json()
-    photos = data.get('results') or []
-
-    fresh = []
-    any_candidates = []
-    for photo in photos:
-        image_url = (photo.get('urls') or {}).get('regular')
-        if not image_url:
-            continue
-        photo_key = extract_unsplash_photo_key(image_url)
-        if not photo_key:
-            continue
-        candidate = {'url': image_url, 'key': f'unsplash:{photo_key}'}
-        any_candidates.append(candidate)
-        if candidate['key'] not in recent_image_keys:
-            fresh.append(candidate)
-
-    return fresh, any_candidates
-
-def get_image_url(search_keyword, recent_image_keys):
-    """Prefer fresh Pexels images, then fresh Unsplash images, before broader fallbacks."""
+def get_image_url(search_keyword, recent_pexels_ids):
+    """Picks a random image from Pexels while avoiding recently used photos."""
     image_url = DEFAULT_IMAGE
     try:
-        pexels_fresh, pexels_any = get_pexels_candidates(search_keyword, recent_image_keys)
-        if pexels_fresh:
-            return random.choice(pexels_fresh)['url']
+        headers = {"Authorization": os.environ['PEXELS_API_KEY']}
+        pexels_resp = requests.get(
+            "https://api.pexels.com/v1/search",
+            params={"query": search_keyword.strip(), "per_page": 30},
+            headers=headers,
+            timeout=20,
+        )
+        pexels_resp.raise_for_status()
+        data = pexels_resp.json()
+        photos = data.get('photos') or []
 
-        unsplash_fresh, unsplash_any = get_unsplash_candidates(search_keyword, recent_image_keys)
-        if unsplash_fresh:
-            return random.choice(unsplash_fresh)['url']
+        candidates = []
+        for photo in photos:
+            photo_id = str(photo.get('id', ''))
+            if photo_id and photo_id not in recent_pexels_ids:
+                candidates.append(photo)
 
-        if pexels_any:
-            return random.choice(pexels_any)['url']
-
-        if unsplash_any:
-            return random.choice(unsplash_any)['url']
+        if candidates:
+            image_url = random.choice(candidates)['src']['large']
+        elif photos:
+            # If all results were recently used, still return a valid image.
+            image_url = random.choice(photos)['src']['large']
     except Exception as e:
         print(f"Image search failed: {e}")
     return image_url
@@ -304,8 +245,8 @@ def main():
     print(f"Using feed path: {FEED_PATH}")
     title, search_keyword = generate_topic()
     print(f"Generated title: {title}")
-    recent_image_keys = get_recent_image_keys_from_feed(FEED_PATH)
-    image_url = get_image_url(search_keyword, recent_image_keys)
+    recent_pexels_ids = get_recent_pexels_ids_from_feed(FEED_PATH)
+    image_url = get_image_url(search_keyword, recent_pexels_ids)
     description_text = generate_description(title)
 
     with open(FEED_PATH, 'r', encoding='utf-8') as f:
