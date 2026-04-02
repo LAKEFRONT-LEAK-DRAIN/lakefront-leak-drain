@@ -28,7 +28,7 @@ jobs:
         run: pip install requests
 
       - name: Refresh city local updates
-        run: python update_city_local_content.py
+        run: python -u update_city_local_content.py
 
       - name: Commit and push changes
         uses: stefanzweifel/git-auto-commit-action@v5
