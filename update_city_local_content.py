@@ -278,14 +278,14 @@ def quality_passes(weather: dict[str, Any], events: list[dict[str, str]], news: 
         or weather.get("wettest_precip") is not None
     )
 
-    if not has_weather:
-        return False, "missing weather signal"
-
     if len(events) < MIN_EVENT_ITEMS:
         return False, f"insufficient event items ({len(events)})"
 
     if len(news) < MIN_NEWS_ITEMS:
         return False, f"insufficient news items ({len(news)})"
+
+    if not has_weather:
+        return True, "weather unavailable"
 
     return True, "ok"
 
@@ -339,17 +339,17 @@ def main() -> None:
         try:
             weather = fetch_weather(city)
         except Exception as exc:
-            print(f"[{city['name']}] weather fetch failed: {exc}")
+            print(f"[{city['name']}] weather fetch failed: {exc}", flush=True)
 
         try:
             events = fetch_rss_items(city["event_query"], limit=3)
         except Exception as exc:
-            print(f"[{city['name']}] event feed fetch failed: {exc}")
+            print(f"[{city['name']}] event feed fetch failed: {exc}", flush=True)
 
         try:
             news = fetch_rss_items(city["news_query"], limit=3)
         except Exception as exc:
-            print(f"[{city['name']}] news feed fetch failed: {exc}")
+            print(f"[{city['name']}] news feed fetch failed: {exc}", flush=True)
 
         ok, reason = quality_passes(weather, events, news)
         if not ok:
@@ -360,27 +360,27 @@ def main() -> None:
                 changed = upsert_local_update(page, fallback_block)
                 if changed:
                     changed_pages += 1
-                    print(f"Inserted fallback local section: {city['page']} ({reason})")
+                    print(f"Inserted fallback local section: {city['page']} ({reason})", flush=True)
                 else:
-                    print(f"No content change (fallback): {city['page']}")
+                    print(f"No content change (fallback): {city['page']}", flush=True)
             else:
                 skipped_pages += 1
-                print(f"Skipped local section: {city['page']} ({reason})")
+                print(f"Skipped local section: {city['page']} ({reason})", flush=True)
             continue
 
         block = build_local_update_html(city, weather, events, news)
         changed = upsert_local_update(page, block)
         if changed:
             changed_pages += 1
-            print(f"Updated local section: {city['page']}")
+            print(f"Updated local section: {city['page']}", flush=True)
         else:
-            print(f"No content change: {city['page']}")
+            print(f"No content change: {city['page']}", flush=True)
 
     print(
         "Done. "
         f"City pages refreshed: {changed_pages}/{len(cities)}. "
         f"Skipped for quality: {skipped_pages}."
-    )
+    , flush=True)
 
 
 if __name__ == "__main__":
