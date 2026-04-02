@@ -19,6 +19,7 @@ LOCAL_UPDATE_END = "<!-- LOCAL_UPDATE_END -->"
 GEOCODE_ENDPOINT = "https://geocoding-api.open-meteo.com/v1/search"
 MIN_EVENT_ITEMS = 1
 MIN_NEWS_ITEMS = 1
+MIN_TOTAL_ITEMS = 1
 COORD_CACHE: dict[str, tuple[float, float]] = {}
 
 
@@ -278,11 +279,15 @@ def quality_passes(weather: dict[str, Any], events: list[dict[str, str]], news: 
         or weather.get("wettest_precip") is not None
     )
 
-    if len(events) < MIN_EVENT_ITEMS:
-        return False, f"insufficient event items ({len(events)})"
+    total_items = len(events) + len(news)
+    if total_items < MIN_TOTAL_ITEMS:
+        return False, f"insufficient total feed items ({total_items})"
 
-    if len(news) < MIN_NEWS_ITEMS:
-        return False, f"insufficient news items ({len(news)})"
+    if len(events) < MIN_EVENT_ITEMS and len(news) < MIN_NEWS_ITEMS:
+        return False, (
+            "insufficient category coverage "
+            f"(events={len(events)}, news={len(news)})"
+        )
 
     if not has_weather:
         return True, "weather unavailable"
