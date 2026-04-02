@@ -1,0 +1,34 @@
+{
+  "cities": [
+    {
+      "slug": "lakewood",
+      "name": "Lakewood",
+      "page": "plumber-lakewood-oh/index.html",
+      "lat": 41.48199,
+      "lon": -81.79819,
+      "state": "OH",
+      "event_query": "Lakewood OH community events",
+      "news_query": "Lakewood OH local news"
+    },
+    {
+      "slug": "rocky-river",
+      "name": "Rocky River",
+      "page": "plumber-rocky-river-oh/index.html",
+      "lat": 41.47559,
+      "lon": -81.8393,
+      "state": "OH",
+      "event_query": "Rocky River OH community events",
+      "news_query": "Rocky River OH local news"
+    },
+    {
+      "slug": "parma",
+      "name": "Parma",
+      "page": "plumber-parma-oh/index.html",
+      "lat": 41.40477,
+      "lon": -81.72291,
+      "state": "OH",
+      "event_query": "Parma OH community events",
+      "news_query": "Parma OH local news"
+    }
+  ]
+}
