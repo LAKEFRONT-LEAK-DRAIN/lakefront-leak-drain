@@ -24,6 +24,8 @@ MIN_NEWS_ITEMS = 1
 MIN_TOTAL_ITEMS = 1
 WEATHER_TIMEOUT_SECONDS = 8
 MAX_CONSECUTIVE_WEATHER_TIMEOUTS = 5
+DEFAULT_EVENT_FALLBACK_QUERY = "Cleveland OH community events"
+DEFAULT_NEWS_FALLBACK_QUERY = "Cleveland OH local news"
 COORD_CACHE: dict[str, tuple[float, float]] = {}
 CONSECUTIVE_WEATHER_TIMEOUTS = 0
 WEATHER_CIRCUIT_OPEN = False
@@ -214,6 +216,59 @@ def fetch_rss_items(query: str, limit: int = 3) -> list[dict[str, str]]:
     return items
 
 
+def fetch_feed_items_with_fallback(
+    city: dict[str, Any],
+    query_key: str,
+    fallback_query: str,
+    category_label: str,
+    limit: int = 3,
+) -> list[dict[str, str]]:
+    city_name = (city.get("name") or "").strip()
+    primary = (city.get(query_key) or "").strip()
+
+    # Query order: city-specific first, then broad regional fallback.
+    queries: list[str] = []
+    if primary:
+        queries.append(primary)
+    if city_name:
+        queries.append(f"{city_name} Ohio {category_label}")
+    queries.append(fallback_query)
+
+    unique_queries: list[str] = []
+    seen_queries: set[str] = set()
+    for query in queries:
+        if query and query not in seen_queries:
+            unique_queries.append(query)
+            seen_queries.add(query)
+
+    items: list[dict[str, str]] = []
+    seen_links: set[str] = set()
+
+    for query in unique_queries:
+        try:
+            fetched = fetch_rss_items(query, limit=limit)
+        except Exception as exc:
+            print(
+                f"[{city['name']}] {category_label} feed fetch failed for query '{query}': {exc}",
+                flush=True,
+            )
+            continue
+
+        for item in fetched:
+            link = item.get("link")
+            if not link or link in seen_links:
+                continue
+            seen_links.add(link)
+            items.append(item)
+            if len(items) >= limit:
+                return items
+
+        if items:
+            return items
+
+    return items
+
+
 def render_link_items(items: list[dict[str, str]], fallback_label: str) -> str:
     if not items:
         return f"<li>No fresh {escape(fallback_label)} items were found in this cycle.</li>"
@@ -371,15 +426,21 @@ def main() -> None:
         except Exception as exc:
             print(f"[{city['name']}] weather fetch failed: {exc}", flush=True)
 
-        try:
-            events = fetch_rss_items(city["event_query"], limit=3)
-        except Exception as exc:
-            print(f"[{city['name']}] event feed fetch failed: {exc}", flush=True)
+        events = fetch_feed_items_with_fallback(
+            city,
+            query_key="event_query",
+            fallback_query=DEFAULT_EVENT_FALLBACK_QUERY,
+            category_label="community events",
+            limit=3,
+        )
 
-        try:
-            news = fetch_rss_items(city["news_query"], limit=3)
-        except Exception as exc:
-            print(f"[{city['name']}] news feed fetch failed: {exc}", flush=True)
+        news = fetch_feed_items_with_fallback(
+            city,
+            query_key="news_query",
+            fallback_query=DEFAULT_NEWS_FALLBACK_QUERY,
+            category_label="local news",
+            limit=3,
+        )
 
         ok, reason = quality_passes(weather, events, news)
         if not ok:
