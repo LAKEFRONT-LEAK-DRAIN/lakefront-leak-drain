@@ -11,16 +11,22 @@ from urllib.parse import quote_plus
 import xml.etree.ElementTree as ET
 
 import requests
+from requests.exceptions import RequestException, Timeout
 
 ROOT = Path(__file__).resolve().parent
 CONFIG_PATH = ROOT / "city_local_updates.json"
 LOCAL_UPDATE_START = "<!-- LOCAL_UPDATE_START -->"
 LOCAL_UPDATE_END = "<!-- LOCAL_UPDATE_END -->"
 GEOCODE_ENDPOINT = "https://geocoding-api.open-meteo.com/v1/search"
+WEATHER_ENDPOINT = "https://api.open-meteo.com/v1/forecast"
 MIN_EVENT_ITEMS = 1
 MIN_NEWS_ITEMS = 1
 MIN_TOTAL_ITEMS = 1
+WEATHER_TIMEOUT_SECONDS = 8
+MAX_CONSECUTIVE_WEATHER_TIMEOUTS = 5
 COORD_CACHE: dict[str, tuple[float, float]] = {}
+CONSECUTIVE_WEATHER_TIMEOUTS = 0
+WEATHER_CIRCUIT_OPEN = False
 
 
 def slug_to_name(slug: str) -> str:
@@ -116,11 +122,15 @@ def seasonal_tip(city_name: str, month: int) -> str:
 
 
 def fetch_weather(city: dict[str, Any]) -> dict[str, Any]:
+    global CONSECUTIVE_WEATHER_TIMEOUTS, WEATHER_CIRCUIT_OPEN
+
+    if WEATHER_CIRCUIT_OPEN:
+        return {}
+
     coords = resolve_coordinates(city)
     if not coords:
         return {}
 
-    endpoint = "https://api.open-meteo.com/v1/forecast"
     params = {
         "latitude": coords[0],
         "longitude": coords[1],
@@ -128,8 +138,23 @@ def fetch_weather(city: dict[str, Any]) -> dict[str, Any]:
         "timezone": "America/New_York",
         "forecast_days": 5,
     }
-    response = requests.get(endpoint, params=params, timeout=20)
-    response.raise_for_status()
+    try:
+        response = requests.get(WEATHER_ENDPOINT, params=params, timeout=WEATHER_TIMEOUT_SECONDS)
+        response.raise_for_status()
+    except Timeout:
+        CONSECUTIVE_WEATHER_TIMEOUTS += 1
+        if CONSECUTIVE_WEATHER_TIMEOUTS >= MAX_CONSECUTIVE_WEATHER_TIMEOUTS:
+            WEATHER_CIRCUIT_OPEN = True
+            print(
+                "Weather API circuit opened after repeated timeouts; "
+                "continuing this run without weather calls.",
+                flush=True,
+            )
+        return {}
+    except RequestException:
+        return {}
+
+    CONSECUTIVE_WEATHER_TIMEOUTS = 0
     data = response.json().get("daily", {})
 
     if not data or not data.get("time"):
