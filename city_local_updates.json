@@ -1,34 +1,1028 @@
 {
-  "cities": [
-    {
-      "slug": "lakewood",
-      "name": "Lakewood",
-      "page": "plumber-lakewood-oh/index.html",
-      "lat": 41.48199,
-      "lon": -81.79819,
-      "state": "OH",
-      "event_query": "Lakewood OH community events",
-      "news_query": "Lakewood OH local news"
-    },
-    {
-      "slug": "rocky-river",
-      "name": "Rocky River",
-      "page": "plumber-rocky-river-oh/index.html",
-      "lat": 41.47559,
-      "lon": -81.8393,
-      "state": "OH",
-      "event_query": "Rocky River OH community events",
-      "news_query": "Rocky River OH local news"
-    },
-    {
-      "slug": "parma",
-      "name": "Parma",
-      "page": "plumber-parma-oh/index.html",
-      "lat": 41.40477,
-      "lon": -81.72291,
-      "state": "OH",
-      "event_query": "Parma OH community events",
-      "news_query": "Parma OH local news"
-    }
-  ]
+    "cities":  [
+                   {
+                       "slug":  "amherst",
+                       "name":  "Amherst",
+                       "page":  "plumber-amherst-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Amherst OH community events",
+                       "news_query":  "Amherst OH local news"
+                   },
+                   {
+                       "slug":  "aurora",
+                       "name":  "Aurora",
+                       "page":  "plumber-aurora-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Aurora OH community events",
+                       "news_query":  "Aurora OH local news"
+                   },
+                   {
+                       "slug":  "avon-lake",
+                       "name":  "Avon Lake",
+                       "page":  "plumber-avon-lake-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Avon Lake OH community events",
+                       "news_query":  "Avon Lake OH local news"
+                   },
+                   {
+                       "slug":  "avon",
+                       "name":  "Avon",
+                       "page":  "plumber-avon-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Avon OH community events",
+                       "news_query":  "Avon OH local news"
+                   },
+                   {
+                       "slug":  "bainbridge",
+                       "name":  "Bainbridge",
+                       "page":  "plumber-bainbridge-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Bainbridge OH community events",
+                       "news_query":  "Bainbridge OH local news"
+                   },
+                   {
+                       "slug":  "bay-village",
+                       "name":  "Bay Village",
+                       "page":  "plumber-bay-village-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Bay Village OH community events",
+                       "news_query":  "Bay Village OH local news"
+                   },
+                   {
+                       "slug":  "beachwood",
+                       "name":  "Beachwood",
+                       "page":  "plumber-beachwood-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Beachwood OH community events",
+                       "news_query":  "Beachwood OH local news"
+                   },
+                   {
+                       "slug":  "bedford-heights",
+                       "name":  "Bedford Heights",
+                       "page":  "plumber-bedford-heights-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Bedford Heights OH community events",
+                       "news_query":  "Bedford Heights OH local news"
+                   },
+                   {
+                       "slug":  "bedford",
+                       "name":  "Bedford",
+                       "page":  "plumber-bedford-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Bedford OH community events",
+                       "news_query":  "Bedford OH local news"
+                   },
+                   {
+                       "slug":  "bentleyville",
+                       "name":  "Bentleyville",
+                       "page":  "plumber-bentleyville-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Bentleyville OH community events",
+                       "news_query":  "Bentleyville OH local news"
+                   },
+                   {
+                       "slug":  "berea",
+                       "name":  "Berea",
+                       "page":  "plumber-berea-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Berea OH community events",
+                       "news_query":  "Berea OH local news"
+                   },
+                   {
+                       "slug":  "brecksville",
+                       "name":  "Brecksville",
+                       "page":  "plumber-brecksville-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Brecksville OH community events",
+                       "news_query":  "Brecksville OH local news"
+                   },
+                   {
+                       "slug":  "broadview-heights",
+                       "name":  "Broadview Heights",
+                       "page":  "plumber-broadview-heights-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Broadview Heights OH community events",
+                       "news_query":  "Broadview Heights OH local news"
+                   },
+                   {
+                       "slug":  "brooklyn-centre",
+                       "name":  "Brooklyn Centre",
+                       "page":  "plumber-brooklyn-centre-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Brooklyn Centre OH community events",
+                       "news_query":  "Brooklyn Centre OH local news"
+                   },
+                   {
+                       "slug":  "brooklyn-heights",
+                       "name":  "Brooklyn Heights",
+                       "page":  "plumber-brooklyn-heights-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Brooklyn Heights OH community events",
+                       "news_query":  "Brooklyn Heights OH local news"
+                   },
+                   {
+                       "slug":  "brooklyn",
+                       "name":  "Brooklyn",
+                       "page":  "plumber-brooklyn-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Brooklyn OH community events",
+                       "news_query":  "Brooklyn OH local news"
+                   },
+                   {
+                       "slug":  "brook-park",
+                       "name":  "Brook Park",
+                       "page":  "plumber-brook-park-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Brook Park OH community events",
+                       "news_query":  "Brook Park OH local news"
+                   },
+                   {
+                       "slug":  "brunswick-hills",
+                       "name":  "Brunswick Hills",
+                       "page":  "plumber-brunswick-hills-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Brunswick Hills OH community events",
+                       "news_query":  "Brunswick Hills OH local news"
+                   },
+                   {
+                       "slug":  "brunswick",
+                       "name":  "Brunswick",
+                       "page":  "plumber-brunswick-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Brunswick OH community events",
+                       "news_query":  "Brunswick OH local news"
+                   },
+                   {
+                       "slug":  "buckeye-shaker",
+                       "name":  "Buckeye Shaker",
+                       "page":  "plumber-buckeye-shaker-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Buckeye Shaker OH community events",
+                       "news_query":  "Buckeye Shaker OH local news"
+                   },
+                   {
+                       "slug":  "chagrin-falls",
+                       "name":  "Chagrin Falls",
+                       "page":  "plumber-chagrin-falls-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Chagrin Falls OH community events",
+                       "news_query":  "Chagrin Falls OH local news"
+                   },
+                   {
+                       "slug":  "chagrin-falls-township",
+                       "name":  "Chagrin Falls Township",
+                       "page":  "plumber-chagrin-falls-township-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Chagrin Falls Township OH community events",
+                       "news_query":  "Chagrin Falls Township OH local news"
+                   },
+                   {
+                       "slug":  "clark-fulton",
+                       "name":  "Clark Fulton",
+                       "page":  "plumber-clark-fulton-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Clark Fulton OH community events",
+                       "news_query":  "Clark Fulton OH local news"
+                   },
+                   {
+                       "slug":  "cleveland-heights",
+                       "name":  "Cleveland Heights",
+                       "page":  "plumber-cleveland-heights-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Cleveland Heights OH community events",
+                       "news_query":  "Cleveland Heights OH local news"
+                   },
+                   {
+                       "slug":  "cleveland",
+                       "name":  "Cleveland",
+                       "page":  "plumber-cleveland-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Cleveland OH community events",
+                       "news_query":  "Cleveland OH local news"
+                   },
+                   {
+                       "slug":  "collinwood",
+                       "name":  "Collinwood",
+                       "page":  "plumber-collinwood-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Collinwood OH community events",
+                       "news_query":  "Collinwood OH local news"
+                   },
+                   {
+                       "slug":  "concord",
+                       "name":  "Concord",
+                       "page":  "plumber-concord-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Concord OH community events",
+                       "news_query":  "Concord OH local news"
+                   },
+                   {
+                       "slug":  "concord-township",
+                       "name":  "Concord Township",
+                       "page":  "plumber-concord-township-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Concord Township OH community events",
+                       "news_query":  "Concord Township OH local news"
+                   },
+                   {
+                       "slug":  "cudell",
+                       "name":  "Cudell",
+                       "page":  "plumber-cudell-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Cudell OH community events",
+                       "news_query":  "Cudell OH local news"
+                   },
+                   {
+                       "slug":  "cuyahoga-heights",
+                       "name":  "Cuyahoga Heights",
+                       "page":  "plumber-cuyahoga-heights-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Cuyahoga Heights OH community events",
+                       "news_query":  "Cuyahoga Heights OH local news"
+                   },
+                   {
+                       "slug":  "detroit-shoreway",
+                       "name":  "Detroit Shoreway",
+                       "page":  "plumber-detroit-shoreway-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Detroit Shoreway OH community events",
+                       "news_query":  "Detroit Shoreway OH local news"
+                   },
+                   {
+                       "slug":  "downtown-cleveland",
+                       "name":  "Downtown Cleveland",
+                       "page":  "plumber-downtown-cleveland-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Downtown Cleveland OH community events",
+                       "news_query":  "Downtown Cleveland OH local news"
+                   },
+                   {
+                       "slug":  "east-cleveland",
+                       "name":  "East Cleveland",
+                       "page":  "plumber-east-cleveland-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "East Cleveland OH community events",
+                       "news_query":  "East Cleveland OH local news"
+                   },
+                   {
+                       "slug":  "eastlake",
+                       "name":  "Eastlake",
+                       "page":  "plumber-eastlake-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Eastlake OH community events",
+                       "news_query":  "Eastlake OH local news"
+                   },
+                   {
+                       "slug":  "edgewater",
+                       "name":  "Edgewater",
+                       "page":  "plumber-edgewater-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Edgewater OH community events",
+                       "news_query":  "Edgewater OH local news"
+                   },
+                   {
+                       "slug":  "elyria",
+                       "name":  "Elyria",
+                       "page":  "plumber-elyria-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Elyria OH community events",
+                       "news_query":  "Elyria OH local news"
+                   },
+                   {
+                       "slug":  "euclid",
+                       "name":  "Euclid",
+                       "page":  "plumber-euclid-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Euclid OH community events",
+                       "news_query":  "Euclid OH local news"
+                   },
+                   {
+                       "slug":  "fairfax",
+                       "name":  "Fairfax",
+                       "page":  "plumber-fairfax-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Fairfax OH community events",
+                       "news_query":  "Fairfax OH local news"
+                   },
+                   {
+                       "slug":  "fairport-harbor",
+                       "name":  "Fairport Harbor",
+                       "page":  "plumber-fairport-harbor-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Fairport Harbor OH community events",
+                       "news_query":  "Fairport Harbor OH local news"
+                   },
+                   {
+                       "slug":  "fairview-park",
+                       "name":  "Fairview Park",
+                       "page":  "plumber-fairview-park-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Fairview Park OH community events",
+                       "news_query":  "Fairview Park OH local news"
+                   },
+                   {
+                       "slug":  "garfield-heights",
+                       "name":  "Garfield Heights",
+                       "page":  "plumber-garfield-heights-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Garfield Heights OH community events",
+                       "news_query":  "Garfield Heights OH local news"
+                   },
+                   {
+                       "slug":  "gates-mills",
+                       "name":  "Gates Mills",
+                       "page":  "plumber-gates-mills-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Gates Mills OH community events",
+                       "news_query":  "Gates Mills OH local news"
+                   },
+                   {
+                       "slug":  "glenville",
+                       "name":  "Glenville",
+                       "page":  "plumber-glenville-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Glenville OH community events",
+                       "news_query":  "Glenville OH local news"
+                   },
+                   {
+                       "slug":  "glenwillow",
+                       "name":  "Glenwillow",
+                       "page":  "plumber-glenwillow-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Glenwillow OH community events",
+                       "news_query":  "Glenwillow OH local news"
+                   },
+                   {
+                       "slug":  "goodrich-kirtland-park",
+                       "name":  "Goodrich Kirtland Park",
+                       "page":  "plumber-goodrich-kirtland-park-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Goodrich Kirtland Park OH community events",
+                       "news_query":  "Goodrich Kirtland Park OH local news"
+                   },
+                   {
+                       "slug":  "gordon-square",
+                       "name":  "Gordon Square",
+                       "page":  "plumber-gordon-square-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Gordon Square OH community events",
+                       "news_query":  "Gordon Square OH local news"
+                   },
+                   {
+                       "slug":  "grand-river",
+                       "name":  "Grand River",
+                       "page":  "plumber-grand-river-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Grand River OH community events",
+                       "news_query":  "Grand River OH local news"
+                   },
+                   {
+                       "slug":  "highland-heights",
+                       "name":  "Highland Heights",
+                       "page":  "plumber-highland-heights-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Highland Heights OH community events",
+                       "news_query":  "Highland Heights OH local news"
+                   },
+                   {
+                       "slug":  "highland-hills",
+                       "name":  "Highland Hills",
+                       "page":  "plumber-highland-hills-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Highland Hills OH community events",
+                       "news_query":  "Highland Hills OH local news"
+                   },
+                   {
+                       "slug":  "hinckley",
+                       "name":  "Hinckley",
+                       "page":  "plumber-hinckley-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Hinckley OH community events",
+                       "news_query":  "Hinckley OH local news"
+                   },
+                   {
+                       "slug":  "hough",
+                       "name":  "Hough",
+                       "page":  "plumber-hough-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Hough OH community events",
+                       "news_query":  "Hough OH local news"
+                   },
+                   {
+                       "slug":  "hudson",
+                       "name":  "Hudson",
+                       "page":  "plumber-hudson-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Hudson OH community events",
+                       "news_query":  "Hudson OH local news"
+                   },
+                   {
+                       "slug":  "hunting-valley",
+                       "name":  "Hunting Valley",
+                       "page":  "plumber-hunting-valley-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Hunting Valley OH community events",
+                       "news_query":  "Hunting Valley OH local news"
+                   },
+                   {
+                       "slug":  "independence",
+                       "name":  "Independence",
+                       "page":  "plumber-independence-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Independence OH community events",
+                       "news_query":  "Independence OH local news"
+                   },
+                   {
+                       "slug":  "jefferson",
+                       "name":  "Jefferson",
+                       "page":  "plumber-jefferson-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Jefferson OH community events",
+                       "news_query":  "Jefferson OH local news"
+                   },
+                   {
+                       "slug":  "kamm-s-corners",
+                       "name":  "Kamm S Corners",
+                       "page":  "plumber-kamm-s-corners-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Kamm S Corners OH community events",
+                       "news_query":  "Kamm S Corners OH local news"
+                   },
+                   {
+                       "slug":  "kinsman",
+                       "name":  "Kinsman",
+                       "page":  "plumber-kinsman-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Kinsman OH community events",
+                       "news_query":  "Kinsman OH local news"
+                   },
+                   {
+                       "slug":  "kirtland-hills",
+                       "name":  "Kirtland Hills",
+                       "page":  "plumber-kirtland-hills-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Kirtland Hills OH community events",
+                       "news_query":  "Kirtland Hills OH local news"
+                   },
+                   {
+                       "slug":  "kirtland",
+                       "name":  "Kirtland",
+                       "page":  "plumber-kirtland-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Kirtland OH community events",
+                       "news_query":  "Kirtland OH local news"
+                   },
+                   {
+                       "slug":  "lakeline",
+                       "name":  "Lakeline",
+                       "page":  "plumber-lakeline-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Lakeline OH community events",
+                       "news_query":  "Lakeline OH local news"
+                   },
+                   {
+                       "slug":  "lakewood",
+                       "name":  "Lakewood",
+                       "page":  "plumber-lakewood-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Lakewood OH community events",
+                       "news_query":  "Lakewood OH local news"
+                   },
+                   {
+                       "slug":  "lee-harvard",
+                       "name":  "Lee Harvard",
+                       "page":  "plumber-lee-harvard-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Lee Harvard OH community events",
+                       "news_query":  "Lee Harvard OH local news"
+                   },
+                   {
+                       "slug":  "linndale",
+                       "name":  "Linndale",
+                       "page":  "plumber-linndale-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Linndale OH community events",
+                       "news_query":  "Linndale OH local news"
+                   },
+                   {
+                       "slug":  "litchfield",
+                       "name":  "Litchfield",
+                       "page":  "plumber-litchfield-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Litchfield OH community events",
+                       "news_query":  "Litchfield OH local news"
+                   },
+                   {
+                       "slug":  "little-italy",
+                       "name":  "Little Italy",
+                       "page":  "plumber-little-italy-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Little Italy OH community events",
+                       "news_query":  "Little Italy OH local news"
+                   },
+                   {
+                       "slug":  "lorain",
+                       "name":  "Lorain",
+                       "page":  "plumber-lorain-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Lorain OH community events",
+                       "news_query":  "Lorain OH local news"
+                   },
+                   {
+                       "slug":  "lyndhurst",
+                       "name":  "Lyndhurst",
+                       "page":  "plumber-lyndhurst-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Lyndhurst OH community events",
+                       "news_query":  "Lyndhurst OH local news"
+                   },
+                   {
+                       "slug":  "macedonia",
+                       "name":  "Macedonia",
+                       "page":  "plumber-macedonia-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Macedonia OH community events",
+                       "news_query":  "Macedonia OH local news"
+                   },
+                   {
+                       "slug":  "madison",
+                       "name":  "Madison",
+                       "page":  "plumber-madison-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Madison OH community events",
+                       "news_query":  "Madison OH local news"
+                   },
+                   {
+                       "slug":  "madison-township",
+                       "name":  "Madison Township",
+                       "page":  "plumber-madison-township-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Madison Township OH community events",
+                       "news_query":  "Madison Township OH local news"
+                   },
+                   {
+                       "slug":  "maple-heights",
+                       "name":  "Maple Heights",
+                       "page":  "plumber-maple-heights-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Maple Heights OH community events",
+                       "news_query":  "Maple Heights OH local news"
+                   },
+                   {
+                       "slug":  "mayfield-heights",
+                       "name":  "Mayfield Heights",
+                       "page":  "plumber-mayfield-heights-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Mayfield Heights OH community events",
+                       "news_query":  "Mayfield Heights OH local news"
+                   },
+                   {
+                       "slug":  "mayfield-village",
+                       "name":  "Mayfield Village",
+                       "page":  "plumber-mayfield-village-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Mayfield Village OH community events",
+                       "news_query":  "Mayfield Village OH local news"
+                   },
+                   {
+                       "slug":  "medina",
+                       "name":  "Medina",
+                       "page":  "plumber-medina-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Medina OH community events",
+                       "news_query":  "Medina OH local news"
+                   },
+                   {
+                       "slug":  "medina-township",
+                       "name":  "Medina Township",
+                       "page":  "plumber-medina-township-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Medina Township OH community events",
+                       "news_query":  "Medina Township OH local news"
+                   },
+                   {
+                       "slug":  "mentor",
+                       "name":  "Mentor",
+                       "page":  "plumber-mentor-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Mentor OH community events",
+                       "news_query":  "Mentor OH local news"
+                   },
+                   {
+                       "slug":  "mentor-on-the-lake",
+                       "name":  "Mentor On The Lake",
+                       "page":  "plumber-mentor-on-the-lake-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Mentor On The Lake OH community events",
+                       "news_query":  "Mentor On The Lake OH local news"
+                   },
+                   {
+                       "slug":  "middleburg-heights",
+                       "name":  "Middleburg Heights",
+                       "page":  "plumber-middleburg-heights-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Middleburg Heights OH community events",
+                       "news_query":  "Middleburg Heights OH local news"
+                   },
+                   {
+                       "slug":  "moreland-hills",
+                       "name":  "Moreland Hills",
+                       "page":  "plumber-moreland-hills-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Moreland Hills OH community events",
+                       "news_query":  "Moreland Hills OH local news"
+                   },
+                   {
+                       "slug":  "mount-pleasant",
+                       "name":  "Mount Pleasant",
+                       "page":  "plumber-mount-pleasant-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Mount Pleasant OH community events",
+                       "news_query":  "Mount Pleasant OH local news"
+                   },
+                   {
+                       "slug":  "newburgh-heights",
+                       "name":  "Newburgh Heights",
+                       "page":  "plumber-newburgh-heights-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Newburgh Heights OH community events",
+                       "news_query":  "Newburgh Heights OH local news"
+                   },
+                   {
+                       "slug":  "northfield",
+                       "name":  "Northfield",
+                       "page":  "plumber-northfield-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Northfield OH community events",
+                       "news_query":  "Northfield OH local news"
+                   },
+                   {
+                       "slug":  "north-olmsted",
+                       "name":  "North Olmsted",
+                       "page":  "plumber-north-olmsted-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "North Olmsted OH community events",
+                       "news_query":  "North Olmsted OH local news"
+                   },
+                   {
+                       "slug":  "north-ridgeville",
+                       "name":  "North Ridgeville",
+                       "page":  "plumber-north-ridgeville-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "North Ridgeville OH community events",
+                       "news_query":  "North Ridgeville OH local news"
+                   },
+                   {
+                       "slug":  "north-royalton",
+                       "name":  "North Royalton",
+                       "page":  "plumber-north-royalton-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "North Royalton OH community events",
+                       "news_query":  "North Royalton OH local news"
+                   },
+                   {
+                       "slug":  "oakwood-village",
+                       "name":  "Oakwood Village",
+                       "page":  "plumber-oakwood-village-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Oakwood Village OH community events",
+                       "news_query":  "Oakwood Village OH local news"
+                   },
+                   {
+                       "slug":  "oberlin",
+                       "name":  "Oberlin",
+                       "page":  "plumber-oberlin-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Oberlin OH community events",
+                       "news_query":  "Oberlin OH local news"
+                   },
+                   {
+                       "slug":  "ohio-city",
+                       "name":  "Ohio City",
+                       "page":  "plumber-ohio-city-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Ohio City OH community events",
+                       "news_query":  "Ohio City OH local news"
+                   },
+                   {
+                       "slug":  "old-brooklyn",
+                       "name":  "Old Brooklyn",
+                       "page":  "plumber-old-brooklyn-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Old Brooklyn OH community events",
+                       "news_query":  "Old Brooklyn OH local news"
+                   },
+                   {
+                       "slug":  "olmsted-falls",
+                       "name":  "Olmsted Falls",
+                       "page":  "plumber-olmsted-falls-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Olmsted Falls OH community events",
+                       "news_query":  "Olmsted Falls OH local news"
+                   },
+                   {
+                       "slug":  "olmsted-township",
+                       "name":  "Olmsted Township",
+                       "page":  "plumber-olmsted-township-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Olmsted Township OH community events",
+                       "news_query":  "Olmsted Township OH local news"
+                   },
+                   {
+                       "slug":  "orange",
+                       "name":  "Orange",
+                       "page":  "plumber-orange-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Orange OH community events",
+                       "news_query":  "Orange OH local news"
+                   },
+                   {
+                       "slug":  "painesville",
+                       "name":  "Painesville",
+                       "page":  "plumber-painesville-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Painesville OH community events",
+                       "news_query":  "Painesville OH local news"
+                   },
+                   {
+                       "slug":  "parma-heights",
+                       "name":  "Parma Heights",
+                       "page":  "plumber-parma-heights-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Parma Heights OH community events",
+                       "news_query":  "Parma Heights OH local news"
+                   },
+                   {
+                       "slug":  "parma",
+                       "name":  "Parma",
+                       "page":  "plumber-parma-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Parma OH community events",
+                       "news_query":  "Parma OH local news"
+                   },
+                   {
+                       "slug":  "parma-township",
+                       "name":  "Parma Township",
+                       "page":  "plumber-parma-township-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Parma Township OH community events",
+                       "news_query":  "Parma Township OH local news"
+                   },
+                   {
+                       "slug":  "pepper-pike",
+                       "name":  "Pepper Pike",
+                       "page":  "plumber-pepper-pike-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Pepper Pike OH community events",
+                       "news_query":  "Pepper Pike OH local news"
+                   },
+                   {
+                       "slug":  "richmond-heights",
+                       "name":  "Richmond Heights",
+                       "page":  "plumber-richmond-heights-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Richmond Heights OH community events",
+                       "news_query":  "Richmond Heights OH local news"
+                   },
+                   {
+                       "slug":  "rocky-river",
+                       "name":  "Rocky River",
+                       "page":  "plumber-rocky-river-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Rocky River OH community events",
+                       "news_query":  "Rocky River OH local news"
+                   },
+                   {
+                       "slug":  "sagamore-hills",
+                       "name":  "Sagamore Hills",
+                       "page":  "plumber-sagamore-hills-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Sagamore Hills OH community events",
+                       "news_query":  "Sagamore Hills OH local news"
+                   },
+                   {
+                       "slug":  "seven-hills",
+                       "name":  "Seven Hills",
+                       "page":  "plumber-seven-hills-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Seven Hills OH community events",
+                       "news_query":  "Seven Hills OH local news"
+                   },
+                   {
+                       "slug":  "seville",
+                       "name":  "Seville",
+                       "page":  "plumber-seville-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Seville OH community events",
+                       "news_query":  "Seville OH local news"
+                   },
+                   {
+                       "slug":  "shaker-heights",
+                       "name":  "Shaker Heights",
+                       "page":  "plumber-shaker-heights-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Shaker Heights OH community events",
+                       "news_query":  "Shaker Heights OH local news"
+                   },
+                   {
+                       "slug":  "sheffield-lake",
+                       "name":  "Sheffield Lake",
+                       "page":  "plumber-sheffield-lake-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Sheffield Lake OH community events",
+                       "news_query":  "Sheffield Lake OH local news"
+                   },
+                   {
+                       "slug":  "sheffield-village",
+                       "name":  "Sheffield Village",
+                       "page":  "plumber-sheffield-village-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Sheffield Village OH community events",
+                       "news_query":  "Sheffield Village OH local news"
+                   },
+                   {
+                       "slug":  "shoreway",
+                       "name":  "Shoreway",
+                       "page":  "plumber-shoreway-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Shoreway OH community events",
+                       "news_query":  "Shoreway OH local news"
+                   },
+                   {
+                       "slug":  "slavic-village",
+                       "name":  "Slavic Village",
+                       "page":  "plumber-slavic-village-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Slavic Village OH community events",
+                       "news_query":  "Slavic Village OH local news"
+                   },
+                   {
+                       "slug":  "solon",
+                       "name":  "Solon",
+                       "page":  "plumber-solon-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Solon OH community events",
+                       "news_query":  "Solon OH local news"
+                   },
+                   {
+                       "slug":  "south-euclid",
+                       "name":  "South Euclid",
+                       "page":  "plumber-south-euclid-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "South Euclid OH community events",
+                       "news_query":  "South Euclid OH local news"
+                   },
+                   {
+                       "slug":  "st-clair-superior",
+                       "name":  "St Clair Superior",
+                       "page":  "plumber-st-clair-superior-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "St Clair Superior OH community events",
+                       "news_query":  "St Clair Superior OH local news"
+                   },
+                   {
+                       "slug":  "stockyards",
+                       "name":  "Stockyards",
+                       "page":  "plumber-stockyards-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Stockyards OH community events",
+                       "news_query":  "Stockyards OH local news"
+                   },
+                   {
+                       "slug":  "strongsville",
+                       "name":  "Strongsville",
+                       "page":  "plumber-strongsville-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Strongsville OH community events",
+                       "news_query":  "Strongsville OH local news"
+                   },
+                   {
+                       "slug":  "tremont",
+                       "name":  "Tremont",
+                       "page":  "plumber-tremont-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Tremont OH community events",
+                       "news_query":  "Tremont OH local news"
+                   },
+                   {
+                       "slug":  "twinsburg",
+                       "name":  "Twinsburg",
+                       "page":  "plumber-twinsburg-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Twinsburg OH community events",
+                       "news_query":  "Twinsburg OH local news"
+                   },
+                   {
+                       "slug":  "university-circle",
+                       "name":  "University Circle",
+                       "page":  "plumber-university-circle-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "University Circle OH community events",
+                       "news_query":  "University Circle OH local news"
+                   },
+                   {
+                       "slug":  "university-heights",
+                       "name":  "University Heights",
+                       "page":  "plumber-university-heights-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "University Heights OH community events",
+                       "news_query":  "University Heights OH local news"
+                   },
+                   {
+                       "slug":  "valley-view",
+                       "name":  "Valley View",
+                       "page":  "plumber-valley-view-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Valley View OH community events",
+                       "news_query":  "Valley View OH local news"
+                   },
+                   {
+                       "slug":  "vermilion",
+                       "name":  "Vermilion",
+                       "page":  "plumber-vermilion-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Vermilion OH community events",
+                       "news_query":  "Vermilion OH local news"
+                   },
+                   {
+                       "slug":  "wadsworth",
+                       "name":  "Wadsworth",
+                       "page":  "plumber-wadsworth-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Wadsworth OH community events",
+                       "news_query":  "Wadsworth OH local news"
+                   },
+                   {
+                       "slug":  "waite-hill",
+                       "name":  "Waite Hill",
+                       "page":  "plumber-waite-hill-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Waite Hill OH community events",
+                       "news_query":  "Waite Hill OH local news"
+                   },
+                   {
+                       "slug":  "walton-hills",
+                       "name":  "Walton Hills",
+                       "page":  "plumber-walton-hills-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Walton Hills OH community events",
+                       "news_query":  "Walton Hills OH local news"
+                   },
+                   {
+                       "slug":  "warrensville-heights",
+                       "name":  "Warrensville Heights",
+                       "page":  "plumber-warrensville-heights-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Warrensville Heights OH community events",
+                       "news_query":  "Warrensville Heights OH local news"
+                   },
+                   {
+                       "slug":  "westlake",
+                       "name":  "Westlake",
+                       "page":  "plumber-westlake-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Westlake OH community events",
+                       "news_query":  "Westlake OH local news"
+                   },
+                   {
+                       "slug":  "west-park",
+                       "name":  "West Park",
+                       "page":  "plumber-west-park-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "West Park OH community events",
+                       "news_query":  "West Park OH local news"
+                   },
+                   {
+                       "slug":  "wickliffe",
+                       "name":  "Wickliffe",
+                       "page":  "plumber-wickliffe-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Wickliffe OH community events",
+                       "news_query":  "Wickliffe OH local news"
+                   },
+                   {
+                       "slug":  "willoughby",
+                       "name":  "Willoughby",
+                       "page":  "plumber-willoughby-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Willoughby OH community events",
+                       "news_query":  "Willoughby OH local news"
+                   },
+                   {
+                       "slug":  "willowick",
+                       "name":  "Willowick",
+                       "page":  "plumber-willowick-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Willowick OH community events",
+                       "news_query":  "Willowick OH local news"
+                   },
+                   {
+                       "slug":  "woodmere",
+                       "name":  "Woodmere",
+                       "page":  "plumber-woodmere-oh/index.html",
+                       "state":  "OH",
+                       "event_query":  "Woodmere OH community events",
+                       "news_query":  "Woodmere OH local news"
+                   }
+               ]
 }

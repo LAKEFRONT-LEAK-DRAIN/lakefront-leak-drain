@@ -33,4 +33,4 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "Auto: refresh local city update sections"
-          file_pattern: "plumber-lakewood-oh/index.html plumber-rocky-river-oh/index.html plumber-parma-oh/index.html"
+          file_pattern: "plumber-*-oh/index.html"

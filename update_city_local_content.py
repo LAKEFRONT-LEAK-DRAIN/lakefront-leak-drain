@@ -16,13 +16,75 @@ ROOT = Path(__file__).resolve().parent
 CONFIG_PATH = ROOT / "city_local_updates.json"
 LOCAL_UPDATE_START = "<!-- LOCAL_UPDATE_START -->"
 LOCAL_UPDATE_END = "<!-- LOCAL_UPDATE_END -->"
+GEOCODE_ENDPOINT = "https://geocoding-api.open-meteo.com/v1/search"
 MIN_EVENT_ITEMS = 1
 MIN_NEWS_ITEMS = 1
+COORD_CACHE: dict[str, tuple[float, float]] = {}
+
+
+def slug_to_name(slug: str) -> str:
+    parts = [p for p in slug.split("-") if p]
+    return " ".join(part[:1].upper() + part[1:] for part in parts)
 
 
 def load_config() -> list[dict[str, Any]]:
     payload = json.loads(CONFIG_PATH.read_text(encoding="utf-8"))
-    return payload.get("cities", [])
+    cities = payload.get("cities", [])
+    normalized: list[dict[str, Any]] = []
+
+    for city in cities:
+        slug = city.get("slug", "").strip()
+        name = (city.get("name") or "").strip() or slug_to_name(slug)
+        city["name"] = name
+
+        if not city.get("event_query"):
+            city["event_query"] = f"{name} OH community events"
+
+        if not city.get("news_query"):
+            city["news_query"] = f"{name} OH local news"
+
+        normalized.append(city)
+
+    return normalized
+
+
+def resolve_coordinates(city: dict[str, Any]) -> tuple[float, float] | None:
+    if city.get("lat") is not None and city.get("lon") is not None:
+        return float(city["lat"]), float(city["lon"])
+
+    cache_key = city.get("slug") or city.get("name") or city.get("page", "")
+    if cache_key in COORD_CACHE:
+        return COORD_CACHE[cache_key]
+
+    city_name = city.get("name", "")
+    if not city_name:
+        return None
+
+    params = {
+        "name": city_name,
+        "count": 10,
+        "language": "en",
+        "format": "json",
+    }
+    response = requests.get(GEOCODE_ENDPOINT, params=params, timeout=20)
+    response.raise_for_status()
+    results = response.json().get("results", [])
+
+    state = (city.get("state") or "OH").upper()
+
+    for result in results:
+        admin1 = (result.get("admin1") or "").strip().lower()
+        country = (result.get("country_code") or "").strip().upper()
+        if country != "US":
+            continue
+        if state == "OH" and admin1 != "ohio":
+            continue
+
+        coords = (float(result["latitude"]), float(result["longitude"]))
+        COORD_CACHE[cache_key] = coords
+        return coords
+
+    return None
 
 
 def normalize_text(value: str) -> str:
@@ -53,10 +115,14 @@ def seasonal_tip(city_name: str, month: int) -> str:
 
 
 def fetch_weather(city: dict[str, Any]) -> dict[str, Any]:
+    coords = resolve_coordinates(city)
+    if not coords:
+        return {}
+
     endpoint = "https://api.open-meteo.com/v1/forecast"
     params = {
-        "latitude": city["lat"],
-        "longitude": city["lon"],
+        "latitude": coords[0],
+        "longitude": coords[1],
         "daily": "temperature_2m_max,temperature_2m_min,precipitation_probability_max",
         "timezone": "America/New_York",
         "forecast_days": 5,
