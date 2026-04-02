@@ -249,6 +249,28 @@ def build_local_update_html(city: dict[str, Any], weather: dict[str, Any], event
     )
 
 
+def build_fallback_local_update_html(city: dict[str, Any], reason: str) -> str:
+    today = datetime.now(timezone.utc).astimezone().date()
+    pretty_date = today.strftime("%B %d, %Y")
+    tip = seasonal_tip(city["name"], today.month)
+
+    return (
+        '<div class="card" style="margin-top:16px">'
+        f"<h3>Local update for {escape(city['name'])}</h3>"
+        f"<p class=\"mini\">Updated {escape(pretty_date)}. Full data feeds were limited in this cycle.</p>"
+        '<div class="grid" style="margin-top:10px">'
+        '<div class="card"><h3>Seasonal plumbing tip</h3>'
+        f'<p class="mini">{escape(tip)}</p>'
+        '</div>'
+        '<div class="card"><h3>Update status</h3>'
+        f'<p class="mini">Automated city update is active. Source refresh reason: {escape(reason)}.</p>'
+        '</div>'
+        '</div>'
+        '<p class="mini" style="margin-top:10px">This section will auto-refresh when complete weather/news/event data is available.</p>'
+        '</div>'
+    )
+
+
 def quality_passes(weather: dict[str, Any], events: list[dict[str, str]], news: list[dict[str, str]]) -> tuple[bool, str]:
     has_weather = bool(weather) and (
         weather.get("max_high") is not None
@@ -296,6 +318,13 @@ def upsert_local_update(page_path: Path, content: str) -> bool:
     return True
 
 
+def page_has_local_update(page_path: Path) -> bool:
+    if not page_path.exists():
+        return False
+    html = page_path.read_text(encoding="utf-8")
+    return LOCAL_UPDATE_START in html and LOCAL_UPDATE_END in html
+
+
 def main() -> None:
     cities = load_config()
     changed_pages = 0
@@ -305,6 +334,7 @@ def main() -> None:
         weather = {}
         events: list[dict[str, str]] = []
         news: list[dict[str, str]] = []
+        page = ROOT / city["page"]
 
         try:
             weather = fetch_weather(city)
@@ -323,12 +353,22 @@ def main() -> None:
 
         ok, reason = quality_passes(weather, events, news)
         if not ok:
-            skipped_pages += 1
-            print(f"Skipped local section: {city['page']} ({reason})")
+            # For first-time rollout, ensure every city page gets a local section,
+            # even when feeds are temporarily sparse.
+            if not page_has_local_update(page):
+                fallback_block = build_fallback_local_update_html(city, reason)
+                changed = upsert_local_update(page, fallback_block)
+                if changed:
+                    changed_pages += 1
+                    print(f"Inserted fallback local section: {city['page']} ({reason})")
+                else:
+                    print(f"No content change (fallback): {city['page']}")
+            else:
+                skipped_pages += 1
+                print(f"Skipped local section: {city['page']} ({reason})")
             continue
 
         block = build_local_update_html(city, weather, events, news)
-        page = ROOT / city["page"]
         changed = upsert_local_update(page, block)
         if changed:
             changed_pages += 1
