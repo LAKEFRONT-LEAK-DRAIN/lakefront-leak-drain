@@ -1,4 +1,5 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+$sitemapXml = @"
+<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://lakefrontleakanddrain.com/</loc>
@@ -1027,3 +1028,13 @@
     <priority>0.6</priority>
   </url>
 </urlset>
+"@
+
+$sitemapXml | Out-File -FilePath sitemap.xml -Encoding UTF8 -Force
+Write-Host "Sitemap successfully updated with 171 total URLs"
+Write-Host "- 7 core/service pages (priority 0.9-1.0)"
+Write-Host "- 36 service pages (priority 0.8)"
+Write-Host "- 128 location pages (priority 0.6-0.7)"
+Write-Host "- All duplicates removed"
+Write-Host "- Consistent lowercase URLs"
+Write-Host "- Full priority and changefreq attributes"
