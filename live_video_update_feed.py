@@ -675,7 +675,7 @@ def generate_gemini_video_asset(title, description, cta, slug):
     output_path = GENERATED_VIDEO_DIR / filename
     generated_video.video.save(str(output_path))
 
-    return f"{GENERATED_VIDEO_URL_PREFIX}/{filename}", "https://lakefrontleakanddrain.com/logo.jpg"
+    return f"{GENERATED_VIDEO_URL_PREFIX}/{filename}", ""
 
 
 def get_video_url(title, search_keyword, recent_video_ids=None, description="", cta=""):
@@ -691,7 +691,7 @@ def get_video_url(title, search_keyword, recent_video_ids=None, description="", 
             return gemini_video_url, gemini_thumb_url
         except Exception as e:
             print(f"Gemini video generation failed, using default fallback video: {e}")
-            return DEFAULT_VIDEO, build_thumbnail_url(DEFAULT_VIDEO)
+            return DEFAULT_VIDEO, ""
 
     if ENFORCE_TEXT_VIDEO_ALIGNMENT:
         alignment_queries = generate_alignment_queries(title, description, cta, search_keyword)
@@ -806,9 +806,7 @@ def generate_video_page(title, slug, description_text, video_url, thumb_url):
     safe_desc = html_escape(description_text)
     safe_video = html_escape(video_url)
     
-    # Build thumbnail URL if not provided
-    if not thumb_url:
-        thumb_url = build_thumbnail_url(video_url)
+    thumb_url = (thumb_url or "").strip()
     safe_thumb = html_escape(thumb_url)
 
     og_image_tag = f'<meta property="og:image" content="{safe_thumb}">' if safe_thumb else ""
@@ -963,7 +961,6 @@ def build_item_xml(title, description_text, video_url, post_link):
     safe_video = escape(video_url)
     safe_post_link = escape(post_link)
     media_length = fetch_media_length(video_url)
-    thumbnail_url = escape(build_thumbnail_url(video_url))
     content_encoded = build_content_encoded(description_text, post_link, video_url)
 
     return f"""    <item>
@@ -975,8 +972,7 @@ def build_item_xml(title, description_text, video_url, post_link):
       <description><![CDATA[{description_text}]]></description>
             <content:encoded>{content_encoded}</content:encoded>
       <enclosure url=\"{safe_video}\" length=\"{media_length}\" type=\"video/mp4\" />
-            <media:content url=\"{safe_video}\" fileSize=\"{media_length}\" medium=\"video\" type=\"video/mp4\" />
-            <media:thumbnail url=\"{thumbnail_url}\" />
+                <media:content url=\"{safe_video}\" fileSize=\"{media_length}\" medium=\"video\" type=\"video/mp4\" />
     </item>"""
 
 
