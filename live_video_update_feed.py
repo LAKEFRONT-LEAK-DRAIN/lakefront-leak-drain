@@ -801,10 +801,6 @@ def build_item_xml(title, description_text, video_url, post_link):
 
     safe_title = escape(title)
     safe_video = escape(video_url)
-    
-    # Generate thumbnail URL from video URL
-    thumbnail_url = video_url.replace("_medium.mp4", "_medium.jpg").replace(".mp4", ".jpg")
-    safe_thumbnail = escape(thumbnail_url)
 
     return f"""    <item>
       <title>{safe_title}</title>
@@ -813,8 +809,6 @@ def build_item_xml(title, description_text, video_url, post_link):
       <pubDate>{pub_date}</pubDate>
       <description><![CDATA[{description_text}]]></description>
       <enclosure url=\"{safe_video}\" length=\"0\" type=\"video/mp4\" />
-      <media:content url=\"{safe_video}\" type=\"video/mp4\" />
-      <media:thumbnail url=\"{safe_thumbnail}\" />
     </item>"""
 
 

@@ -5,7 +5,6 @@
     xmlns:wfw="http://wellformedweb.org/CommentAPI/"
     xmlns:dc="http://purl.org/dc/elements/1.1/"
     xmlns:wp="http://wordpress.org/export/1.2/"
-    xmlns:media="http://search.yahoo.com/mrss/"
 >
 
 <channel>
@@ -36,8 +35,6 @@
     <pubDate>Fri, 03 Apr 2026 11:32:10 GMT</pubDate>
     <description><![CDATA[Extreme rainfall events, often called 'rain bombs,' can severely test Cleveland's aging infrastructure. Learn critical steps to protect your sewer line and prevent costly basement backups. Watch now for essential prep tips!]]></description>
     <enclosure url="https://cdn.pixabay.com/video/2024/04/29/209973_medium.mp4" length="0" type="video/mp4" />
-    <media:content url="https://cdn.pixabay.com/video/2024/04/29/209973_medium.mp4" type="video/mp4" />
-    <media:thumbnail url="https://cdn.pixabay.com/video/2024/04/29/209973_medium.jpg" />
     </item>
 
     <item>
@@ -47,8 +44,6 @@
     <pubDate>Fri, 03 Apr 2026 11:26:05 GMT</pubDate>
     <description><![CDATA[Cleveland often sees heavy rainfall that can lead to stressful basement backups. Learn practical tips to protect your home from water damage. Watch the video for essential tips!]]></description>
     <enclosure url="https://cdn.pixabay.com/video/2025/10/24/311710_medium.mp4" length="0" type="video/mp4" />
-    <media:content url="https://cdn.pixabay.com/video/2025/10/24/311710_medium.mp4" type="video/mp4" />
-    <media:thumbnail url="https://cdn.pixabay.com/video/2025/10/24/311710_medium.jpg" />
     </item>
 
     <item>
@@ -56,8 +51,6 @@
     <link>https://lakefrontleakanddrain.com/live-video/cleveland-downpour-is-your-sump-pump-toast.html</link>
     <guid isPermaLink="false">lakefrontleakanddrain.com/live-video/20260403111809</guid>
     <pubDate>Fri, 03 Apr 2026 11:18:09 GMT</pubDate>
-    <media:content url="https://cdn.pixabay.com/video/2025/06/16/286152_medium.mp4" type="video/mp4" />
-    <media:thumbnail url="https://cdn.pixabay.com/video/2025/06/16/286152_medium.jpg" />
     <description><![CDATA[Heavy rains just hit Cleveland, putting every homeowner's sump pump to the test. Learn to spot the signs of failure before your basement floods. Watch now to protect your home!]]></description>
     <enclosure url="https://cdn.pixabay.com/video/2025/06/16/286152_medium.mp4" length="0" type="video/mp4" />
     </item>
@@ -67,8 +60,6 @@
     <link>https://lakefrontleakanddrain.com/live-video/cleveland-gurgling-drains-mean-sewer-trouble.html</link>
     <guid isPermaLink="false">lakefrontleakanddrain.com/live-video/20260403110727</guid>
     <pubDate>Fri, 03 Apr 2026 11:07:27 GMT</pubDate>
-    <media:content url="https://cdn.pixabay.com/video/2016/08/10/4344-178324620_medium.mp4" type="video/mp4" />
-    <media:thumbnail url="https://cdn.pixabay.com/video/2016/08/10/4344-178324620_medium.jpg" />
     <description><![CDATA[Hearing gurgling sounds from your drains can signal a serious sewer blockage. Learn why your Cleveland home's sewer system might be struggling and what to do next. Watch now to protect your home.]]></description>
     <enclosure url="https://cdn.pixabay.com/video/2016/08/10/4344-178324620_medium.mp4" length="0" type="video/mp4" />
     </item>
