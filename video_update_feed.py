@@ -459,6 +459,17 @@ def make_description(description, cta):
     return f"{description} {cta}".strip()
 
 
+def fetch_media_length(video_url):
+    try:
+        response = requests.head(video_url, allow_redirects=True, timeout=20)
+        content_length = response.headers.get("Content-Length", "").strip()
+        if content_length.isdigit():
+            return content_length
+    except requests.RequestException:
+        pass
+    return "0"
+
+
 def build_item_xml(title, description_text, video_url, post_link):
     now = datetime.now(timezone.utc)
     pub_date = now.strftime("%a, %d %b %Y %H:%M:%S GMT")
@@ -466,6 +477,7 @@ def build_item_xml(title, description_text, video_url, post_link):
 
     safe_title = escape(title)
     safe_video = escape(video_url)
+    media_length = fetch_media_length(video_url)
 
     return f"""    <item>
       <title>{safe_title}</title>
@@ -473,7 +485,7 @@ def build_item_xml(title, description_text, video_url, post_link):
       <guid isPermaLink=\"false\">{guid}</guid>
       <pubDate>{pub_date}</pubDate>
       <description><![CDATA[{description_text}]]></description>
-      <enclosure url=\"{safe_video}\" length=\"0\" type=\"video/mp4\" />
+      <enclosure url=\"{safe_video}\" length=\"{media_length}\" type=\"video/mp4\" />
     </item>"""
 
 
