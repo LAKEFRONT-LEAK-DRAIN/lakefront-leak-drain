@@ -535,10 +535,10 @@ def build_item_xml(title, description_text, video_url, post_link):
 
     safe_title = escape(title)
     safe_video = escape(video_url)
-        safe_post_link = escape(post_link)
+    safe_post_link = escape(post_link)
     media_length = fetch_media_length(video_url)
-        thumbnail_url = escape(build_thumbnail_url(video_url))
-        content_encoded = build_content_encoded(description_text, post_link, video_url)
+    thumbnail_url = escape(build_thumbnail_url(video_url))
+    content_encoded = build_content_encoded(description_text, post_link, video_url)
 
     return f"""    <item>
             <title><![CDATA[{title}]]></title>
