@@ -25,6 +25,8 @@ MAX_ITEMS = 20
 RECENT_TITLE_LOOKBACK = 12
 RECENT_VIDEO_LOOKBACK = 12
 ALLOW_PEXELS_FALLBACK = os.environ.get("ALLOW_PEXELS_FALLBACK", "false").strip().lower() == "true"
+MAX_VIDEO_WIDTH = int(os.environ.get("MAX_VIDEO_WIDTH", "1920"))
+REQUIRE_VERTICAL_VIDEO = os.environ.get("REQUIRE_VERTICAL_VIDEO", "true").strip().lower() == "true"
 
 PLUMBING_TERMS = [
     "drain",
@@ -178,6 +180,25 @@ def is_likely_non_plumbing(video_tags):
     return any(bad in tags_lower for bad in BAD_VIDEO_KEYWORDS)
 
 
+def is_platform_safe_video(width, height):
+    try:
+        video_width = int(width or 0)
+        video_height = int(height or 0)
+    except (TypeError, ValueError):
+        return False
+
+    if video_width <= 0 or video_height <= 0:
+        return False
+
+    if video_width > MAX_VIDEO_WIDTH:
+        return False
+
+    if REQUIRE_VERTICAL_VIDEO and video_height <= video_width:
+        return False
+
+    return True
+
+
 def fetch_pexels_video_candidates(query):
     headers = {"Authorization": os.environ["PEXELS_API_KEY"]}
     resp = requests.get(
@@ -204,6 +225,8 @@ def fetch_pexels_video_candidates(query):
         
         for vf in v.get("video_files") or []:
             if vf.get("file_type") == "video/mp4" and vf.get("link"):
+                if not is_platform_safe_video(vf.get("width") or v.get("width"), vf.get("height") or v.get("height")):
+                    continue
                 candidates.append(
                     {
                         "video_url": vf.get("link"),
@@ -250,6 +273,8 @@ def fetch_pixabay_video_candidates(query):
         for quality_key in ["medium", "small", "large"]:
             video_data = videos_obj.get(quality_key)
             if video_data and video_data.get("url"):
+                if not is_platform_safe_video(video_data.get("width"), video_data.get("height")):
+                    continue
                 candidates.append(
                     {
                         "video_url": video_data.get("url"),
