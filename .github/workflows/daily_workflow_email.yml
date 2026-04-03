@@ -1,0 +1,148 @@
+name: Daily Workflow Email Notice
+
+on:
+  schedule:
+    # Run in both DST and standard-time UTC offsets, then gate to 06:15 America/New_York.
+    - cron: '15 10,11 * * *'
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  email-daily-status:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check 6:15 AM ET window
+        id: report_window
+        run: |
+          if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then
+            echo "should_run=true" >> "$GITHUB_OUTPUT"
+          else
+            current_hour=$(TZ=America/New_York date +%H)
+            current_minute=$(TZ=America/New_York date +%M)
+            if [ "$current_hour" = "06" ] && [ "$current_minute" = "15" ]; then
+              echo "should_run=true" >> "$GITHUB_OUTPUT"
+            else
+              echo "should_run=false" >> "$GITHUB_OUTPUT"
+            fi
+          fi
+
+      - name: Build workflow status report
+        if: steps.report_window.outputs.should_run == 'true'
+        id: build_report
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+
+            const workflowResp = await github.rest.actions.listRepoWorkflows({
+              owner,
+              repo,
+              per_page: 100
+            });
+            const workflows = workflowResp.data.workflows || [];
+
+            const etDateFormatter = new Intl.DateTimeFormat('en-CA', {
+              timeZone: 'America/New_York',
+              year: 'numeric',
+              month: '2-digit',
+              day: '2-digit'
+            });
+
+            const etTimeFormatter = new Intl.DateTimeFormat('en-US', {
+              timeZone: 'America/New_York',
+              hour: '2-digit',
+              minute: '2-digit',
+              second: '2-digit',
+              hour12: false
+            });
+
+            const toEtDate = (iso) => etDateFormatter.format(new Date(iso));
+            const toEtTime = (iso) => etTimeFormatter.format(new Date(iso));
+            const todayEt = etDateFormatter.format(new Date());
+
+            const lines = [];
+            const statuses = [];
+
+            for (const wf of workflows) {
+              if (!wf.path || !wf.path.endsWith('.yml')) {
+                continue;
+              }
+
+              try {
+                const runsResp = await github.rest.actions.listWorkflowRuns({
+                  owner,
+                  repo,
+                  workflow_id: wf.id,
+                  branch: 'main',
+                  per_page: 20
+                });
+
+                const todayRun = runsResp.data.workflow_runs.find((run) => toEtDate(run.created_at) === todayEt);
+
+                if (!todayRun) {
+                  statuses.push('not_run');
+                  lines.push(`- ${wf.name}: NOT RUN today (${todayEt} ET)`);
+                  continue;
+                }
+
+                const createdEt = `${todayEt} ${toEtTime(todayRun.created_at)} ET`;
+                const runUrl = todayRun.html_url;
+                const eventName = todayRun.event;
+
+                if (todayRun.status !== 'completed') {
+                  statuses.push('in_progress');
+                  lines.push(`- ${wf.name}: IN PROGRESS (${eventName}) at ${createdEt}`);
+                  lines.push(`  Run: ${runUrl}`);
+                } else if (todayRun.conclusion === 'success') {
+                  statuses.push('ran');
+                  lines.push(`- ${wf.name}: RAN (${eventName}, success) at ${createdEt}`);
+                  lines.push(`  Run: ${runUrl}`);
+                } else if (todayRun.conclusion === 'skipped') {
+                  statuses.push('skipped');
+                  lines.push(`- ${wf.name}: TRIGGERED but SKIPPED (${eventName}) at ${createdEt}`);
+                  lines.push(`  Run: ${runUrl}`);
+                } else {
+                  statuses.push('failed');
+                  lines.push(`- ${wf.name}: FAILED (${eventName}, ${todayRun.conclusion}) at ${createdEt}`);
+                  lines.push(`  Run: ${runUrl}`);
+                }
+              } catch (error) {
+                statuses.push('error');
+                lines.push(`- ${wf.name || wf.path || 'Unknown workflow'}: ERROR while checking status: ${error.message}`);
+              }
+            }
+
+            const allRan = statuses.length > 0 && statuses.every((s) => s === 'ran');
+            const anyProblems = statuses.some((s) => ['not_run', 'failed', 'error'].includes(s));
+            const summary = allRan
+              ? 'ALL RAN'
+              : (anyProblems ? 'ATTENTION NEEDED' : 'CHECK DETAILS');
+
+            const body = [
+              `Daily workflow check for ${todayEt} (America/New_York).`,
+              '',
+              ...lines,
+              '',
+              `Repository: ${owner}/${repo}`
+            ].join('\n');
+
+            core.setOutput('subject', `[Lakefront Daily Workflow Check] ${todayEt} - ${summary}`);
+            core.setOutput('body', body);
+
+      - name: Send status email
+        if: steps.report_window.outputs.should_run == 'true'
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: ${{ secrets.SMTP_SERVER }}
+          server_port: ${{ secrets.SMTP_PORT }}
+          username: ${{ secrets.SMTP_USERNAME }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          subject: ${{ steps.build_report.outputs.subject }}
+          to: ${{ secrets.ALERT_EMAIL_TO }}
+          from: ${{ secrets.ALERT_EMAIL_FROM }}
+          body: ${{ steps.build_report.outputs.body }}
