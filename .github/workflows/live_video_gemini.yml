@@ -41,6 +41,10 @@ jobs:
           PIXABAY_API_KEY: ${{ secrets.PIXABAY_API_KEY }}
           ALLOW_PEXELS_FALLBACK: 'true'
           ENFORCE_TEXT_VIDEO_ALIGNMENT: 'true'
+          USE_GEMINI_GENERATED_VIDEO: 'true'
+          GEMINI_VIDEO_MODEL: 'veo-3.1-generate-preview'
+          GEMINI_VIDEO_ASPECT_RATIO: '9:16'
+          GEMINI_VIDEO_RESOLUTION: '720p'
           VIDEO_FEED_FILE: Live_Video_Feed.xml
           VIDEO_PAGE_DIR: live-video
         run: python live_video_update_feed.py

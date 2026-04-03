@@ -2,6 +2,7 @@
 import random
 import re
 import json
+import time
 from datetime import datetime, timezone
 from email.utils import parsedate_to_datetime
 from html import escape as html_escape
@@ -10,6 +11,7 @@ from xml.sax.saxutils import escape
 
 import requests
 from google import genai
+from google.genai import types
 
 client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
 
@@ -32,11 +34,18 @@ ENFORCE_TEXT_VIDEO_ALIGNMENT = os.environ.get("ENFORCE_TEXT_VIDEO_ALIGNMENT", "t
 ALIGNMENT_MAX_CANDIDATES = 18
 MAX_VIDEO_WIDTH = int(os.environ.get("MAX_VIDEO_WIDTH", "1920"))
 REQUIRE_VERTICAL_VIDEO = os.environ.get("REQUIRE_VERTICAL_VIDEO", "true").strip().lower() == "true"
+USE_GEMINI_GENERATED_VIDEO = os.environ.get("USE_GEMINI_GENERATED_VIDEO", "false").strip().lower() == "true"
+GEMINI_VIDEO_MODEL = os.environ.get("GEMINI_VIDEO_MODEL", "veo-3.1-generate-preview").strip() or "veo-3.1-generate-preview"
+GEMINI_VIDEO_ASPECT_RATIO = os.environ.get("GEMINI_VIDEO_ASPECT_RATIO", "9:16").strip() or "9:16"
+GEMINI_VIDEO_RESOLUTION = os.environ.get("GEMINI_VIDEO_RESOLUTION", "720p").strip() or "720p"
+GENERATED_VIDEO_SUBDIR = os.environ.get("GENERATED_VIDEO_SUBDIR", "generated").strip() or "generated"
 
 CLEVELAND_LAT = 41.4993
 CLEVELAND_LON = -81.6944
 FORECAST_DAYS = 5
 OPEN_METEO_URL = "https://api.open-meteo.com/v1/forecast"
+GENERATED_VIDEO_DIR = BASE_DIR / VIDEO_PAGE_DIR / GENERATED_VIDEO_SUBDIR
+GENERATED_VIDEO_URL_PREFIX = f"{SITE_BASE_URL}/{VIDEO_PAGE_DIR}/{GENERATED_VIDEO_SUBDIR}"
 
 PLUMBING_TERMS = [
     "drain",
@@ -621,11 +630,68 @@ Use the candidate number only.
     return random.choice(shortlist)
 
 
+def build_gemini_video_prompt(title, description, cta):
+    prompt_parts = [
+        "Create a realistic short social video for a Cleveland plumbing company.",
+        f"Topic: {title}.",
+        f"Message: {description} {cta}".strip(),
+        "Show a believable residential plumbing scene that matches the topic, such as a sump pump, drain, sewer line, leaking pipe, sink, faucet, basement water, utility room, or bathroom fixture.",
+        "Style: realistic, clean, professional, homeowner-friendly, vertical short-form social media clip.",
+        "Composition: portrait framing, clear subject, smooth camera movement, no split screen.",
+        "Avoid text overlays, subtitles, logos, watermarks, brand names, and UI elements.",
+    ]
+    return " ".join(part for part in prompt_parts if part)
+
+
+def generate_gemini_video_asset(title, description, cta, slug):
+    GENERATED_VIDEO_DIR.mkdir(parents=True, exist_ok=True)
+    prompt = build_gemini_video_prompt(title, description, cta)
+
+    config = types.GenerateVideosConfig(
+        aspect_ratio=GEMINI_VIDEO_ASPECT_RATIO,
+        resolution=GEMINI_VIDEO_RESOLUTION,
+    )
+
+    operation = client.models.generate_videos(
+        model=GEMINI_VIDEO_MODEL,
+        prompt=prompt,
+        config=config,
+    )
+
+    while not operation.done:
+        print("Waiting for Gemini video generation to complete...")
+        time.sleep(10)
+        operation = client.operations.get(operation)
+
+    response = getattr(operation, "response", None)
+    generated_videos = getattr(response, "generated_videos", None) or []
+    if not generated_videos:
+        raise RuntimeError("Gemini video generation completed without a video result")
+
+    generated_video = generated_videos[0]
+    client.files.download(file=generated_video.video)
+
+    filename = f"{slug}-{datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S')}.mp4"
+    output_path = GENERATED_VIDEO_DIR / filename
+    generated_video.video.save(str(output_path))
+
+    return f"{GENERATED_VIDEO_URL_PREFIX}/{filename}", "https://lakefrontleakanddrain.com/logo.jpg"
+
+
 def get_video_url(title, search_keyword, recent_video_ids=None, description="", cta=""):
     video_url = DEFAULT_VIDEO
     thumb_url = ""
     queries = build_video_queries(title, search_keyword)
     recent_video_ids = recent_video_ids or set()
+
+    if USE_GEMINI_GENERATED_VIDEO:
+        try:
+            gemini_video_url, gemini_thumb_url = generate_gemini_video_asset(title, description, cta, create_slug(title))
+            print("Video generated with Gemini Veo")
+            return gemini_video_url, gemini_thumb_url
+        except Exception as e:
+            print(f"Gemini video generation failed, using default fallback video: {e}")
+            return DEFAULT_VIDEO, build_thumbnail_url(DEFAULT_VIDEO)
 
     if ENFORCE_TEXT_VIDEO_ALIGNMENT:
         alignment_queries = generate_alignment_queries(title, description, cta, search_keyword)
@@ -1072,6 +1138,29 @@ def write_feed(feed_text):
     with open(VIDEO_FEED_PATH, "w", encoding="utf-8") as f:
         f.write(final_text)
 
+    return final_text
+
+
+def cleanup_generated_video_assets(feed_text):
+    if not GENERATED_VIDEO_DIR.exists():
+        return
+
+    referenced_names = set()
+    for item in extract_items(feed_text):
+        video_url = extract_enclosure_url(item)
+        if not video_url or not video_url.startswith(GENERATED_VIDEO_URL_PREFIX + "/"):
+            continue
+        referenced_names.add(video_url.rsplit("/", 1)[-1])
+
+    for video_path in GENERATED_VIDEO_DIR.glob("*.mp4"):
+        if video_path.name in referenced_names:
+            continue
+        try:
+            video_path.unlink()
+            print(f"Removed unreferenced generated video asset: {video_path.name}")
+        except OSError as e:
+            print(f"Could not remove stale generated video asset {video_path.name}: {e}")
+
 
 def main():
     with open(VIDEO_FEED_PATH, "r", encoding="utf-8") as f:
@@ -1119,7 +1208,8 @@ def main():
 
     header, items_blob, footer = split_feed(feed)
     updated_feed = header + new_item + "\n\n" + items_blob.lstrip() + footer
-    write_feed(updated_feed)
+    final_feed = write_feed(updated_feed)
+    cleanup_generated_video_assets(final_feed)
 
     print(f"Added new video item at top: {final_title}")
 
