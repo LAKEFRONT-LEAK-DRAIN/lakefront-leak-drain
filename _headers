@@ -18,3 +18,10 @@
   Access-Control-Allow-Methods: GET, OPTIONS
   Access-Control-Allow-Headers: *
   X-Content-Type-Options: nosniff
+
+/live-video-feed.xml
+  Content-Type: application/rss+xml; charset=UTF-8
+  Access-Control-Allow-Origin: *
+  Access-Control-Allow-Methods: GET, OPTIONS
+  Access-Control-Allow-Headers: *
+  X-Content-Type-Options: nosniff
