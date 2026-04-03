@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:media="http://search.yahoo.com/mrss/">
+  <channel>
+    <title>Lakefront Metricool Test Feed</title>
+    <link>https://lakefrontleakanddrain.com/</link>
+    <description>Minimal RSS test feed for Metricool import</description>
+    <language>en-us</language>
+    <item>
+      <title>Metricool Test Item 1</title>
+      <link>https://lakefrontleakanddrain.com/live-video/cleveland-homeowners-avoid-burst-pipes-this-april.html</link>
+      <guid isPermaLink="false">metricool-test-1</guid>
+      <pubDate>Fri, 03 Apr 2026 22:30:00 GMT</pubDate>
+      <description>Minimal test item to validate Metricool RSS ingestion.</description>
+      <enclosure url="https://lakefrontleakanddrain.com/live-video/generated/clevelands-april-plunge-prevent-burst-pipes-20260403164744.mp4" length="0" type="video/mp4" />
+      <media:content url="https://lakefrontleakanddrain.com/live-video/generated/clevelands-april-plunge-prevent-burst-pipes-20260403164744.mp4" medium="video" type="video/mp4" fileSize="0" />
+      <media:thumbnail url="https://lakefrontleakanddrain.com/blog/logo_tmp.jpg" />
+    </item>
+  </channel>
+</rss>
