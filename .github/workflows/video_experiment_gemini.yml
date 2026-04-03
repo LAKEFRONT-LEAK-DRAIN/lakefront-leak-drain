@@ -1,0 +1,72 @@
+name: Gemini Video Feed Experiment Updater
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update-video-feed-experiment:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.PAT_TOKEN }}
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: pip install google-genai requests
+
+      - name: Run experiment video feed updater
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
+          PIXABAY_API_KEY: ${{ secrets.PIXABAY_API_KEY }}
+          ALLOW_PEXELS_FALLBACK: 'true'
+          ENFORCE_TEXT_VIDEO_ALIGNMENT: 'true'
+          USE_GEMINI_GENERATED_VIDEO: 'true'
+          GEMINI_VIDEO_MODEL: 'veo-3.1-generate-preview'
+          GEMINI_VIDEO_ASPECT_RATIO: '9:16'
+          GEMINI_VIDEO_RESOLUTION: '720p'
+          VIDEO_FEED_FILE: video_feed_experiment.xml
+          VIDEO_PAGE_DIR: video
+        run: python video_experiment_update_feed.py
+
+      - name: Commit and push changes
+        run: |
+          if git diff --quiet && git diff --cached --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No staged changes to commit."
+            exit 0
+          fi
+
+          git commit -m "Auto: update experiment video RSS feed"
+
+          for attempt in 1 2 3; do
+            echo "Push attempt ${attempt}..."
+            git fetch origin main
+            git rebase origin/main
+            if git push origin HEAD:main; then
+              echo "Push succeeded."
+              exit 0
+            fi
+          done
+
+          echo "Push failed after 3 attempts."
+          exit 1
