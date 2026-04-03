@@ -27,6 +27,11 @@ ALLOW_PEXELS_FALLBACK = os.environ.get("ALLOW_PEXELS_FALLBACK", "false").strip()
 ENFORCE_TEXT_VIDEO_ALIGNMENT = os.environ.get("ENFORCE_TEXT_VIDEO_ALIGNMENT", "true").strip().lower() == "true"
 ALIGNMENT_MAX_CANDIDATES = 18
 
+CLEVELAND_LAT = 41.4993
+CLEVELAND_LON = -81.6944
+FORECAST_DAYS = 5
+OPEN_METEO_URL = "https://api.open-meteo.com/v1/forecast"
+
 PLUMBING_TERMS = [
     "drain",
     "sewer",
@@ -87,8 +92,164 @@ GOOD_VIDEO_KEYWORDS = {
 }
 
 
+def c_to_f(celsius):
+    return (celsius * 9.0 / 5.0) + 32.0
+
+
+def weather_code_label(code):
+    labels = {
+        0: "clear",
+        1: "mainly clear",
+        2: "partly cloudy",
+        3: "overcast",
+        45: "fog",
+        48: "depositing rime fog",
+        51: "light drizzle",
+        53: "moderate drizzle",
+        55: "dense drizzle",
+        56: "light freezing drizzle",
+        57: "dense freezing drizzle",
+        61: "slight rain",
+        63: "moderate rain",
+        65: "heavy rain",
+        66: "light freezing rain",
+        67: "heavy freezing rain",
+        71: "slight snow",
+        73: "moderate snow",
+        75: "heavy snow",
+        77: "snow grains",
+        80: "slight rain showers",
+        81: "moderate rain showers",
+        82: "violent rain showers",
+        85: "slight snow showers",
+        86: "heavy snow showers",
+        95: "thunderstorm",
+        96: "thunderstorm with slight hail",
+        99: "thunderstorm with heavy hail",
+    }
+    return labels.get(int(code), "mixed conditions")
+
+
+def fetch_cleveland_forecast():
+    params = {
+        "latitude": CLEVELAND_LAT,
+        "longitude": CLEVELAND_LON,
+        "timezone": "America/New_York",
+        "forecast_days": FORECAST_DAYS,
+        "daily": "weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,windspeed_10m_max",
+    }
+
+    resp = requests.get(OPEN_METEO_URL, params=params, timeout=20)
+    resp.raise_for_status()
+    data = resp.json()
+    daily = data.get("daily") or {}
+
+    dates = daily.get("time") or []
+    weather_codes = daily.get("weather_code") or []
+    temp_maxes = daily.get("temperature_2m_max") or []
+    temp_mins = daily.get("temperature_2m_min") or []
+    precip_sums = daily.get("precipitation_sum") or []
+    precip_probs = daily.get("precipitation_probability_max") or []
+    wind_maxes = daily.get("windspeed_10m_max") or []
+
+    days = []
+    for idx, date_str in enumerate(dates):
+        try:
+            days.append(
+                {
+                    "date": date_str,
+                    "code": float(weather_codes[idx]),
+                    "temp_max_c": float(temp_maxes[idx]),
+                    "temp_min_c": float(temp_mins[idx]),
+                    "precip_mm": float(precip_sums[idx]),
+                    "precip_prob": float(precip_probs[idx]),
+                    "wind_kmh": float(wind_maxes[idx]),
+                }
+            )
+        except Exception:
+            continue
+
+    return days
+
+
+def analyze_forecast_for_plumbing(days):
+    if not days:
+        return {
+            "has_substantial_event": False,
+            "event_notes": ["Forecast data unavailable."],
+            "day_lines": ["- Forecast unavailable; use seasonal evergreen plumbing topic."],
+        }
+
+    event_notes = []
+
+    heavy_rain_days = [d for d in days if d["precip_mm"] >= 19.0 or (d["precip_mm"] >= 12.0 and d["precip_prob"] >= 75.0)]
+    moderate_rain_days = [d for d in days if d["precip_mm"] >= 8.0 and d not in heavy_rain_days]
+    freezing_days = [d for d in days if d["temp_min_c"] <= 0.0]
+    freeze_thaw_days = [d for d in days if d["temp_min_c"] <= 0.0 and d["temp_max_c"] >= 4.0]
+    high_wind_days = [d for d in days if d["wind_kmh"] >= 45.0]
+
+    if heavy_rain_days:
+        event_notes.append("Heavy rain risk: prioritize sump pump, drainage, backups, and main line prevention.")
+    elif moderate_rain_days:
+        event_notes.append("Moderate rain risk: consider drain clogs, gutter/downspout tie-ins, and sump readiness.")
+
+    if freezing_days:
+        event_notes.append("Freeze risk: prioritize frozen pipes, hose bibs, and burst-pipe prevention.")
+
+    if freeze_thaw_days:
+        event_notes.append("Freeze-thaw swing: emphasize crack/leak checks and pipe stress points.")
+
+    if high_wind_days:
+        event_notes.append("High wind risk: include outage-prep messaging for sump pumps and basement water management.")
+
+    day_lines = []
+    for d in days:
+        max_f = round(c_to_f(d["temp_max_c"]))
+        min_f = round(c_to_f(d["temp_min_c"]))
+        day_lines.append(
+            f"- {d['date']}: {weather_code_label(d['code'])}, high {max_f}F, low {min_f}F, precip {d['precip_mm']:.1f} mm, precip chance {d['precip_prob']:.0f}%, wind {d['wind_kmh']:.0f} km/h"
+        )
+
+    has_substantial_event = bool(heavy_rain_days or freezing_days or freeze_thaw_days or high_wind_days)
+
+    if not event_notes:
+        event_notes.append("No strong weather trigger in next 5 days; pick seasonal evergreen prevention topic.")
+
+    return {
+        "has_substantial_event": has_substantial_event,
+        "event_notes": event_notes,
+        "day_lines": day_lines,
+    }
+
+
+def build_forecast_context_block():
+    try:
+        days = fetch_cleveland_forecast()
+        analysis = analyze_forecast_for_plumbing(days)
+    except Exception as e:
+        print(f"Forecast fetch failed: {e}")
+        return (
+            "Forecast unavailable due to API/network issue.\n"
+            "- Use seasonal Cleveland plumbing relevance as fallback.\n"
+            "- Do not invent weather claims."
+        )
+
+    event_text = "\n".join(f"- {note}" for note in analysis["event_notes"])
+    days_text = "\n".join(analysis["day_lines"]) or "- No day-level forecast data returned."
+    event_flag = "YES" if analysis["has_substantial_event"] else "NO"
+
+    return (
+        f"Substantial plumbing-relevant weather event in next 5 days: {event_flag}\n"
+        "Forecast analysis notes:\n"
+        f"{event_text}\n"
+        "Day-by-day forecast:\n"
+        f"{days_text}"
+    )
+
+
 def generate_topic(existing_titles):
     recent_titles_text = "\n".join(f"- {t}" for t in existing_titles[:RECENT_TITLE_LOOKBACK]) or "- None"
+    forecast_context = build_forecast_context_block()
 
     prompt = f"""
 Invent ONE strong short-form VIDEO topic for Lakefront Leak & Drain in Cleveland, Ohio.
@@ -96,9 +257,14 @@ Invent ONE strong short-form VIDEO topic for Lakefront Leak & Drain in Cleveland
 Avoid repeating or closely mimicking these recent titles:
 {recent_titles_text}
 
+Use this 5-day Cleveland weather context before deciding topic:
+{forecast_context}
+
 Rules:
 - Make it specific to homeowners, drains, sewer lines, leaks, sump pumps, frozen pipes, water heaters, inspections, backups, or plumbing emergencies.
 - Favor seasonal relevance for Cleveland.
+- If forecast indicates a substantial plumbing-relevant weather event, prioritize that event and create a prevention-focused topic tied to it.
+- If no substantial weather event is present, use a strong evergreen seasonal plumbing prevention topic.
 - Keep title concise and hooky for TikTok/Shorts.
 - Output ONLY this format:
 Title | video keyword
