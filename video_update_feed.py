@@ -12,6 +12,10 @@ from google import genai
 
 client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
 
+REQUEST_HEADERS = {
+    "User-Agent": "Mozilla/5.0 (compatible; LakefrontLeakDrainBot/1.0; +https://lakefrontleakanddrain.com)"
+}
+
 BASE_DIR = Path(__file__).resolve().parent
 SITE_BASE_URL = "https://lakefrontleakanddrain.com"
 VIDEO_FEED_PATH = BASE_DIR / "video_feed.xml"
@@ -461,13 +465,59 @@ def make_description(description, cta):
 
 def fetch_media_length(video_url):
     try:
-        response = requests.head(video_url, allow_redirects=True, timeout=20)
+        response = requests.head(
+            video_url,
+            allow_redirects=True,
+            timeout=20,
+            headers=REQUEST_HEADERS,
+        )
         content_length = response.headers.get("Content-Length", "").strip()
         if content_length.isdigit():
             return content_length
     except requests.RequestException:
         pass
+
+    try:
+        response = requests.get(
+            video_url,
+            allow_redirects=True,
+            timeout=20,
+            headers={**REQUEST_HEADERS, "Range": "bytes=0-0"},
+            stream=True,
+        )
+        content_range = response.headers.get("Content-Range", "")
+        if "/" in content_range:
+            total_size = content_range.split("/")[-1].strip()
+            if total_size.isdigit():
+                return total_size
+
+        content_length = response.headers.get("Content-Length", "").strip()
+        if content_length.isdigit():
+            return content_length
+    except requests.RequestException:
+        pass
+
     return "0"
+
+
+def build_thumbnail_url(video_url):
+    if "cdn.pixabay.com/video/" in video_url and video_url.endswith(".mp4"):
+        return video_url[:-4] + ".jpg"
+    return "https://lakefrontleakanddrain.com/logo.jpg"
+
+
+def build_content_encoded(description_text, post_link, video_url):
+    safe_post_link = html_escape(post_link, quote=True)
+    safe_video_url = html_escape(video_url, quote=True)
+    safe_description = html_escape(description_text)
+    return (
+        "<![CDATA["
+        f"<p>{safe_description}</p>"
+        f"<p><a href=\"{safe_post_link}\">Watch on Lakefront Leak &amp; Drain</a></p>"
+        f"<video controls preload=\"metadata\" playsinline style=\"max-width:100%;height:auto;\">"
+        f"<source src=\"{safe_video_url}\" type=\"video/mp4\">"
+        "</video>"
+        "]]>")
 
 
 def build_item_xml(title, description_text, video_url, post_link):
@@ -477,15 +527,22 @@ def build_item_xml(title, description_text, video_url, post_link):
 
     safe_title = escape(title)
     safe_video = escape(video_url)
+        safe_post_link = escape(post_link)
     media_length = fetch_media_length(video_url)
+        thumbnail_url = escape(build_thumbnail_url(video_url))
+        content_encoded = build_content_encoded(description_text, post_link, video_url)
 
     return f"""    <item>
-      <title>{safe_title}</title>
-            <link>{post_link}</link>
+            <title><![CDATA[{title}]]></title>
+                        <link>{safe_post_link}</link>
+            <dc:creator><![CDATA[lakefrontleakanddrain]]></dc:creator>
       <guid isPermaLink=\"false\">{guid}</guid>
       <pubDate>{pub_date}</pubDate>
-      <description><![CDATA[{description_text}]]></description>
+            <description><![CDATA[{description_text}]]></description>
+            <content:encoded>{content_encoded}</content:encoded>
       <enclosure url=\"{safe_video}\" length=\"{media_length}\" type=\"video/mp4\" />
+            <media:content url=\"{safe_video}\" fileSize=\"{media_length}\" medium=\"video\" type=\"video/mp4\" />
+            <media:thumbnail url=\"{thumbnail_url}\" />
     </item>"""
 
 

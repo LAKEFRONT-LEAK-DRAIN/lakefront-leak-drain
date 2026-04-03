@@ -5,6 +5,7 @@
     xmlns:wfw="http://wellformedweb.org/CommentAPI/"
     xmlns:dc="http://purl.org/dc/elements/1.1/"
     xmlns:wp="http://wordpress.org/export/1.2/"
+    xmlns:media="http://search.yahoo.com/mrss/"
 >
 
 <channel>
@@ -20,12 +21,16 @@
     <generator>http://wordpress.com/</generator>
 
     <item>
-    <title>Cleveland Basement Mystery Smell? Sewer Line Clue Revealed!</title>
+    <title><![CDATA[Cleveland Basement Mystery Smell? Sewer Line Clue Revealed!]]></title>
     <link>https://lakefrontleakanddrain.com/video/cleveland-basement-mystery-smell-sewer-line-clue-revealed.html</link>
+    <dc:creator><![CDATA[lakefrontleakanddrain]]></dc:creator>
     <guid isPermaLink="false">lakefrontleakanddrain.com/video/20260403132957</guid>
     <pubDate>Fri, 03 Apr 2026 13:29:57 GMT</pubDate>
     <description><![CDATA[Cleveland homeowners, don't ignore that mystery basement smell. Learn the telltale signs of a sewer line problem and protect your home. Watch now to uncover the truth!]]></description>
-    <enclosure url="https://cdn.pixabay.com/video/2025/02/07/257091_medium.mp4" length="0" type="video/mp4" />
+    <content:encoded><![CDATA[<p>Cleveland homeowners, don't ignore that mystery basement smell. Learn the telltale signs of a sewer line problem and protect your home. Watch now to uncover the truth!</p><p><a href="https://lakefrontleakanddrain.com/video/cleveland-basement-mystery-smell-sewer-line-clue-revealed.html">Watch on Lakefront Leak &amp; Drain</a></p><video controls preload="metadata" playsinline style="max-width:100%;height:auto;"><source src="https://cdn.pixabay.com/video/2025/02/07/257091_medium.mp4" type="video/mp4"></video>]]></content:encoded>
+    <enclosure url="https://cdn.pixabay.com/video/2025/02/07/257091_medium.mp4" length="8495373" type="video/mp4" />
+    <media:content url="https://cdn.pixabay.com/video/2025/02/07/257091_medium.mp4" fileSize="8495373" medium="video" type="video/mp4" />
+    <media:thumbnail url="https://cdn.pixabay.com/video/2025/02/07/257091_medium.jpg" />
     </item>
 
     <item>

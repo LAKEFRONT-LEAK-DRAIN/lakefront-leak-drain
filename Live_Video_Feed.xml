@@ -5,6 +5,7 @@
     xmlns:wfw="http://wellformedweb.org/CommentAPI/"
     xmlns:dc="http://purl.org/dc/elements/1.1/"
     xmlns:wp="http://wordpress.org/export/1.2/"
+    xmlns:media="http://search.yahoo.com/mrss/"
 >
 
 <channel>
@@ -20,12 +21,16 @@
     <generator>http://wordpress.com/</generator>
 
     <item>
-    <title>Cleveland Flood Warning: Is Your Sump Pump Ready?</title>
+    <title><![CDATA[Cleveland Flood Warning: Is Your Sump Pump Ready?]]></title>
     <link>https://lakefrontleakanddrain.com/live-video/cleveland-flood-warning-is-your-sump-pump-ready.html</link>
+    <dc:creator><![CDATA[lakefrontleakanddrain]]></dc:creator>
     <guid isPermaLink="false">lakefrontleakanddrain.com/live-video/20260403133303</guid>
     <pubDate>Fri, 03 Apr 2026 13:33:03 GMT</pubDate>
     <description><![CDATA[Heavy rains are expected, leading to potential flooding across Cleveland. Now is the critical time to ensure your sump pump is working properly and ready to protect your home. Watch our video for a quick guide on testing your sump pump.]]></description>
-    <enclosure url="https://cdn.pixabay.com/video/2018/02/14/14324-256171779_medium.mp4" length="0" type="video/mp4" />
+    <content:encoded><![CDATA[<p>Heavy rains are expected, leading to potential flooding across Cleveland. Now is the critical time to ensure your sump pump is working properly and ready to protect your home. Watch our video for a quick guide on testing your sump pump.</p><p><a href="https://lakefrontleakanddrain.com/live-video/cleveland-flood-warning-is-your-sump-pump-ready.html">Watch on Lakefront Leak &amp; Drain</a></p><video controls preload="metadata" playsinline style="max-width:100%;height:auto;"><source src="https://cdn.pixabay.com/video/2018/02/14/14324-256171779_medium.mp4" type="video/mp4"></video>]]></content:encoded>
+    <enclosure url="https://cdn.pixabay.com/video/2018/02/14/14324-256171779_medium.mp4" length="6458204" type="video/mp4" />
+    <media:content url="https://cdn.pixabay.com/video/2018/02/14/14324-256171779_medium.mp4" fileSize="6458204" medium="video" type="video/mp4" />
+    <media:thumbnail url="https://cdn.pixabay.com/video/2018/02/14/14324-256171779_medium.jpg" />
     </item>
 
     <item>
