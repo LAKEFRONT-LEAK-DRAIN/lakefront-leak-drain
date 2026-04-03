@@ -28,3 +28,14 @@ Add these in GitHub: Settings -> Secrets and variables -> Actions -> New reposit
 1. Go to Actions -> `Daily Workflow Email Notice`.
 2. Click `Run workflow`.
 3. Confirm you receive an email with today's status details and run links.
+
+## Video text-to-visual alignment test workflow
+
+Use `.github/workflows/video_gemini_alignment_test.yml` to test a stricter mode where Gemini:
+
+- generates post copy first,
+- generates targeted stock-video search queries from that copy,
+- ranks candidate clips by relevance to the written post,
+- then selects the best-matching candidate.
+
+This test workflow does not change production feed behavior. It writes to `video_feed_alignment_test.xml` and uploads artifacts for review.

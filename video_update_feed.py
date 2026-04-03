@@ -1,6 +1,7 @@
 import os
 import random
 import re
+import json
 from datetime import datetime, timezone
 from email.utils import parsedate_to_datetime
 from html import escape as html_escape
@@ -14,13 +15,16 @@ client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
 
 BASE_DIR = Path(__file__).resolve().parent
 SITE_BASE_URL = "https://lakefrontleakanddrain.com"
-VIDEO_FEED_PATH = BASE_DIR / "video_feed.xml"
+VIDEO_FEED_FILE = os.environ.get("VIDEO_FEED_FILE", "video_feed.xml").strip() or "video_feed.xml"
+VIDEO_FEED_PATH = BASE_DIR / VIDEO_FEED_FILE
 DEFAULT_LINK = "https://lakefrontleakanddrain.com/"
 DEFAULT_VIDEO = "https://lakefrontleakanddrain.com/logo-animated.mp4"
 MAX_ITEMS = 20
 RECENT_TITLE_LOOKBACK = 12
 RECENT_VIDEO_LOOKBACK = 12
 ALLOW_PEXELS_FALLBACK = os.environ.get("ALLOW_PEXELS_FALLBACK", "false").strip().lower() == "true"
+ENFORCE_TEXT_VIDEO_ALIGNMENT = os.environ.get("ENFORCE_TEXT_VIDEO_ALIGNMENT", "false").strip().lower() == "true"
+ALIGNMENT_MAX_CANDIDATES = 18
 
 PLUMBING_TERMS = [
     "drain",
@@ -205,6 +209,9 @@ def fetch_pexels_video_candidates(query):
                         "video_url": vf.get("link"),
                         "thumb_url": thumb_url,
                         "id": f"pexels:{video_id}" if video_id else "",
+                        "provider": "pexels",
+                        "tags": str(tags or ""),
+                        "source_query": query,
                     }
                 )
     return candidates
@@ -251,6 +258,9 @@ def fetch_pixabay_video_candidates(query):
                         "video_url": video_data.get("url"),
                         "thumb_url": (video_data.get("thumbnail") or "").strip(),
                         "id": f"pixabay:{video_id}" if video_id else "",
+                        "provider": "pixabay",
+                        "tags": str(tags or ""),
+                        "source_query": query,
                     }
                 )
                 break
@@ -304,11 +314,171 @@ def extract_recent_video_ids(feed_text, lookback=RECENT_VIDEO_LOOKBACK):
     return set(recent_ids)
 
 
-def get_video_url(title, search_keyword, recent_video_ids=None):
+def safe_json_object(text):
+    raw = (text or "").strip()
+    if not raw:
+        return {}
+
+    try:
+        data = json.loads(raw)
+        return data if isinstance(data, dict) else {}
+    except Exception:
+        pass
+
+    fence_match = re.search(r"\{[\s\S]*\}", raw)
+    if not fence_match:
+        return {}
+
+    try:
+        data = json.loads(fence_match.group(0))
+        return data if isinstance(data, dict) else {}
+    except Exception:
+        return {}
+
+
+def generate_alignment_queries(title, description, cta, fallback_keyword):
+    prompt = f"""
+Create search queries to find stock video that visually matches this post.
+
+Title: {title}
+Description: {description}
+CTA: {cta}
+
+Return ONLY JSON:
+{{"queries":["...","...","..."]}}
+
+Rules:
+- 5 to 8 queries
+- each query 2 to 6 words
+- include concrete plumbing visuals when possible (drain, pipe, sink, basement water, etc.)
+- no punctuation except spaces
+""".strip()
+
+    try:
+        resp = client.models.generate_content(model="gemini-2.5-flash", contents=prompt)
+        data = safe_json_object(resp.text)
+        queries = data.get("queries") if isinstance(data, dict) else None
+        if isinstance(queries, list):
+            clean = []
+            seen = set()
+            for q in queries:
+                text = normalize_text(str(q))
+                if not text:
+                    continue
+                if text in seen:
+                    continue
+                seen.add(text)
+                clean.append(text)
+            if clean:
+                return clean[:8]
+    except Exception as e:
+        print(f"Alignment query generation failed: {e}")
+
+    fallback = [
+        normalize_text(fallback_keyword) or "plumbing repair",
+        "drain cleaning",
+        "pipe leak repair",
+        "clogged sink drain",
+        "basement water cleanup",
+    ]
+    return [q for q in fallback if q]
+
+
+def choose_best_aligned_candidate(title, description, cta, candidates):
+    if not candidates:
+        return None
+
+    shortlist = candidates[:ALIGNMENT_MAX_CANDIDATES]
+    candidate_lines = []
+    for idx, c in enumerate(shortlist, start=1):
+        provider = c.get("provider", "unknown")
+        tags = (c.get("tags") or "").strip() or "none"
+        query = (c.get("source_query") or "").strip() or "none"
+        candidate_lines.append(f"{idx}. provider={provider}; tags={tags}; query={query}")
+
+    prompt = f"""
+Pick the one best stock video candidate for this post.
+
+Post:
+- Title: {title}
+- Description: {description}
+- CTA: {cta}
+
+Candidates:
+{chr(10).join(candidate_lines)}
+
+Return ONLY JSON: {{"choice": <number>, "reason": "short reason"}}
+Use the candidate number only.
+""".strip()
+
+    try:
+        resp = client.models.generate_content(model="gemini-2.5-flash", contents=prompt)
+        data = safe_json_object(resp.text)
+        choice = int(data.get("choice", 0))
+        if 1 <= choice <= len(shortlist):
+            picked = shortlist[choice - 1]
+            print(f"Gemini alignment picked candidate #{choice}: {data.get('reason', 'no reason provided')}")
+            return picked
+    except Exception as e:
+        print(f"Gemini candidate ranking failed: {e}")
+
+    return random.choice(shortlist)
+
+
+def get_video_url(title, search_keyword, recent_video_ids=None, description="", cta=""):
     video_url = DEFAULT_VIDEO
     thumb_url = ""
     queries = build_video_queries(title, search_keyword)
     recent_video_ids = recent_video_ids or set()
+
+    if ENFORCE_TEXT_VIDEO_ALIGNMENT:
+        alignment_queries = generate_alignment_queries(title, description, cta, search_keyword)
+        combined_queries = []
+        seen_query_keys = set()
+        for q in alignment_queries + queries:
+            q_key = normalize_text(q)
+            if not q_key or q_key in seen_query_keys:
+                continue
+            seen_query_keys.add(q_key)
+            combined_queries.append(q)
+
+        all_candidates = []
+        seen_candidate_ids = set()
+
+        for query in combined_queries:
+            try:
+                for c in fetch_pixabay_video_candidates(query):
+                    cid = canonical_video_id(c.get("video_url"))
+                    if not cid or cid in seen_candidate_ids:
+                        continue
+                    seen_candidate_ids.add(cid)
+                    all_candidates.append(c)
+            except Exception as e:
+                print(f"Pixabay search failed for '{query}': {e}")
+
+        if ALLOW_PEXELS_FALLBACK:
+            for query in combined_queries:
+                try:
+                    for c in fetch_pexels_video_candidates(query):
+                        cid = canonical_video_id(c.get("video_url"))
+                        if not cid or cid in seen_candidate_ids:
+                            continue
+                        seen_candidate_ids.add(cid)
+                        all_candidates.append(c)
+                except Exception as e:
+                    print(f"Pexels search failed for '{query}': {e}")
+
+        if all_candidates:
+            fresh_candidates = [c for c in all_candidates if canonical_video_id(c.get("video_url")) not in recent_video_ids]
+            ranking_pool = fresh_candidates if fresh_candidates else all_candidates
+            selected = choose_best_aligned_candidate(title, description, cta, ranking_pool)
+            if selected:
+                print("Video selected in alignment mode")
+                video_url = selected.get("video_url") or DEFAULT_VIDEO
+                thumb_url = selected.get("thumb_url") or ""
+                return video_url, thumb_url
+
+        print("Alignment mode found no candidates. Using fallback selection logic.")
 
     print("Trying Pixabay first (primary source)...")
     pixabay_queries = ["plumbing"]
@@ -436,8 +606,6 @@ Rules:
 
     resp = client.models.generate_content(model="gemini-2.5-flash", contents=prompt)
     text = (resp.text or "").strip()
-
-    import json
 
     try:
         data = json.loads(text)
@@ -652,8 +820,23 @@ def main():
         return
 
     recent_video_ids = extract_recent_video_ids(feed)
-    video_url, thumb_url = get_video_url(title, search_keyword, recent_video_ids)
-    headline, description, cta = generate_post_copy(title)
+
+    headline = title
+    description = ""
+    cta = "Call or book Lakefront Leak & Drain."
+    if ENFORCE_TEXT_VIDEO_ALIGNMENT:
+        headline, description, cta = generate_post_copy(title)
+
+    video_url, thumb_url = get_video_url(
+        title,
+        search_keyword,
+        recent_video_ids,
+        description=description,
+        cta=cta,
+    )
+
+    if not ENFORCE_TEXT_VIDEO_ALIGNMENT:
+        headline, description, cta = generate_post_copy(title)
 
     final_title = headline.strip() or title.strip()
     if title_exists(feed, final_title):
