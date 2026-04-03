@@ -933,7 +933,7 @@ def fetch_media_length(video_url):
 def build_thumbnail_url(video_url):
     if "cdn.pixabay.com/video/" in video_url and video_url.endswith(".mp4"):
         return video_url[:-4] + ".jpg"
-    return ""
+    return "https://lakefrontleakanddrain.com/blog/logo_tmp.jpg"
 
 
 def build_content_encoded(description_text, post_link, video_url):
@@ -960,6 +960,8 @@ def build_item_xml(title, description_text, video_url, post_link):
     safe_post_link = escape(post_link)
     media_length = fetch_media_length(video_url)
     content_encoded = build_content_encoded(description_text, post_link, video_url)
+    thumbnail_url = build_thumbnail_url(video_url)
+    safe_thumbnail = escape(thumbnail_url)
 
     return f"""    <item>
             <title><![CDATA[{title}]]></title>
@@ -971,6 +973,7 @@ def build_item_xml(title, description_text, video_url, post_link):
             <content:encoded>{content_encoded}</content:encoded>
       <enclosure url=\"{safe_video}\" length=\"{media_length}\" type=\"video/mp4\" />
                 <media:content url=\"{safe_video}\" fileSize=\"{media_length}\" medium=\"video\" type=\"video/mp4\" />
+      <media:thumbnail url=\"{safe_thumbnail}\" />
     </item>"""
 
 
