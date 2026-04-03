@@ -936,66 +936,41 @@ def build_thumbnail_url(video_url):
     return ""
 
 
-def build_content_encoded(description_text):
+def build_content_encoded(description_text, post_link, video_url):
+    safe_post_link = html_escape(post_link, quote=True)
+    safe_video_url = html_escape(video_url, quote=True)
     safe_description = html_escape(description_text)
     return (
-        "<![CDATA[<!-- wp:paragraph -->\n"
-        f"<p>{safe_description}</p>\n"
-        "<!-- /wp:paragraph -->\n\n"
-        "<!-- wp:paragraph -->\n"
-        "<p>Visit our website:<br><a href=\"https://lakefrontleakanddrain.com\">https://lakefrontleakanddrain.com</a></p>\n"
-        "<!-- /wp:paragraph -->\n\n"
-        "<!-- wp:paragraph -->\n"
-        "<p>Call 216-505-7765</p>\n"
-        "<!-- /wp:paragraph -->]]>"
-    )
+        "<![CDATA["
+        f"<p>{safe_description}</p>"
+        f"<p><a href=\"{safe_post_link}\">Watch on Lakefront Leak &amp; Drain</a></p>"
+        f"<video controls preload=\"metadata\" playsinline style=\"max-width:100%;height:auto;\">"
+        f"<source src=\"{safe_video_url}\" type=\"video/mp4\">"
+        "</video>"
+        "]]>")
 
 
 def build_item_xml(title, description_text, video_url, post_link):
     now = datetime.now(timezone.utc)
-    pub_date = now.strftime("%a, %d %b %Y %H:%M:%S +0000")
-    wp_date = now.strftime("%Y-%m-%d %H:%M:%S")
+    pub_date = now.strftime("%a, %d %b %Y %H:%M:%S GMT")
     guid = f"lakefrontleakanddrain.com/{VIDEO_PAGE_DIR}/{now.strftime('%Y%m%d%H%M%S')}"
-    post_slug = post_link.rstrip("/").split("/")[-1].replace(".html", "")
-    post_id = int(now.strftime("%y%m%d%H%M%S"))
 
+    safe_title = escape(title)
     safe_video = escape(video_url)
     safe_post_link = escape(post_link)
     media_length = fetch_media_length(video_url)
-    content_encoded = build_content_encoded(description_text)
+    content_encoded = build_content_encoded(description_text, post_link, video_url)
 
     return f"""    <item>
             <title><![CDATA[{title}]]></title>
-            <link>{safe_post_link}</link>
-            <pubDate>{pub_date}</pubDate>
+                        <link>{safe_post_link}</link>
             <dc:creator><![CDATA[lakefrontleakanddrain]]></dc:creator>
-            <guid isPermaLink=\"false\">{guid}</guid>
-            <description></description>
+      <guid isPermaLink=\"false\">{guid}</guid>
+      <pubDate>{pub_date}</pubDate>
+      <description><![CDATA[{description_text}]]></description>
             <content:encoded>{content_encoded}</content:encoded>
-            <excerpt:encoded><![CDATA[]]></excerpt:encoded>
-            <wp:post_id>{post_id}</wp:post_id>
-            <wp:post_date><![CDATA[{wp_date}]]></wp:post_date>
-            <wp:post_date_gmt><![CDATA[{wp_date}]]></wp:post_date_gmt>
-            <wp:post_modified><![CDATA[{wp_date}]]></wp:post_modified>
-            <wp:post_modified_gmt><![CDATA[{wp_date}]]></wp:post_modified_gmt>
-            <wp:comment_status><![CDATA[open]]></wp:comment_status>
-            <wp:ping_status><![CDATA[open]]></wp:ping_status>
-            <wp:post_name><![CDATA[{post_slug}]]></wp:post_name>
-            <wp:status><![CDATA[publish]]></wp:status>
-            <wp:post_parent>0</wp:post_parent>
-            <wp:menu_order>0</wp:menu_order>
-            <wp:post_type><![CDATA[post]]></wp:post_type>
-            <wp:post_password><![CDATA[]]></wp:post_password>
-            <wp:is_sticky>0</wp:is_sticky>
-            <category domain=\"post_tag\" nicename=\"cleveland-plumbing\"><![CDATA[CLEVELAND PLUMBING]]></category>
-            <category domain=\"post_tag\" nicename=\"plumbing-tips\"><![CDATA[PLUMBING TIPS]]></category>
-            <category domain=\"post_tag\" nicename=\"drain-cleaning\"><![CDATA[DRAIN CLEANING]]></category>
-            <category domain=\"category\" nicename=\"uncategorized\"><![CDATA[Uncategorized]]></category>
-            <enclosure url=\"{safe_video}\" length=\"{media_length}\" type=\"video/mp4\" />
-            <wp:postmeta>
-                <wp:meta_key><![CDATA[_last_editor_used_jetpack]]></wp:meta_key>
-                <wp:meta_value><![CDATA[block-editor]]></wp:meta_value>
-            </wp:postmeta>
+      <enclosure url=\"{safe_video}\" length=\"{media_length}\" type=\"video/mp4\" />
+                <media:content url=\"{safe_video}\" fileSize=\"{media_length}\" medium=\"video\" type=\"video/mp4\" />
     </item>"""
 
 
