@@ -38,4 +38,4 @@ Use `.github/workflows/video_gemini_alignment_test.yml` to test a stricter mode 
 - ranks candidate clips by relevance to the written post,
 - then selects the best-matching candidate.
 
-This test workflow does not change production feed behavior. It writes to `video_feed_alignment_test.xml` and uploads artifacts for review.
+This test workflow is fully separate from production workflows. It runs `video_update_feed_alignment_test.py`, writes to `video_feed_alignment_test.xml`, and uploads artifacts for review.

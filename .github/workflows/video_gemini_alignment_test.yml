@@ -35,7 +35,7 @@ jobs:
           ALLOW_PEXELS_FALLBACK: 'true'
           ENFORCE_TEXT_VIDEO_ALIGNMENT: 'true'
           VIDEO_FEED_FILE: video_feed_alignment_test.xml
-        run: python video_update_feed.py
+        run: python video_update_feed_alignment_test.py
 
       - name: Upload test feed artifact
         uses: actions/upload-artifact@v4
