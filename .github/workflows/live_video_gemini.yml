@@ -1,0 +1,61 @@
+name: Gemini Automated Live Video Feed Updater
+
+on:
+  schedule:
+    # GitHub Actions cron uses UTC. We run at both DST and standard-time UTC offsets
+    # and then gate execution below so posts publish at 4 AM and 4 PM America/New_York.
+    - cron: '0 8,9,20,21 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update-live-video-feed:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.PAT_TOKEN }}
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: pip install google-genai requests
+
+      - name: Check Eastern publish window
+        id: publish_window
+        run: |
+          if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then
+            echo "should_run=true" >> "$GITHUB_OUTPUT"
+          else
+            current_hour=$(TZ=America/New_York date +%H)
+            if [ "$current_hour" = "04" ] || [ "$current_hour" = "16" ]; then
+              echo "should_run=true" >> "$GITHUB_OUTPUT"
+            else
+              echo "should_run=false" >> "$GITHUB_OUTPUT"
+            fi
+          fi
+
+      - name: Run Live Video feed updater
+        if: steps.publish_window.outputs.should_run == 'true'
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
+          PIXABAY_API_KEY: ${{ secrets.PIXABAY_API_KEY }}
+          ALLOW_PEXELS_FALLBACK: 'true'
+          ENFORCE_TEXT_VIDEO_ALIGNMENT: 'true'
+          VIDEO_FEED_FILE: Live_Video_Feed.xml
+          VIDEO_PAGE_DIR: live-video
+        run: python live_video_update_feed.py
+
+      - name: Commit and push changes
+        if: steps.publish_window.outputs.should_run == 'true'
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Auto: update Live Video RSS feed"

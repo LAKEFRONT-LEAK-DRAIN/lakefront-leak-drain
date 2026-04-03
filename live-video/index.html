@@ -1,0 +1,263 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Video Plumbing Tips - Lakefront Leak & Drain</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700;900&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <meta property="og:title" content="Cleveland Live Video Tips">
+    <meta property="og:description" content="Live video plumbing advice for Cleveland homeowners">
+    <meta property="og:image" content="https://lakefrontleakanddrain.com/logo.jpg">
+    <meta property="og:url" content="https://lakefrontleakanddrain.com/live-video/">
+    <meta property="og:type" content="website">
+
+    <style>
+        :root {
+            --brand-900: #001030;
+            --brand-800: #002040;
+            --brand-700: #003060;
+            --brand-600: #004070;
+            --brand-100: #e0f0ff;
+            --brand-050: #f0ffff;
+            --surface: #ffffff;
+            --text: #152036;
+            --text-muted: #43546f;
+            --border: #c8d8ea;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: "Source Sans 3", "Segoe UI", sans-serif;
+            color: var(--text);
+            line-height: 1.7;
+            background:
+                radial-gradient(circle at 10% 10%, var(--brand-050), transparent 45%),
+                linear-gradient(180deg, #f8fcff 0%, #f3f8ff 100%);
+        }
+
+        header {
+            border-bottom: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.94);
+            backdrop-filter: blur(4px);
+        }
+
+        .header-inner {
+            max-width: 980px;
+            margin: 0 auto;
+            padding: 18px 20px;
+        }
+
+        .brand-link {
+            color: var(--brand-800);
+            text-decoration: none;
+            font-family: "Merriweather", Georgia, serif;
+            font-size: 1.2rem;
+            font-weight: 900;
+            letter-spacing: 0.2px;
+        }
+
+        .brand-link:hover { color: var(--brand-600); }
+
+        #video-content {
+            max-width: 820px;
+            margin: 0 auto;
+            padding: 38px 20px 62px;
+        }
+
+        .page-intro { margin-bottom: 28px; }
+
+        h1, h2 {
+            color: var(--brand-900);
+            font-family: "Merriweather", Georgia, serif;
+            line-height: 1.25;
+            margin-top: 0;
+        }
+
+        h1 {
+            font-size: clamp(1.9rem, 3.2vw, 2.4rem);
+            margin-bottom: 12px;
+        }
+
+        h2 {
+            font-size: clamp(1.2rem, 2vw, 1.45rem);
+            margin-bottom: 8px;
+        }
+
+        p {
+            margin: 0 0 17px;
+            font-size: 1.08rem;
+            max-width: 68ch;
+        }
+
+        .loading-state,
+        .status-card,
+        .video-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 22px;
+            box-shadow: 0 8px 24px rgba(0, 32, 64, 0.06);
+        }
+
+        .video-list {
+            display: grid;
+            gap: 16px;
+        }
+
+        .video-title {
+            margin: 0 0 8px;
+        }
+
+        .video-link {
+            color: var(--brand-700);
+            text-decoration: none;
+        }
+
+        .video-link:hover {
+            color: var(--brand-600);
+            text-decoration: underline;
+            text-underline-offset: 3px;
+        }
+
+        .video-link:visited { color: #2f4668; }
+
+        .video-link:focus-visible,
+        .cta-link:focus-visible,
+        .back-link:focus-visible,
+        .brand-link:focus-visible {
+            outline: 2px solid var(--brand-600);
+            outline-offset: 2px;
+            border-radius: 4px;
+        }
+
+        .video-excerpt {
+            color: var(--text-muted);
+            margin-bottom: 10px;
+        }
+
+        .video-embed {
+            width: 100%;
+            border-radius: 10px;
+            border: 1px solid #d6e4f2;
+            background: var(--brand-050);
+            margin: 8px 0 12px;
+        }
+
+        .cta-link {
+            color: var(--brand-800);
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .cta-link:hover {
+            text-decoration: underline;
+            text-underline-offset: 3px;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 16px;
+            color: var(--brand-800);
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+            text-underline-offset: 3px;
+        }
+
+        @media (max-width: 700px) {
+            .header-inner { padding: 16px; }
+            #video-content { padding: 24px 14px 42px; }
+            .video-card, .loading-state, .status-card { border-radius: 12px; padding: 16px; }
+            p { font-size: 1rem; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-inner">
+            <a href="/" class="brand-link">Lakefront Leak & Drain</a>
+        </div>
+    </header>
+
+    <main id="video-content">
+        <section class="loading-state">
+            <h1>Loading Live Video posts...</h1>
+            <p>Gathering your latest Cleveland Live Video posts.</p>
+        </section>
+    </main>
+
+    <script>
+        function text(node, fallback = "") {
+            return (node && node.textContent ? node.textContent.trim() : fallback);
+        }
+
+        function clip(textValue, maxLen) {
+            if (textValue.length <= maxLen) return textValue;
+            return textValue.slice(0, maxLen - 1).trimEnd() + "...";
+        }
+
+        fetch('/Live_Video_Feed.xml')
+            .then(response => response.text())
+            .then(xmlText => new window.DOMParser().parseFromString(xmlText, 'text/xml'))
+            .then(xml => {
+                const items = Array.from(xml.querySelectorAll('item'));
+                const container = document.getElementById('video-content');
+
+                if (!items.length) {
+                    container.innerHTML = `
+                        <section class="status-card">
+                            <h1>No Live Video posts yet</h1>
+                            <p>New Live Video posts will appear here soon.</p>
+                            <a href="/" class="back-link">Return to homepage</a>
+                        </section>
+                    `;
+                    return;
+                }
+
+                const cards = items.map(item => {
+                    const title = text(item.querySelector('title'), 'Live Video Plumbing Tip');
+                    const description = text(item.querySelector('description'), 'Helpful Live Video plumbing tip for Cleveland homeowners.').replace(/<!\[CDATA\[|\]\]>/g, '');
+                    const link = text(item.querySelector('link'), '/live-video/');
+                    const enclosure = item.querySelector('enclosure');
+                    const videoUrl = enclosure ? (enclosure.getAttribute('url') || '') : '';
+
+                    return `
+                        <article class="video-card">
+                            <h2 class="video-title"><a class="video-link" href="${link}">${title}</a></h2>
+                            ${videoUrl ? `<video class="video-embed" controls playsinline preload="metadata"><source src="${videoUrl}" type="video/mp4"></video>` : ''}
+                            <p class="video-excerpt">${clip(description, 180)}</p>
+                            <a class="cta-link" href="${link}">Open live video page -></a>
+                        </article>
+                    `;
+                }).join('');
+
+                container.innerHTML = `
+                    <section class="page-intro">
+                        <h1>Cleveland Live Video Tips</h1>
+                        <p>Fast Live Video advice from Lakefront Leak & Drain for drain issues, leaks, sump systems, and emergency prevention.</p>
+                    </section>
+                    <section class="video-list">${cards}</section>
+                    <a href="/" class="back-link">Return to homepage</a>
+                `;
+            })
+            .catch(() => {
+                document.getElementById('video-content').innerHTML = `
+                    <section class="status-card">
+                        <h1>Unable to load Live Video posts right now</h1>
+                        <p>Please try again in a moment.</p>
+                        <a href="/" class="back-link">Return to homepage</a>
+                    </section>
+                `;
+            });
+    </script>
+</body>
+</html>
+
