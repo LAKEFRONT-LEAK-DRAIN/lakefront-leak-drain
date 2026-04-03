@@ -809,11 +809,9 @@ def generate_video_page(title, slug, description_text, video_url, thumb_url):
     thumb_url = (thumb_url or "").strip()
     safe_thumb = html_escape(thumb_url)
 
-    og_image_tag = f'<meta property="og:image" content="{safe_thumb}">' if safe_thumb else ""
-    twitter_image_tag = f'<meta name="twitter:image" content="{safe_thumb}">' if safe_thumb else ""
-    
-    # Build featured image tag for body
-    img_tag = f'<img src="{safe_thumb}" alt="{safe_title}" style="max-width: 100%; height: auto;">' if safe_thumb else ""
+    og_image_tag = ""
+    twitter_image_tag = ""
+    img_tag = ""
 
     html_content = f"""<!doctype html>
 <html lang=\"en\">
@@ -935,7 +933,7 @@ def fetch_media_length(video_url):
 def build_thumbnail_url(video_url):
     if "cdn.pixabay.com/video/" in video_url and video_url.endswith(".mp4"):
         return video_url[:-4] + ".jpg"
-    return "https://lakefrontleakanddrain.com/logo.jpg"
+    return ""
 
 
 def build_content_encoded(description_text, post_link, video_url):
