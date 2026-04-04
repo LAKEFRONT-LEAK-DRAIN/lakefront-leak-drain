@@ -50,7 +50,9 @@ def main() -> int:
         guid = (item.findtext("guid") or "").strip()
         enclosure = item.find("enclosure")
 
-        if not enclosure:
+        # ElementTree elements are falsey when they have no children, so use
+        # explicit None check for self-closing <enclosure ... /> tags.
+        if enclosure is None:
             fail(f"Item {idx} is missing <enclosure>")
 
         enclosure_url = (enclosure.get("url") or "").strip()
