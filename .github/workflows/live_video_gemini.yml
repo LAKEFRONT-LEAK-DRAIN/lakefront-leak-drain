@@ -50,6 +50,10 @@ jobs:
           VIDEO_PAGE_DIR: live-video
         run: python live_video_update_feed.py
 
+      - name: Build Metricool minimal live feed
+        if: steps.publish_window.outputs.should_run == 'true'
+        run: python build_metricool_live_min_feed.py
+
       - name: Commit and push changes
         if: steps.publish_window.outputs.should_run == 'true'
         run: |
