@@ -630,12 +630,28 @@ Use the candidate number only.
     return random.choice(shortlist)
 
 
+def pick_on_screen_ethnicity_guidance():
+    roll = random.random()
+    if roll < 0.70:
+        return "Primarily Caucasian adults in the scene"
+    if roll < 0.78:
+        return "Primarily African American adults in the scene"
+    if roll < 0.86:
+        return "Primarily Hispanic/Latino adults in the scene"
+    if roll < 0.93:
+        return "Primarily Asian adults in the scene"
+    return "Primarily Middle Eastern or multiracial adults in the scene"
+
+
 def build_gemini_video_prompt(title, description, cta):
+    ethnicity_guidance = pick_on_screen_ethnicity_guidance()
     prompt_parts = [
         "Create a realistic short social video for a Cleveland plumbing company.",
         f"Topic: {title}.",
         f"Message: {description} {cta}".strip(),
         "Show a believable residential plumbing scene that matches the topic, such as a sump pump, drain, sewer line, leaking pipe, sink, faucet, basement water, utility room, or bathroom fixture.",
+        f"People casting guidance: {ethnicity_guidance}.",
+        "If there is spoken dialogue, it must be English only with a neutral U.S. accent.",
         "Style: realistic, clean, professional, homeowner-friendly, vertical short-form social media clip.",
         "Composition: portrait framing, clear subject, smooth camera movement, no split screen.",
         "Avoid text overlays, subtitles, logos, watermarks, brand names, and UI elements.",
