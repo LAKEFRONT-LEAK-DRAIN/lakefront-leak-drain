@@ -58,6 +58,10 @@ jobs:
         if: steps.publish_window.outputs.should_run == 'true'
         run: python build_metricool_live_latest_feed.py
 
+      - name: Sync Metricool basic live feed URL
+        if: steps.publish_window.outputs.should_run == 'true'
+        run: cp metricool-live-latest.xml metricool-live-basic.xml
+
       - name: Commit and push changes
         if: steps.publish_window.outputs.should_run == 'true'
         run: |
