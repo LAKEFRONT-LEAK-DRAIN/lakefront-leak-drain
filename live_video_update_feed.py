@@ -1185,11 +1185,19 @@ def main():
     if backfilled:
         print(f"Backfilled video pages/links for {backfilled} existing items")
 
-    existing_titles = extract_titles(feed)
-    title, search_keyword = generate_topic(existing_titles)
+    existing_titles = set(extract_titles(feed))
 
-    if title_exists(feed, title):
-        print(f"Skipped duplicate title: {title}")
+    title = ""
+    search_keyword = ""
+    for attempt in range(1, 6):
+        candidate_title, candidate_keyword = generate_topic(existing_titles)
+        if candidate_title and not title_exists(feed, candidate_title):
+            title, search_keyword = candidate_title, candidate_keyword
+            break
+        print(f"Duplicate candidate title on attempt {attempt}: {candidate_title}")
+
+    if not title:
+        print("Could not generate a unique title after 5 attempts. Skipping run.")
         return
 
     recent_video_ids = extract_recent_video_ids(feed)
@@ -1213,8 +1221,10 @@ def main():
 
     final_title = headline.strip() or title.strip()
     if title_exists(feed, final_title):
-        print(f"Skipped duplicate title after headline generation: {final_title}")
-        return
+        # Keep the run productive even when Gemini copy generation collides.
+        suffix = datetime.now(timezone.utc).strftime(" %Y-%m-%d %H%M UTC")
+        final_title = (final_title + suffix).strip()
+        print(f"Adjusted duplicate headline to unique title: {final_title}")
 
     description_text = make_description(description, cta)
     slug = create_slug(final_title)
