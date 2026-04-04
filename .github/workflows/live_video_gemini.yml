@@ -29,6 +29,12 @@ jobs:
       - name: Install dependencies
         run: pip install google-genai requests
 
+      - name: Install ffmpeg
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+          ffmpeg -version
+
       - name: Enable scheduled/manual run
         id: publish_window
         run: |
