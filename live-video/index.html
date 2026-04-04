@@ -201,7 +201,8 @@
             return textValue.slice(0, maxLen - 1).trimEnd() + "...";
         }
 
-        fetch('/Live_Video_Feed.xml')
+        const feedUrl = `/Live_Video_Feed.xml?v=${Date.now()}`;
+        fetch(feedUrl, { cache: 'no-store' })
             .then(response => response.text())
             .then(xmlText => new window.DOMParser().parseFromString(xmlText, 'text/xml'))
             .then(xml => {
