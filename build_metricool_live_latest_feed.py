@@ -1,4 +1,5 @@
 import email.utils
+import re
 import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
 from pathlib import Path
@@ -13,6 +14,27 @@ def text_of(node: ET.Element | None, fallback: str = "") -> str:
         return fallback
     value = node.text.strip()
     return value if value else fallback
+
+
+def pub_date_to_version(pub_date: str) -> str:
+    """Convert an RFC 2822 pubDate string to a compact YYYYMMDDHHMMSS version token.
+
+    Falls back to the current UTC time if parsing fails.  The token is used as
+    a ``?v=`` query-string suffix on video URLs to bust Metricool's cache when
+    the video file is replaced but the filename stays the same.
+    """
+    try:
+        dt = email.utils.parsedate_to_datetime(pub_date)
+        return dt.strftime("%Y%m%d%H%M%S")
+    except Exception:
+        return datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
+
+
+def add_version_param(url: str, version: str) -> str:
+    """Append ``?v=<version>`` to *url*, replacing any existing ``v=`` param."""
+    url = re.sub(r"[?&]v=[^&]*", "", url)
+    sep = "&" if "?" in url else "?"
+    return f"{url}{sep}v={version}"
 
 
 def build_latest_feed() -> None:
@@ -50,22 +72,29 @@ def build_latest_feed() -> None:
         if not enclosure_len or enclosure_len == "0":
             enclosure_len = "1"
 
-        # Prefer direct MP4 as link/guid to maximize chance of true video ingestion.
-        item_link = enclosure_url or page_link
+        # Derive a version token from the item's pubDate for cache-busting.
+        item_pub_date = text_of(source_item.find("pubDate"), build_date)
+        version = pub_date_to_version(item_pub_date)
+
+        # Prefer direct MP4 as link/guid to maximise chance of true video ingestion.
+        # Append ?v=<version> so Metricool re-downloads when the file is replaced.
+        raw_item_link = enclosure_url or page_link
+        item_link = add_version_param(raw_item_link, version)
+        versioned_enclosure_url = add_version_param(enclosure_url, version) if enclosure_url else ""
 
         ET.SubElement(out_item, "title").text = text_of(source_item.find("title"), "Live Video")
         ET.SubElement(out_item, "link").text = item_link
         guid = ET.SubElement(out_item, "guid", {"isPermaLink": "true"})
         guid.text = item_link
-        ET.SubElement(out_item, "pubDate").text = text_of(source_item.find("pubDate"), build_date)
+        ET.SubElement(out_item, "pubDate").text = item_pub_date
         base_desc = text_of(source_item.find("description"), "Live video update.")
         ET.SubElement(out_item, "description").text = f"{base_desc} Watch page: {page_link}"
 
-        if enclosure_url:
+        if versioned_enclosure_url:
             ET.SubElement(
                 out_item,
                 "enclosure",
-                {"url": enclosure_url, "length": enclosure_len, "type": enclosure_type},
+                {"url": versioned_enclosure_url, "length": enclosure_len, "type": enclosure_type},
             )
 
     ET.indent(rss, space="  ")
