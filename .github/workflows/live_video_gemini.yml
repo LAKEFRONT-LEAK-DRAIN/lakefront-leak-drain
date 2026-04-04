@@ -70,6 +70,10 @@ jobs:
         if: steps.publish_window.outputs.should_run == 'true'
         run: cp metricool-live-latest.xml metricool-live-basic.xml
 
+      - name: Validate Metricool live feed invariants
+        if: steps.publish_window.outputs.should_run == 'true'
+        run: python validate_metricool_feed.py
+
       - name: Commit and push changes
         if: steps.publish_window.outputs.should_run == 'true'
         run: |
