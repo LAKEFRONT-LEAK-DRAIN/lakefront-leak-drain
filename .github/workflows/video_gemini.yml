@@ -1,0 +1,142 @@
+name: Gemini Stock Video Feed Updater
+
+on:
+  schedule:
+    # Staggered from the live-video workflow to reduce concurrent push conflicts.
+    - cron: '15 0 * * *'
+    - cron: '45 0 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update-video-feed:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.PAT_TOKEN }}
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: pip install google-genai requests
+
+      - name: Enable scheduled/manual run
+        id: publish_window
+        run: |
+          echo "should_run=true" >> "$GITHUB_OUTPUT"
+
+      - name: Capture current stock feed top item
+        if: steps.publish_window.outputs.should_run == 'true'
+        id: baseline_video_feed
+        run: |
+          python - <<'PY'
+          import os
+          import xml.etree.ElementTree as ET
+          from pathlib import Path
+
+          path = Path("video_feed.xml")
+          top_title = ""
+          top_pub = ""
+
+          if path.exists():
+              root = ET.parse(path).getroot()
+              channel = root.find("channel")
+              if channel is not None:
+                  first = channel.find("item")
+                  if first is not None:
+                      top_title = (first.findtext("title") or "").strip()
+                      top_pub = (first.findtext("pubDate") or "").strip()
+
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as f:
+              f.write(f"top_title={top_title}\n")
+              f.write(f"top_pub={top_pub}\n")
+          print(f"Baseline top title: {top_title or '[none]'}")
+          print(f"Baseline top pubDate: {top_pub or '[none]'}")
+          PY
+
+      - name: Run stock video feed updater
+        if: steps.publish_window.outputs.should_run == 'true'
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
+          PIXABAY_API_KEY: ${{ secrets.PIXABAY_API_KEY }}
+          ALLOW_PEXELS_FALLBACK: 'true'
+        run: python video_update_feed.py
+
+      - name: Verify stock feed top item changed
+        if: steps.publish_window.outputs.should_run == 'true'
+        env:
+          PREV_TOP_TITLE: ${{ steps.baseline_video_feed.outputs.top_title }}
+          PREV_TOP_PUB: ${{ steps.baseline_video_feed.outputs.top_pub }}
+        run: |
+          python - <<'PY'
+          import os
+          import xml.etree.ElementTree as ET
+          from pathlib import Path
+
+          path = Path("video_feed.xml")
+          if not path.exists():
+              raise SystemExit("video_feed.xml missing after update step")
+
+          root = ET.parse(path).getroot()
+          channel = root.find("channel")
+          if channel is None:
+              raise SystemExit("video_feed.xml missing <channel>")
+          first = channel.find("item")
+          if first is None:
+              raise SystemExit("video_feed.xml has no <item>")
+
+          new_title = (first.findtext("title") or "").strip()
+          new_pub = (first.findtext("pubDate") or "").strip()
+          prev_title = os.environ.get("PREV_TOP_TITLE", "").strip()
+          prev_pub = os.environ.get("PREV_TOP_PUB", "").strip()
+
+          print(f"Previous top title: {prev_title or '[none]'}")
+          print(f"Previous top pubDate: {prev_pub or '[none]'}")
+          print(f"New top title: {new_title or '[none]'}")
+          print(f"New top pubDate: {new_pub or '[none]'}")
+
+          if prev_title and prev_pub and new_title == prev_title and new_pub == prev_pub:
+              raise SystemExit("video_feed.xml top item did not change; failing to prevent stale successful run")
+          PY
+
+      - name: Commit and push changes
+        if: steps.publish_window.outputs.should_run == 'true'
+        run: |
+          if git diff --quiet && git diff --cached --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No staged changes to commit."
+            exit 0
+          fi
+
+          git commit -m "Auto: update stock video RSS feed"
+
+          for attempt in 1 2 3; do
+            echo "Push attempt ${attempt}..."
+            git fetch origin main
+            git rebase origin/main
+            if git push origin HEAD:main; then
+              echo "Push succeeded."
+              exit 0
+            fi
+          done
+
+          echo "Push failed after 3 attempts."
+          exit 1
