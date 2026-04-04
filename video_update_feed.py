@@ -533,7 +533,7 @@ def get_video_url(title, search_keyword, recent_video_ids=None):
 
     if not ALLOW_PEXELS_FALLBACK:
         print("Pixabay exhausted and Pexels fallback is disabled. Using default video fallback")
-        return video_url, thumb_url
+        raise RuntimeError("No stock candidates found from Pixabay and Pexels fallback is disabled")
 
     print("Pixabay exhausted, trying Pexels fallback...")
     for query in queries:
@@ -555,7 +555,7 @@ def get_video_url(title, search_keyword, recent_video_ids=None):
             print(f"Pexels search failed for '{query}': {e}")
 
     print("Using default video fallback")
-    return video_url, thumb_url
+    raise RuntimeError("No stock candidates found from Pixabay/Pexels")
 
 
 def generate_video_page(title, slug, description_text, video_url, thumb_url):
@@ -912,20 +912,40 @@ def main():
         print(f"Backfilled video pages/links for {backfilled} existing items")
 
     existing_titles = extract_titles(feed)
-    title, search_keyword = generate_topic(existing_titles)
+    title = ""
+    search_keyword = ""
+    last_candidate_title = ""
+    last_candidate_keyword = ""
 
-    if title_exists(feed, title):
-        print(f"Skipped duplicate title: {title}")
-        return
+    for attempt in range(1, 6):
+        candidate_title, candidate_keyword = generate_topic(existing_titles)
+        last_candidate_title = (candidate_title or "").strip()
+        last_candidate_keyword = (candidate_keyword or "").strip()
+        if candidate_title and not title_exists(feed, candidate_title):
+            title, search_keyword = candidate_title, candidate_keyword
+            break
+        print(f"Duplicate candidate title on attempt {attempt}: {candidate_title}")
+
+    if not title:
+        base_title = last_candidate_title or "Cleveland Plumbing Prevention Alert"
+        suffix = datetime.now(timezone.utc).strftime(" %Y-%m-%d %H%M UTC")
+        title = (base_title + suffix).strip()
+        search_keyword = last_candidate_keyword or "plumbing prevention"
+        print(f"Using forced-unique fallback title: {title}")
 
     recent_video_ids = extract_recent_video_ids(feed)
     video_url, thumb_url = get_video_url(title, search_keyword, recent_video_ids)
+
+    if (video_url or "").strip().lower() == DEFAULT_VIDEO.lower():
+        raise RuntimeError("Resolved to default fallback video; aborting to avoid stale/no-op feed run")
+
     headline, description, cta = generate_post_copy(title)
 
     final_title = headline.strip() or title.strip()
     if title_exists(feed, final_title):
-        print(f"Skipped duplicate title after headline generation: {final_title}")
-        return
+        suffix = datetime.now(timezone.utc).strftime(" %Y-%m-%d %H%M UTC")
+        final_title = (final_title + suffix).strip()
+        print(f"Adjusted duplicate headline to unique title: {final_title}")
 
     description_text = make_description(description, cta)
     slug = create_slug(final_title)
