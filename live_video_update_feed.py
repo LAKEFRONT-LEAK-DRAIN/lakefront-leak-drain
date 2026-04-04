@@ -1185,7 +1185,7 @@ def main():
     if backfilled:
         print(f"Backfilled video pages/links for {backfilled} existing items")
 
-    existing_titles = set(extract_titles(feed))
+    existing_titles = extract_titles(feed)
 
     title = ""
     search_keyword = ""
