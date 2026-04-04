@@ -395,7 +395,6 @@ def fetch_pexels_video_candidates(query):
             if vf.get("file_type") == "video/mp4" and vf.get("link"):
                 if not is_platform_safe_video(vf.get("width") or v.get("width"), vf.get("height") or v.get("height")):
                     continue
-                candidates.append(
                 target_list = strict_candidates if is_strict_match else neutral_candidates
                 target_list.append(
                     {
