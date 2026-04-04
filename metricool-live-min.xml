@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>Lakefront Live Test Feed</title>
+    <link>https://lakefrontleakanddrain.com/</link>
+    <description>Minimal live video test feed for Metricool import.</description>
+    <language>en-us</language>
+    <lastBuildDate>Sat, 04 Apr 2026 12:00:00 GMT</lastBuildDate>
+    <item>
+      <title>Live Feed Test Item One</title>
+      <link>https://lakefrontleakanddrain.com/live-video/</link>
+      <guid isPermaLink="true">https://lakefrontleakanddrain.com/live-video/?test=1</guid>
+      <pubDate>Sat, 04 Apr 2026 12:00:00 GMT</pubDate>
+      <description>Simple test item for Metricool parsing.</description>
+      <enclosure url="https://cdn.pixabay.com/video/2021/05/12/73977-549736324_medium.mp4" length="12335191" type="video/mp4" />
+    </item>
+  </channel>
+</rss>
