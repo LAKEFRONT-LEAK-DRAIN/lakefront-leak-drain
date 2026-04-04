@@ -376,15 +376,18 @@ def fetch_pexels_video_candidates(query):
     data = resp.json()
     videos = data.get("videos") or []
 
-    candidates = []
+    strict_candidates = []
+    neutral_candidates = []
     for v in videos:
         video_id = str(v.get("id", ""))
         if video_id in BLACKLIST_PEXELS_IDS:
             continue
         
         tags = v.get("tags", "")
-        if not is_plumbing_relevant(tags):
+        if is_likely_non_plumbing(tags):
             continue
+
+        is_strict_match = is_plumbing_relevant(tags)
 
         thumb_url = (v.get("image") or "").strip()
         
@@ -393,13 +396,16 @@ def fetch_pexels_video_candidates(query):
                 if not is_platform_safe_video(vf.get("width") or v.get("width"), vf.get("height") or v.get("height")):
                     continue
                 candidates.append(
+                target_list = strict_candidates if is_strict_match else neutral_candidates
+                target_list.append(
                     {
                         "video_url": vf.get("link"),
                         "thumb_url": thumb_url,
                         "id": f"pexels:{video_id}" if video_id else "",
                     }
                 )
-    return candidates
+    # Prefer strong plumbing-tag matches, then fall back to neutral-but-safe clips.
+    return strict_candidates or neutral_candidates
 
 
 def fetch_pixabay_video_candidates(query):
@@ -505,7 +511,13 @@ def get_video_url(title, search_keyword, recent_video_ids=None):
     recent_video_ids = recent_video_ids or set()
 
     print("Trying Pixabay first (primary source)...")
-    pixabay_queries = ["plumbing"]
+    pixabay_queries = [
+        search_keyword,
+        "plumbing",
+        "drain repair",
+        "sump pump",
+        "leaking pipe",
+    ]
 
     seen_pixabay = set()
     for pq in pixabay_queries:

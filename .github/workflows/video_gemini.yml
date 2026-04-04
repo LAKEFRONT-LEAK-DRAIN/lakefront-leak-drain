@@ -70,6 +70,7 @@ jobs:
           PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
           PIXABAY_API_KEY: ${{ secrets.PIXABAY_API_KEY }}
           ALLOW_PEXELS_FALLBACK: 'true'
+          REQUIRE_VERTICAL_VIDEO: 'false'
         run: python video_update_feed.py
 
       - name: Verify stock feed top item changed
