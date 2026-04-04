@@ -54,6 +54,10 @@ jobs:
         if: steps.publish_window.outputs.should_run == 'true'
         run: python build_metricool_live_min_feed.py
 
+      - name: Normalize generated video files for social APIs
+        if: steps.publish_window.outputs.should_run == 'true'
+        run: python optimize_metricool_video_assets.py
+
       - name: Build Metricool latest-item live feed
         if: steps.publish_window.outputs.should_run == 'true'
         run: python build_metricool_live_latest_feed.py

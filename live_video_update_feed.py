@@ -806,11 +806,11 @@ def generate_video_page(title, slug, description_text, video_url, thumb_url):
     safe_desc = html_escape(description_text)
     safe_video = html_escape(video_url)
     
-    thumb_url = (thumb_url or "").strip()
+    thumb_url = (thumb_url or "").strip() or "https://lakefrontleakanddrain.com/blog/logo_tmp.jpg"
     safe_thumb = html_escape(thumb_url)
 
-    og_image_tag = ""
-    twitter_image_tag = ""
+    og_image_tag = f'<meta property="og:image" content="{safe_thumb}">'
+    twitter_image_tag = f'<meta name="twitter:image" content="{safe_thumb}">'
     img_tag = ""
 
     html_content = f"""<!doctype html>
@@ -828,6 +828,8 @@ def generate_video_page(title, slug, description_text, video_url, thumb_url):
     <meta property=\"og:video\" content=\"{safe_video}\">
     <meta property=\"og:video:secure_url\" content=\"{safe_video}\">
     <meta property=\"og:video:type\" content=\"video/mp4\">
+    <meta property=\"og:video:width\" content=\"720\">
+    <meta property=\"og:video:height\" content=\"1280\">
     <meta name=\"twitter:card\" content=\"summary_large_image\">
     <meta name=\"twitter:title\" content=\"{safe_title}\">
     <meta name=\"twitter:description\" content=\"{safe_desc}\">
