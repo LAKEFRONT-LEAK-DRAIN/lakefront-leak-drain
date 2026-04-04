@@ -5,6 +5,7 @@ from pathlib import Path
 
 SOURCE_FEED = Path("Live_Video_Feed.xml")
 OUTPUT_FEED = Path("metricool-live-latest.xml")
+MAX_ITEMS = 3
 
 
 def text_of(node: ET.Element | None, fallback: str = "") -> str:
@@ -21,11 +22,11 @@ def build_latest_feed() -> None:
     if source_channel is None:
         raise ValueError("Source feed is missing channel element")
 
-    first_item = source_channel.find("item")
-    if first_item is None:
+    source_items = source_channel.findall("item")
+    if not source_items:
         raise ValueError("Source feed has no items")
 
-    build_date = text_of(first_item.find("pubDate"), email.utils.format_datetime(datetime.now(timezone.utc)))
+    build_date = text_of(source_items[0].find("pubDate"), email.utils.format_datetime(datetime.now(timezone.utc)))
 
     rss = ET.Element("rss", {"version": "2.0"})
     channel = ET.SubElement(rss, "channel")
@@ -38,33 +39,34 @@ def build_latest_feed() -> None:
     ET.SubElement(channel, "language").text = "en-us"
     ET.SubElement(channel, "lastBuildDate").text = build_date
 
-    out_item = ET.SubElement(channel, "item")
-    page_link = text_of(first_item.find("link"), "https://lakefrontleakanddrain.com/live-video/")
+    for source_item in source_items[:MAX_ITEMS]:
+        out_item = ET.SubElement(channel, "item")
+        page_link = text_of(source_item.find("link"), "https://lakefrontleakanddrain.com/live-video/")
 
-    enclosure = first_item.find("enclosure")
-    enclosure_url = enclosure.get("url", "").strip() if enclosure is not None else ""
-    enclosure_type = enclosure.get("type", "video/mp4").strip() if enclosure is not None else "video/mp4"
-    enclosure_len = enclosure.get("length", "1").strip() if enclosure is not None else "1"
-    if not enclosure_len or enclosure_len == "0":
-        enclosure_len = "1"
+        enclosure = source_item.find("enclosure")
+        enclosure_url = enclosure.get("url", "").strip() if enclosure is not None else ""
+        enclosure_type = enclosure.get("type", "video/mp4").strip() if enclosure is not None else "video/mp4"
+        enclosure_len = enclosure.get("length", "1").strip() if enclosure is not None else "1"
+        if not enclosure_len or enclosure_len == "0":
+            enclosure_len = "1"
 
-    # Prefer direct MP4 as link/guid to maximize chance of true video ingestion.
-    item_link = enclosure_url or page_link
+        # Prefer direct MP4 as link/guid to maximize chance of true video ingestion.
+        item_link = enclosure_url or page_link
 
-    ET.SubElement(out_item, "title").text = text_of(first_item.find("title"), "Live Video")
-    ET.SubElement(out_item, "link").text = item_link
-    guid = ET.SubElement(out_item, "guid", {"isPermaLink": "true"})
-    guid.text = item_link
-    ET.SubElement(out_item, "pubDate").text = text_of(first_item.find("pubDate"), build_date)
-    base_desc = text_of(first_item.find("description"), "Live video update.")
-    ET.SubElement(out_item, "description").text = f"{base_desc} Watch page: {page_link}"
+        ET.SubElement(out_item, "title").text = text_of(source_item.find("title"), "Live Video")
+        ET.SubElement(out_item, "link").text = item_link
+        guid = ET.SubElement(out_item, "guid", {"isPermaLink": "true"})
+        guid.text = item_link
+        ET.SubElement(out_item, "pubDate").text = text_of(source_item.find("pubDate"), build_date)
+        base_desc = text_of(source_item.find("description"), "Live video update.")
+        ET.SubElement(out_item, "description").text = f"{base_desc} Watch page: {page_link}"
 
-    if enclosure_url:
-        ET.SubElement(
-            out_item,
-            "enclosure",
-            {"url": enclosure_url, "length": enclosure_len, "type": enclosure_type},
-        )
+        if enclosure_url:
+            ET.SubElement(
+                out_item,
+                "enclosure",
+                {"url": enclosure_url, "length": enclosure_len, "type": enclosure_type},
+            )
 
     ET.indent(rss, space="  ")
     OUTPUT_FEED.write_text(
