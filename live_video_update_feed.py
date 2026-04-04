@@ -699,6 +699,7 @@ def get_video_url(title, search_keyword, recent_video_ids=None, description="", 
     thumb_url = ""
     queries = build_video_queries(title, search_keyword)
     recent_video_ids = recent_video_ids or set()
+    gemini_failed = False
 
     if USE_GEMINI_GENERATED_VIDEO:
         try:
@@ -706,8 +707,8 @@ def get_video_url(title, search_keyword, recent_video_ids=None, description="", 
             print("Video generated with Gemini Veo")
             return gemini_video_url, gemini_thumb_url
         except Exception as e:
-            print(f"Gemini video generation failed, using default fallback video: {e}")
-            return DEFAULT_VIDEO, ""
+            print(f"Gemini video generation failed, trying stock fallback sources: {e}")
+            gemini_failed = True
 
     if ENFORCE_TEXT_VIDEO_ALIGNMENT:
         alignment_queries = generate_alignment_queries(title, description, cta, search_keyword)
@@ -787,6 +788,8 @@ def get_video_url(title, search_keyword, recent_video_ids=None, description="", 
 
     if not ALLOW_PEXELS_FALLBACK:
         print("Pixabay exhausted and Pexels fallback is disabled. Using default video fallback")
+        if gemini_failed:
+            raise RuntimeError("Gemini failed and Pexels fallback is disabled")
         return video_url, thumb_url
 
     print("Pixabay exhausted, trying Pexels fallback...")
@@ -809,6 +812,8 @@ def get_video_url(title, search_keyword, recent_video_ids=None, description="", 
             print(f"Pexels search failed for '{query}': {e}")
 
     print("Using default video fallback")
+    if gemini_failed:
+        raise RuntimeError("Gemini failed and no stock candidate video was found")
     return video_url, thumb_url
 
 
@@ -1223,6 +1228,9 @@ def main():
         description=description,
         cta=cta,
     )
+
+    if (video_url or "").strip().lower() == DEFAULT_VIDEO.lower():
+        raise RuntimeError("Resolved to default fallback video; aborting to avoid stale/no-op feed run")
 
     if not ENFORCE_TEXT_VIDEO_ALIGNMENT:
         headline, description, cta = generate_post_copy(title)
