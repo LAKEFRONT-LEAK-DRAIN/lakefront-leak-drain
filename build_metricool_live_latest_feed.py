@@ -39,14 +39,7 @@ def build_latest_feed() -> None:
     ET.SubElement(channel, "lastBuildDate").text = build_date
 
     out_item = ET.SubElement(channel, "item")
-    item_link = text_of(first_item.find("link"), "https://lakefrontleakanddrain.com/live-video/")
-
-    ET.SubElement(out_item, "title").text = text_of(first_item.find("title"), "Live Video")
-    ET.SubElement(out_item, "link").text = item_link
-    guid = ET.SubElement(out_item, "guid", {"isPermaLink": "true"})
-    guid.text = item_link
-    ET.SubElement(out_item, "pubDate").text = text_of(first_item.find("pubDate"), build_date)
-    ET.SubElement(out_item, "description").text = text_of(first_item.find("description"), "Live video update.")
+    page_link = text_of(first_item.find("link"), "https://lakefrontleakanddrain.com/live-video/")
 
     enclosure = first_item.find("enclosure")
     enclosure_url = enclosure.get("url", "").strip() if enclosure is not None else ""
@@ -54,6 +47,17 @@ def build_latest_feed() -> None:
     enclosure_len = enclosure.get("length", "1").strip() if enclosure is not None else "1"
     if not enclosure_len or enclosure_len == "0":
         enclosure_len = "1"
+
+    # Prefer direct MP4 as link/guid to maximize chance of true video ingestion.
+    item_link = enclosure_url or page_link
+
+    ET.SubElement(out_item, "title").text = text_of(first_item.find("title"), "Live Video")
+    ET.SubElement(out_item, "link").text = item_link
+    guid = ET.SubElement(out_item, "guid", {"isPermaLink": "true"})
+    guid.text = item_link
+    ET.SubElement(out_item, "pubDate").text = text_of(first_item.find("pubDate"), build_date)
+    base_desc = text_of(first_item.find("description"), "Live video update.")
+    ET.SubElement(out_item, "description").text = f"{base_desc} Watch page: {page_link}"
 
     if enclosure_url:
         ET.SubElement(
