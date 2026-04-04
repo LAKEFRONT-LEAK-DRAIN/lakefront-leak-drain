@@ -1,4 +1,4 @@
-name: Gemini Automated Feed Updater
+name: Gemini Main Feed Updater
 
 on:
   schedule:

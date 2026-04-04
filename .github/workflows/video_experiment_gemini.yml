@@ -1,4 +1,4 @@
-name: Gemini Video Feed Experiment Updater
+name: Gemini Video Feed Experiment (Manual)
 
 on:
   workflow_dispatch:

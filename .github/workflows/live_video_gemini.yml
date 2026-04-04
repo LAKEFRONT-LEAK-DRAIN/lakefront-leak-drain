@@ -1,4 +1,4 @@
-name: Gemini Automated Live Video Feed Updater
+name: Gemini Live Video Feed Updater (Primary)
 
 on:
   schedule:
