@@ -3,10 +3,14 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
+import requests
+
 FEED_PATH = Path("metricool-live-basic.xml")
 MAX_ITEM_SIZE_BYTES = 20 * 1024 * 1024
 REQUIRED_ITEM_COUNT = 3
 SITE_PREFIX = "https://lakefrontleakanddrain.com/"
+REQUEST_TIMEOUT_SECONDS = 12
+USER_AGENT = "LakefrontMetricoolValidator/1.0"
 
 
 def local_path_from_url(url: str) -> Path | None:
@@ -24,6 +28,38 @@ def has_version_param(url: str) -> bool:
     params = parse_qs(parsed.query)
     value = params.get("v", [""])[0].strip()
     return bool(value and value.isdigit())
+
+
+def normalized_video_path(url: str) -> str:
+    parsed = urlparse(url)
+    return parsed.path.strip().lower()
+
+
+def ensure_remote_video_headers(item_idx: int, url: str) -> None:
+    try:
+        response = requests.head(
+            url,
+            allow_redirects=True,
+            timeout=REQUEST_TIMEOUT_SECONDS,
+            headers={"User-Agent": USER_AGENT},
+        )
+    except Exception as e:
+        fail(f"Item {item_idx} remote HEAD failed for enclosure URL {url}: {e}")
+
+    if response.status_code >= 400:
+        fail(f"Item {item_idx} enclosure URL returned HTTP {response.status_code}: {url}")
+
+    content_type = (response.headers.get("Content-Type") or "").strip().lower()
+    if "video/mp4" not in content_type:
+        fail(f"Item {item_idx} enclosure Content-Type is not video/mp4: {content_type or '[missing]'}")
+
+    cors = (response.headers.get("Access-Control-Allow-Origin") or "").strip()
+    if cors != "*":
+        fail(f"Item {item_idx} enclosure missing wildcard CORS header: {url}")
+
+    accept_ranges = (response.headers.get("Accept-Ranges") or "").strip().lower()
+    if "bytes" not in accept_ranges:
+        fail(f"Item {item_idx} enclosure missing Accept-Ranges: bytes: {url}")
 
 
 def fail(msg: str) -> None:
@@ -66,10 +102,26 @@ def main() -> int:
         for field_name, value in (("link", link), ("guid", guid), ("enclosure", enclosure_url)):
             if not value:
                 fail(f"Item {idx} has empty {field_name}")
+            if any(ch.isspace() for ch in value):
+                fail(f"Item {idx} {field_name} URL contains whitespace: {value}")
+
+            parsed = urlparse(value)
+            if parsed.scheme.lower() != "https" or not parsed.netloc:
+                fail(f"Item {idx} {field_name} must be an absolute HTTPS URL: {value}")
+
             if ".mp4" not in value.lower():
                 fail(f"Item {idx} {field_name} is not an MP4 URL: {value}")
             if not has_version_param(value):
                 fail(f"Item {idx} {field_name} is missing numeric ?v= cache-buster: {value}")
+
+        link_path = normalized_video_path(link)
+        guid_path = normalized_video_path(guid)
+        enclosure_path = normalized_video_path(enclosure_url)
+        if not (link_path == guid_path == enclosure_path):
+            fail(
+                f"Item {idx} link/guid/enclosure point to different MP4 paths: "
+                f"link={link_path}, guid={guid_path}, enclosure={enclosure_path}"
+            )
 
         local_video_path = local_path_from_url(enclosure_url)
         if local_video_path is not None:
@@ -81,6 +133,8 @@ def main() -> int:
                 fail(
                     f"Item {idx} MP4 exceeds 20 MB ({mb:.1f} MB): {local_video_path}"
                 )
+
+        ensure_remote_video_headers(idx, enclosure_url)
 
     print(f"Validation passed for {len(items)} items in {FEED_PATH}.")
     return 0
