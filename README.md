@@ -50,3 +50,5 @@ The repository now has a fully separate Live Video pipeline for Metricool and in
 - Workflow: `.github/workflows/live_video_gemini.yml`
 
 This pipeline does not write to the original `video_feed.xml` or `video/` paths.
+
+# Trigger: organization repo transfer test 2026-04-05
