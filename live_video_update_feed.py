@@ -276,14 +276,14 @@ Use this 5-day Cleveland weather context before deciding topic:
 {forecast_context}
 
 Rules:
-- Make it specific to homeowners, drains, sewer lines, leaks, sump pumps, frozen pipes, water heaters, inspections, backups, or plumbing emergencies.
+- The topic MUST be about residential plumbing services only: drains, sewer lines, pipes, sump pumps, water heaters, leaks, backups, frozen pipes, hose bibs, faucets, garbage disposals, or plumbing emergencies. NEVER suggest a non-plumbing or general home improvement topic.
 - Favor seasonal relevance for Cleveland.
 - If forecast indicates a substantial plumbing-relevant weather event, prioritize that event and create a prevention-focused topic tied to it.
 - If no substantial weather event is present, use a strong evergreen seasonal plumbing prevention topic.
 - Keep title concise and hooky for TikTok/Shorts.
 - Output ONLY this format:
 Title | video keyword
-- video keyword should be 2 to 4 words.
+- video keyword should be 2 to 4 words describing a plumbing visual.
 """.strip()
 
     resp = client.models.generate_content(model="gemini-2.5-flash", contents=prompt)
@@ -543,7 +543,7 @@ def safe_json_object(text):
 
 def generate_alignment_queries(title, description, cta, fallback_keyword):
     prompt = f"""
-Create search queries to find stock video that visually matches this post.
+Create search queries to find stock video that visually matches this plumbing post.
 
 Title: {title}
 Description: {description}
@@ -555,7 +555,8 @@ Return ONLY JSON:
 Rules:
 - 5 to 8 queries
 - each query 2 to 6 words
-- include concrete plumbing visuals when possible (drain, pipe, sink, basement water, etc.)
+- ALL queries must describe plumbing, drainage, pipes, or residential water system visuals (drain, pipe, sewer, sump pump, water heater, leak, sink, basement water, plumber working, etc.)
+- NEVER include generic lifestyle, home decor, or non-plumbing visuals
 - no punctuation except spaces
 """.strip()
 
@@ -877,7 +878,7 @@ def generate_video_page(title, slug, description_text, video_url, thumb_url):
 
 def generate_post_copy(title):
     prompt = f"""
-Write short RSS-ready copy for this video title:
+Write short RSS-ready copy for this plumbing video:
 {title}
 
 Return ONLY valid JSON with keys:
@@ -886,10 +887,11 @@ description
 cta
 
 Rules:
-- Audience: Cleveland homeowners.
+- ALL content MUST directly relate to residential plumbing: drains, sewer lines, pipes, sump pumps, water heaters, leaks, backups, frozen pipes, or plumbing emergencies. Do NOT drift into general home improvement, lifestyle, or any non-plumbing topic.
+- Audience: Cleveland homeowners who need a local licensed plumber.
 - Tone: helpful, local, clear, urgent but not spammy.
-- description must be exactly 2 short sentences.
-- cta must be one short sentence.
+- description must be exactly 2 short sentences grounded in the specific plumbing topic above.
+- cta must be one short sentence directing the reader to call or book Lakefront Leak & Drain.
 - No markdown.
 """.strip()
 
