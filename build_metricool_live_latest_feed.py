@@ -116,7 +116,7 @@ def build_latest_feed() -> None:
         guid.text = item_link
         ET.SubElement(out_item, "pubDate").text = item_pub_date
         base_desc = text_of(source_item.find("description"), "Live video update.")
-        ET.SubElement(out_item, "description").text = f"{base_desc} Watch page: {page_link}"
+        ET.SubElement(out_item, "description").text = base_desc
 
         if versioned_enclosure_url:
             ET.SubElement(
