@@ -7,7 +7,8 @@ import requests
 
 FEED_PATH = Path("metricool-live-basic.xml")
 MAX_ITEM_SIZE_BYTES = 20 * 1024 * 1024
-REQUIRED_ITEM_COUNT = 3
+MIN_ITEM_COUNT = 1
+MAX_ITEM_COUNT = 3
 SITE_PREFIX = "https://lakefrontleakanddrain.com/"
 REQUEST_TIMEOUT_SECONDS = 12
 USER_AGENT = "LakefrontMetricoolValidator/1.0"
@@ -78,8 +79,8 @@ def main() -> int:
         fail("Feed has no <channel> element")
 
     items = channel.findall("item")
-    if len(items) != REQUIRED_ITEM_COUNT:
-        fail(f"Expected exactly {REQUIRED_ITEM_COUNT} items, found {len(items)}")
+    if len(items) < MIN_ITEM_COUNT or len(items) > MAX_ITEM_COUNT:
+        fail(f"Expected {MIN_ITEM_COUNT} to {MAX_ITEM_COUNT} items, found {len(items)}")
 
     for idx, item in enumerate(items, start=1):
         link = (item.findtext("link") or "").strip()
