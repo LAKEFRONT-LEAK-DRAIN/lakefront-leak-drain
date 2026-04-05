@@ -944,7 +944,33 @@ def make_description(description, cta, hashtags=""):
     return f"{description} {cta} {hashtags}".strip()
 
 
+def local_file_path_from_site_url(url):
+    normalized = (url or "").strip()
+    site_prefix = SITE_BASE_URL.rstrip("/") + "/"
+    if not normalized.startswith(site_prefix):
+        return None
+
+    rel = normalized[len(site_prefix):].strip("/")
+    if not rel:
+        return None
+
+    candidate = (BASE_DIR / Path(rel)).resolve()
+    try:
+        candidate.relative_to(BASE_DIR.resolve())
+    except ValueError:
+        return None
+
+    return candidate
+
+
 def fetch_media_length(video_url):
+    local_path = local_file_path_from_site_url(video_url)
+    if local_path and local_path.exists() and local_path.is_file():
+        try:
+            return str(local_path.stat().st_size)
+        except OSError:
+            pass
+
     try:
         response = requests.head(
             video_url,
