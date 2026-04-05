@@ -95,3 +95,17 @@
   Access-Control-Allow-Methods: GET, OPTIONS
   Access-Control-Allow-Headers: *
   X-Content-Type-Options: nosniff
+
+/live-video/generated/*
+  Content-Type: video/mp4
+  Access-Control-Allow-Origin: *
+  Access-Control-Allow-Methods: GET, HEAD, OPTIONS
+  Access-Control-Allow-Headers: *
+  Accept-Ranges: bytes
+  X-Content-Type-Options: nosniff
+
+/live-video/*
+  Access-Control-Allow-Origin: *
+  Access-Control-Allow-Methods: GET, HEAD, OPTIONS
+  Access-Control-Allow-Headers: *
+  Accept-Ranges: bytes

@@ -4,6 +4,8 @@ import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
 from pathlib import Path
 
+import requests
+
 SOURCE_FEED = Path("Live_Video_Feed.xml")
 OUTPUT_FEED = Path("metricool-live-latest.xml")
 MAX_ITEMS = 3
@@ -37,6 +39,32 @@ def add_version_param(url: str, version: str) -> str:
     return f"{url}{sep}v={version}"
 
 
+def resolve_enclosure_length(declared_len: str, url: str) -> str:
+    """Return a best-effort byte length string for an enclosure.
+
+    If the declared length is missing, zero, or the placeholder '1', attempt an
+    HTTP HEAD request to get the real Content-Length.  Falls back to '0' on
+    failure so the feed remains valid without a misleading size.
+    """
+    clean = (declared_len or "").strip()
+    if clean and clean not in ("0", "1"):
+        return clean
+
+    if not url:
+        return "0"
+
+    try:
+        resp = requests.head(url.split("?")[0], allow_redirects=True, timeout=8,
+                             headers={"User-Agent": "LakefrontFeedBuilder/1.0"})
+        content_length = resp.headers.get("Content-Length", "").strip()
+        if content_length.isdigit() and int(content_length) > 1:
+            return content_length
+    except Exception:
+        pass
+
+    return "0"
+
+
 def build_latest_feed() -> None:
     source_tree = ET.parse(SOURCE_FEED)
     source_root = source_tree.getroot()
@@ -68,9 +96,9 @@ def build_latest_feed() -> None:
         enclosure = source_item.find("enclosure")
         enclosure_url = enclosure.get("url", "").strip() if enclosure is not None else ""
         enclosure_type = enclosure.get("type", "video/mp4").strip() if enclosure is not None else "video/mp4"
-        enclosure_len = enclosure.get("length", "1").strip() if enclosure is not None else "1"
-        if not enclosure_len or enclosure_len == "0":
-            enclosure_len = "1"
+        enclosure_len = enclosure.get("length", "0").strip() if enclosure is not None else "0"
+
+        enclosure_len = resolve_enclosure_length(enclosure_len, enclosure_url)
 
         # Derive a version token from the item's pubDate for cache-busting.
         item_pub_date = text_of(source_item.find("pubDate"), build_date)
