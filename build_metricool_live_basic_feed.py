@@ -69,6 +69,12 @@ def build_basic_feed() -> None:
     item_link = add_version_param(enclosure_url, version)
     thumb_url = find_media_thumbnail_url(source_item) or "https://lakefrontleakanddrain.com/blog/logo_tmp.jpg"
 
+    # Strict validation: abort if any output URL is empty
+    if not item_link:
+        raise ValueError("Output item link is empty after versioning")
+    if not thumb_url:
+        raise ValueError("Output thumbnail URL is empty")
+
     rss = ET.Element("rss", {"version": "2.0", "xmlns:media": MEDIA_NS})
     channel = ET.SubElement(rss, "channel")
     ET.SubElement(channel, "title").text = text_of(source_channel.find("title"), "Lakefront Live Video Feed")
