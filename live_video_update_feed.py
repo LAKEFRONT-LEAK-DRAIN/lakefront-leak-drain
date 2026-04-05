@@ -262,6 +262,22 @@ def build_forecast_context_block():
     )
 
 
+def safe_generate_content_text(prompt, model="gemini-2.5-flash", attempts=3):
+    last_error = None
+    for attempt in range(1, attempts + 1):
+        try:
+            resp = client.models.generate_content(model=model, contents=prompt)
+            return (resp.text or "").strip()
+        except Exception as e:
+            last_error = e
+            print(f"Gemini generate_content failed (attempt {attempt}/{attempts}): {e}")
+            if attempt < attempts:
+                time.sleep(min(2 * attempt, 6))
+
+    print(f"Gemini generate_content exhausted retries: {last_error}")
+    return ""
+
+
 def generate_topic(existing_titles):
     recent_titles_text = "\n".join(f"- {t}" for t in existing_titles[:RECENT_TITLE_LOOKBACK]) or "- None"
     forecast_context = build_forecast_context_block()
@@ -286,8 +302,7 @@ Title | video keyword
 - video keyword should be 2 to 4 words describing a plumbing visual.
 """.strip()
 
-    resp = client.models.generate_content(model="gemini-2.5-flash", contents=prompt)
-    text = (resp.text or "").strip()
+    text = safe_generate_content_text(prompt, model="gemini-2.5-flash")
 
     try:
         title, search_keyword = [x.strip() for x in text.split("|", 1)]
@@ -561,8 +576,8 @@ Rules:
 """.strip()
 
     try:
-        resp = client.models.generate_content(model="gemini-2.5-flash", contents=prompt)
-        data = safe_json_object(resp.text)
+        text = safe_generate_content_text(prompt, model="gemini-2.5-flash")
+        data = safe_json_object(text)
         queries = data.get("queries") if isinstance(data, dict) else None
         if isinstance(queries, list):
             clean = []
@@ -618,8 +633,8 @@ Use the candidate number only.
 """.strip()
 
     try:
-        resp = client.models.generate_content(model="gemini-2.5-flash", contents=prompt)
-        data = safe_json_object(resp.text)
+        text = safe_generate_content_text(prompt, model="gemini-2.5-flash")
+        data = safe_json_object(text)
         choice = int(data.get("choice", 0))
         if 1 <= choice <= len(shortlist):
             picked = shortlist[choice - 1]
@@ -902,8 +917,7 @@ Rules:
 - No markdown.
 """.strip()
 
-    resp = client.models.generate_content(model="gemini-2.5-flash", contents=prompt)
-    text = (resp.text or "").strip()
+    text = safe_generate_content_text(prompt, model="gemini-2.5-flash")
 
     try:
         data = safe_json_object(text)
