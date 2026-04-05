@@ -877,21 +877,28 @@ def generate_video_page(title, slug, description_text, video_url, thumb_url):
 
 
 def generate_post_copy(title):
+    forecast_context = build_forecast_context_block()
+
     prompt = f"""
 Write short RSS-ready copy for this plumbing video:
 {title}
+
+Use this 5-day Cleveland weather context to drive urgency if a storm or freeze is coming:
+{forecast_context}
 
 Return ONLY valid JSON with keys:
 headline
 description
 cta
+hashtags
 
 Rules:
 - ALL content MUST directly relate to residential plumbing: drains, sewer lines, pipes, sump pumps, water heaters, leaks, backups, frozen pipes, or plumbing emergencies. Do NOT drift into general home improvement, lifestyle, or any non-plumbing topic.
 - Audience: Cleveland homeowners who need a local licensed plumber.
 - Tone: helpful, local, clear, urgent but not spammy.
-- description must be exactly 2 short sentences grounded in the specific plumbing topic above.
-- cta must be one short sentence directing the reader to call or book Lakefront Leak & Drain.
+- description must be exactly 2 short sentences grounded in the specific plumbing topic above. If there is a severe weather event, tie the description to the weather.
+- cta must be one short, dynamic sentence. Instead of a generic "Call us," reference the weather or specific plumbing issue (e.g., "Don't wait for your basement to flood this weekend-book your sump pump inspection today.").
+- hashtags must be a single string of 3 to 5 relevant hashtags including local tags (e.g., "#ClevelandPlumber #SumpPump #OhioWeather").
 - No markdown.
 """.strip()
 
@@ -899,23 +906,28 @@ Rules:
     text = (resp.text or "").strip()
 
     try:
-        data = json.loads(text)
+        data = safe_json_object(text)
         headline = (data.get("headline") or title).strip()
         description = (data.get("description") or "").strip()
         cta = (data.get("cta") or "Call or book Lakefront Leak & Drain.").strip()
+        hashtags = (data.get("hashtags") or "").strip()
     except Exception:
         headline = title
         description = "Cleveland plumbing issues can escalate fast when warning signs are ignored. Learn what to watch for so you can act early and avoid bigger damage."
         cta = "Call or book Lakefront Leak & Drain."
+        hashtags = "#ClevelandPlumber #PlumbingRepair"
 
     if not description:
         description = "Cleveland plumbing issues can escalate fast when warning signs are ignored. Learn what to watch for so you can act early and avoid bigger damage."
 
-    return headline, description, cta
+    if not hashtags:
+        hashtags = "#ClevelandPlumber #PlumbingRepair"
+
+    return headline, description, cta, hashtags
 
 
-def make_description(description, cta):
-    return f"{description} {cta}".strip()
+def make_description(description, cta, hashtags=""):
+    return f"{description} {cta} {hashtags}".strip()
 
 
 def fetch_media_length(video_url):
@@ -1220,8 +1232,9 @@ def main():
     headline = title
     description = ""
     cta = "Call or book Lakefront Leak & Drain."
+    hashtags = "#ClevelandPlumber #PlumbingRepair"
     if ENFORCE_TEXT_VIDEO_ALIGNMENT:
-        headline, description, cta = generate_post_copy(title)
+        headline, description, cta, hashtags = generate_post_copy(title)
 
     video_url, thumb_url = get_video_url(
         title,
@@ -1235,7 +1248,7 @@ def main():
         raise RuntimeError("Resolved to default fallback video; aborting to avoid stale/no-op feed run")
 
     if not ENFORCE_TEXT_VIDEO_ALIGNMENT:
-        headline, description, cta = generate_post_copy(title)
+        headline, description, cta, hashtags = generate_post_copy(title)
 
     final_title = headline.strip() or title.strip()
     if title_exists(feed, final_title):
@@ -1244,7 +1257,7 @@ def main():
         final_title = (final_title + suffix).strip()
         print(f"Adjusted duplicate headline to unique title: {final_title}")
 
-    description_text = make_description(description, cta)
+    description_text = make_description(description, cta, hashtags)
     slug = create_slug(final_title)
     post_link = generate_video_page(final_title, slug, description_text, video_url, thumb_url)
     new_item = build_item_xml(final_title, description_text, video_url, post_link)
