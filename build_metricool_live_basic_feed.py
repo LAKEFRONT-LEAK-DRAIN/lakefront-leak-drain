@@ -6,6 +6,7 @@ from pathlib import Path
 
 SOURCE_FEED = Path("Live_Video_Feed.xml")
 OUTPUT_FEED = Path("metricool-live-basic.xml")
+MEDIA_NS = "http://search.yahoo.com/mrss/"
 
 
 def text_of(node: ET.Element | None, fallback: str = "") -> str:
@@ -31,7 +32,19 @@ def add_version_param(url: str, version: str) -> str:
     return f"{url}{sep}v={version}"
 
 
+def find_media_thumbnail_url(item: ET.Element) -> str:
+    for child in list(item):
+        tag = child.tag or ""
+        if tag.endswith("thumbnail"):
+            url = (child.get("url") or "").strip()
+            if url:
+                return url
+    return ""
+
+
 def build_basic_feed() -> None:
+    ET.register_namespace("media", MEDIA_NS)
+
     source_tree = ET.parse(SOURCE_FEED)
     source_root = source_tree.getroot()
     source_channel = source_root.find("channel")
@@ -54,8 +67,9 @@ def build_basic_feed() -> None:
 
     version = pub_date_to_version(item_pub_date)
     item_link = add_version_param(enclosure_url, version)
+    thumb_url = find_media_thumbnail_url(source_item) or "https://lakefrontleakanddrain.com/blog/logo_tmp.jpg"
 
-    rss = ET.Element("rss", {"version": "2.0"})
+    rss = ET.Element("rss", {"version": "2.0", "xmlns:media": MEDIA_NS})
     channel = ET.SubElement(rss, "channel")
     ET.SubElement(channel, "title").text = text_of(source_channel.find("title"), "Lakefront Live Video Feed")
     ET.SubElement(channel, "link").text = text_of(source_channel.find("link"), "https://lakefrontleakanddrain.com/")
@@ -75,6 +89,17 @@ def build_basic_feed() -> None:
         "enclosure",
         {"url": item_link, "length": enclosure_len or "0", "type": enclosure_type or "video/mp4"},
     )
+    ET.SubElement(
+        out_item,
+        "media:content",
+        {
+            "url": item_link,
+            "medium": "video",
+            "type": enclosure_type or "video/mp4",
+            "fileSize": enclosure_len or "0",
+        },
+    )
+    ET.SubElement(out_item, "media:thumbnail", {"url": thumb_url})
 
     ET.indent(rss, space="  ")
     OUTPUT_FEED.write_text(
