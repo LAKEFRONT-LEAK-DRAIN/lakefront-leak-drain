@@ -133,18 +133,22 @@ def main() -> int:
             if parsed.scheme.lower() != "https" or not parsed.netloc:
                 fail(f"Item {idx} {field_name} must be an absolute HTTPS URL: {value}")
 
-            if ".mp4" not in value.lower():
-                fail(f"Item {idx} {field_name} is not an MP4 URL: {value}")
-            if not has_version_param(value):
-                fail(f"Item {idx} {field_name} is missing numeric ?v= cache-buster: {value}")
+        # Metricool feed format:
+        # - link/guid: HTML page URL for post body
+        # - enclosure/media:content: direct MP4 URL for media attachment
+        if ".mp4" in link.lower():
+            fail(f"Item {idx} link should be an HTML page URL, not an MP4 URL: {link}")
+        if ".mp4" in guid.lower():
+            fail(f"Item {idx} guid should be an HTML page URL, not an MP4 URL: {guid}")
+
+        if ".mp4" not in enclosure_url.lower():
+            fail(f"Item {idx} enclosure is not an MP4 URL: {enclosure_url}")
 
         link_path = normalized_video_path(link)
         guid_path = normalized_video_path(guid)
-        enclosure_path = normalized_video_path(enclosure_url)
-        if not (link_path == guid_path == enclosure_path):
+        if link_path != guid_path:
             fail(
-                f"Item {idx} link/guid/enclosure point to different MP4 paths: "
-                f"link={link_path}, guid={guid_path}, enclosure={enclosure_path}"
+                f"Item {idx} link/guid paths differ: link={link_path}, guid={guid_path}"
             )
 
         local_video_path = local_path_from_url(enclosure_url)
