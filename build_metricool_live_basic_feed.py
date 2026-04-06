@@ -78,6 +78,9 @@ def build_basic_feed() -> None:
         raise ValueError("Output item link is empty after versioning")
     if not versioned_enclosure_url:
         raise ValueError("Output enclosure URL is empty after versioning")
+    # Use the clean .mp4 URL (no ?v= query param) for enclosure/media:content
+    # so Metricool can identify it as a video by the file extension.
+    media_url = enclosure_url
     if not thumb_url:
         raise ValueError("Output thumbnail URL is empty")
 
@@ -99,13 +102,13 @@ def build_basic_feed() -> None:
     ET.SubElement(
         out_item,
         "enclosure",
-        {"url": versioned_enclosure_url, "length": enclosure_len or "0", "type": enclosure_type or "video/mp4"},
+        {"url": media_url, "length": enclosure_len or "0", "type": enclosure_type or "video/mp4"},
     )
     ET.SubElement(
         out_item,
         "media:content",
         {
-            "url": versioned_enclosure_url,
+            "url": media_url,
             "medium": "video",
             "type": enclosure_type or "video/mp4",
             "fileSize": enclosure_len or "0",
