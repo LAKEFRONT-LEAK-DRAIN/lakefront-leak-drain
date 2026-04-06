@@ -66,12 +66,18 @@ def build_basic_feed() -> None:
         raise ValueError("Top source item is missing enclosure URL")
 
     version = pub_date_to_version(item_pub_date)
-    item_link = add_version_param(enclosure_url, version)
+    # Use the HTML page link (not the .mp4 URL) so Metricool doesn't inject
+    # a raw video file URL into the post body text.
+    page_link = text_of(source_item.find("link"), "")
+    item_link = page_link if page_link else add_version_param(enclosure_url, version)
+    versioned_enclosure_url = add_version_param(enclosure_url, version)
     thumb_url = find_media_thumbnail_url(source_item) or "https://lakefrontleakanddrain.com/blog/logo_tmp.jpg"
 
     # Strict validation: abort if any output URL is empty
     if not item_link:
         raise ValueError("Output item link is empty after versioning")
+    if not versioned_enclosure_url:
+        raise ValueError("Output enclosure URL is empty after versioning")
     if not thumb_url:
         raise ValueError("Output thumbnail URL is empty")
 
@@ -93,13 +99,13 @@ def build_basic_feed() -> None:
     ET.SubElement(
         out_item,
         "enclosure",
-        {"url": item_link, "length": enclosure_len or "0", "type": enclosure_type or "video/mp4"},
+        {"url": versioned_enclosure_url, "length": enclosure_len or "0", "type": enclosure_type or "video/mp4"},
     )
     ET.SubElement(
         out_item,
         "media:content",
         {
-            "url": item_link,
+            "url": versioned_enclosure_url,
             "medium": "video",
             "type": enclosure_type or "video/mp4",
             "fileSize": enclosure_len or "0",
