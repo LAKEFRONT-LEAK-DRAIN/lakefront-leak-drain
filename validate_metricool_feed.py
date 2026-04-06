@@ -40,6 +40,10 @@ def normalized_video_path(url: str) -> str:
     return parsed.path.strip().lower()
 
 
+def is_site_url(url: str) -> bool:
+    return url.startswith(SITE_PREFIX)
+
+
 def ensure_remote_video_headers(item_idx: int, url: str) -> None:
     try:
         response = requests.head(
@@ -57,6 +61,9 @@ def ensure_remote_video_headers(item_idx: int, url: str) -> None:
     content_type = (response.headers.get("Content-Type") or "").strip().lower()
     if "video/mp4" not in content_type:
         fail(f"Item {item_idx} enclosure Content-Type is not video/mp4: {content_type or '[missing]'}")
+
+    if not is_site_url(url):
+        return
 
     cors = (response.headers.get("Access-Control-Allow-Origin") or "").strip()
     if cors != "*":
