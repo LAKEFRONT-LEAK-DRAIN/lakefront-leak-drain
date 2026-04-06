@@ -71,7 +71,7 @@ def build_basic_feed() -> None:
     page_link = text_of(source_item.find("link"), "")
     item_link = page_link if page_link else add_version_param(enclosure_url, version)
     versioned_enclosure_url = add_version_param(enclosure_url, version)
-    thumb_url = find_media_thumbnail_url(source_item) or "https://lakefrontleakanddrain.com/blog/logo_tmp.jpg"
+    thumb_url = find_media_thumbnail_url(source_item) or ""
 
     # Strict validation: abort if any output URL is empty
     if not item_link:
@@ -81,8 +81,6 @@ def build_basic_feed() -> None:
     # Use the clean .mp4 URL (no ?v= query param) for enclosure/media:content
     # so Metricool can identify it as a video by the file extension.
     media_url = enclosure_url
-    if not thumb_url:
-        raise ValueError("Output thumbnail URL is empty")
 
     rss = ET.Element("rss", {"version": "2.0", "xmlns:media": MEDIA_NS})
     channel = ET.SubElement(rss, "channel")
@@ -114,7 +112,8 @@ def build_basic_feed() -> None:
             "fileSize": enclosure_len or "0",
         },
     )
-    ET.SubElement(out_item, "media:thumbnail", {"url": thumb_url})
+    # Omit media:thumbnail in the Metricool feed so video enclosures are
+    # prioritized by consumers that otherwise choose image thumbnails.
 
     ET.indent(rss, space="  ")
     OUTPUT_FEED.write_text(
