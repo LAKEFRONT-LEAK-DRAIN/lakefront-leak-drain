@@ -1,3 +1,4 @@
+import os
 import sys
 import xml.etree.ElementTree as ET
 from pathlib import Path
@@ -12,6 +13,9 @@ MAX_ITEM_COUNT = 3
 SITE_PREFIX = "https://lakefrontleakanddrain.com/"
 REQUEST_TIMEOUT_SECONDS = 12
 USER_AGENT = "LakefrontMetricoolValidator/1.0"
+VALIDATE_REMOTE_LOCAL_SITE_ASSETS = os.environ.get(
+    "VALIDATE_REMOTE_LOCAL_SITE_ASSETS", "false"
+).strip().lower() in {"1", "true", "yes", "on"}
 
 
 def local_path_from_url(url: str) -> Path | None:
@@ -61,6 +65,12 @@ def ensure_remote_video_headers(item_idx: int, url: str) -> None:
     accept_ranges = (response.headers.get("Accept-Ranges") or "").strip().lower()
     if "bytes" not in accept_ranges:
         fail(f"Item {item_idx} enclosure missing Accept-Ranges: bytes: {url}")
+
+
+def should_validate_remote_headers(local_video_path: Path | None) -> bool:
+    if local_video_path is None:
+        return True
+    return VALIDATE_REMOTE_LOCAL_SITE_ASSETS
 
 
 def fail(msg: str) -> None:
@@ -129,13 +139,20 @@ def main() -> int:
             if not local_video_path.exists():
                 fail(f"Item {idx} local MP4 missing: {local_video_path}")
             size_bytes = local_video_path.stat().st_size
+            if size_bytes <= 0:
+                fail(f"Item {idx} local MP4 is empty: {local_video_path}")
             if size_bytes > MAX_ITEM_SIZE_BYTES:
                 mb = size_bytes / (1024 * 1024)
                 fail(
                     f"Item {idx} MP4 exceeds 20 MB ({mb:.1f} MB): {local_video_path}"
                 )
 
-        ensure_remote_video_headers(idx, enclosure_url)
+        if should_validate_remote_headers(local_video_path):
+            ensure_remote_video_headers(idx, enclosure_url)
+        else:
+            print(
+                f"Item {idx}: skipping remote header check for local site asset before deploy: {enclosure_url}"
+            )
 
     print(f"Validation passed for {len(items)} items in {FEED_PATH}.")
     return 0
