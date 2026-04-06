@@ -11,6 +11,7 @@ MAX_ITEM_SIZE_BYTES = 20 * 1024 * 1024
 MIN_ITEM_COUNT = 1
 MAX_ITEM_COUNT = 3
 SITE_PREFIX = "https://lakefrontleakanddrain.com/"
+SITE_HOSTS = {"lakefrontleakanddrain.com", "www.lakefrontleakanddrain.com"}
 REQUEST_TIMEOUT_SECONDS = 12
 USER_AGENT = "LakefrontMetricoolValidator/1.0"
 VALIDATE_REMOTE_LOCAL_SITE_ASSETS = os.environ.get(
@@ -41,7 +42,9 @@ def normalized_video_path(url: str) -> str:
 
 
 def is_site_url(url: str) -> bool:
-    return url.startswith(SITE_PREFIX)
+    parsed = urlparse(url)
+    host = (parsed.netloc or "").strip().lower()
+    return host in SITE_HOSTS
 
 
 def ensure_remote_video_headers(item_idx: int, url: str) -> None:
@@ -62,7 +65,10 @@ def ensure_remote_video_headers(item_idx: int, url: str) -> None:
     if "video/mp4" not in content_type:
         fail(f"Item {item_idx} enclosure Content-Type is not video/mp4: {content_type or '[missing]'}")
 
-    if not is_site_url(url):
+    # Enforce strict CORS/range requirements only for first-party assets.
+    # External CDNs (e.g., Pixabay) are allowed as long as they return valid MP4s.
+    final_url = (response.url or "").strip()
+    if not is_site_url(url) and not is_site_url(final_url):
         return
 
     cors = (response.headers.get("Access-Control-Allow-Origin") or "").strip()
