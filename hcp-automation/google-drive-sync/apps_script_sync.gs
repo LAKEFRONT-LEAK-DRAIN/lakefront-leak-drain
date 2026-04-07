@@ -1,12 +1,12 @@
 /**
- * Google Drive -> GitHub sync for pending task JSON files.
+ * Google Drive -> GitHub sync for pending task JSON content.
  *
  * Store settings in Script Properties:
  * - GITHUB_TOKEN: Fine-grained PAT with Contents Read/Write on this repo
  * - GITHUB_OWNER: lakefrontleakanddrain-design
  * - GITHUB_REPO: lakefront-leak-drain
  * - GITHUB_BRANCH: main
- * - DRIVE_FOLDER_ID: source folder containing task JSON files
+ * - DRIVE_FOLDER_ID: source folder containing JSON files and/or Google Docs with JSON text
  */
 
 function syncPendingTasksToGitHub() {
@@ -22,18 +22,19 @@ function syncPendingTasksToGitHub() {
     var nextState = {};
 
     var folder = DriveApp.getFolderById(cfg.driveFolderId);
-    var files = folder.getFilesByType(MimeType.PLAIN_TEXT);
+    var files = folder.getFiles();
     var pushedCount = 0;
 
     while (files.hasNext()) {
       var file = files.next();
       var name = file.getName();
+      var fileId = file.getId();
+      var mimeType = file.getMimeType();
 
-      if (!/\.json$/i.test(name)) {
+      if (!isSupportedSource_(name, mimeType)) {
         continue;
       }
 
-      var fileId = file.getId();
       var modifiedAt = file.getLastUpdated().toISOString();
       nextState[fileId] = modifiedAt;
 
@@ -41,11 +42,13 @@ function syncPendingTasksToGitHub() {
         continue;
       }
 
-      var content = file.getBlob().getDataAsString("UTF-8");
-      validateJson_(content, name);
+      var sourceText = readSourceText_(fileId, mimeType);
+      var jsonText = normalizeJsonText_(sourceText, name);
 
-      var targetPath = "hcp-automation/pending-tasks/" + sanitizeFileName_(name);
-      upsertGitHubFile_(cfg, targetPath, content, "sync pending-task from drive: " + name);
+      var targetFileName = buildTargetFileName_(name, fileId, mimeType);
+      var targetPath = "hcp-automation/pending-tasks/" + targetFileName;
+      upsertGitHubFile_(cfg, targetPath, jsonText, "sync pending-task from drive: " + name);
+
       pushedCount++;
     }
 
@@ -98,12 +101,57 @@ function setState_(stateObj) {
   PropertiesService.getScriptProperties().setProperty("SYNC_STATE_JSON", JSON.stringify(stateObj));
 }
 
-function validateJson_(content, fileName) {
+function isSupportedSource_(name, mimeType) {
+  if (/\.json$/i.test(name)) {
+    return true;
+  }
+
+  if (mimeType === MimeType.GOOGLE_DOCS) {
+    return true;
+  }
+
+  return false;
+}
+
+function readSourceText_(fileId, mimeType) {
+  if (mimeType === MimeType.GOOGLE_DOCS) {
+    return DocumentApp.openById(fileId).getBody().getText();
+  }
+
+  return DriveApp.getFileById(fileId).getBlob().getDataAsString("UTF-8");
+}
+
+function normalizeJsonText_(content, fileName) {
+  var cleaned = content
+    .replace(/\u201C|\u201D/g, '"')
+    .replace(/\u2018|\u2019/g, "'")
+    .trim();
+
+  if (cleaned.indexOf("```") === 0) {
+    cleaned = cleaned
+      .replace(/^```(?:json)?\s*/i, "")
+      .replace(/\s*```$/, "")
+      .trim();
+  }
+
   try {
-    JSON.parse(content);
+    var parsed = JSON.parse(cleaned);
+    return JSON.stringify(parsed, null, 2) + "\n";
   } catch (err) {
     throw new Error("Invalid JSON in file " + fileName + ": " + err);
   }
+}
+
+function buildTargetFileName_(name, fileId, mimeType) {
+  if (mimeType === MimeType.GOOGLE_DOCS) {
+    return "doc-" + sanitizeFileName_(fileId) + ".json";
+  }
+
+  if (/\.json$/i.test(name)) {
+    return sanitizeFileName_(name);
+  }
+
+  return sanitizeFileName_(name) + ".json";
 }
 
 function sanitizeFileName_(name) {

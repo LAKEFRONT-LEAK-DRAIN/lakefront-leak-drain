@@ -8,7 +8,9 @@ Use this to keep hcp-automation/pending-tasks in GitHub synced from a Google Dri
 
 ## Setup
 
-1. In Google Drive, open the source folder that contains task JSON files.
+1. In Google Drive, open the source folder that contains either:
+   - .json files, or
+   - Google Docs where the doc body is raw JSON text.
 2. Copy the folder ID from the URL.
 3. Go to https://script.google.com and create a new script project.
 4. Paste the code from apps_script_sync.gs into the editor.
@@ -27,14 +29,21 @@ Use this to keep hcp-automation/pending-tasks in GitHub synced from a Google Dri
 
 ## Behavior
 
-- Syncs only .json files from your Drive folder.
+- Syncs source tasks from your Drive folder using either .json files or Google Docs.
 - Validates JSON before upload.
 - Writes files into hcp-automation/pending-tasks on main.
 - Tracks Drive file modified times to avoid duplicate commits.
 - Each upload creates a GitHub commit, which triggers the existing workflow.
 
+### Google Doc mapping
+
+- If the source is a Google Doc, output filename is deterministic and unique:
+   - doc-<google-file-id>.json
+- This avoids collisions if multiple docs have the same title.
+
 ## Notes
 
 - Keep JSON filenames unique in your Drive folder.
 - If a JSON file in Drive is renamed, a new filename is created in GitHub.
+- For Google Docs, renaming the doc does not change output filename because it is based on file ID.
 - Deleted Drive files are not auto-deleted in GitHub by this version.
