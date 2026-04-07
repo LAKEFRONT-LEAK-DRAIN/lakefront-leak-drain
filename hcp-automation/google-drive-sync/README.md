@@ -20,6 +20,7 @@ Use this to keep hcp-automation/pending-tasks in GitHub synced from a Google Dri
    - GITHUB_REPO = lakefront-leak-drain
    - GITHUB_BRANCH = main
    - DRIVE_FOLDER_ID = 1GtobaFzFgmif5nXUsXUD0xJrWvPsl5X2
+   - DOC_FILENAME_MODE = title
 6. Create a fine-grained GitHub token with Contents read/write on this repo.
 7. Run syncPendingTasksToGitHub once manually and approve permissions.
 8. In Apps Script, add a Trigger:
@@ -37,13 +38,15 @@ Use this to keep hcp-automation/pending-tasks in GitHub synced from a Google Dri
 
 ### Google Doc mapping
 
-- If the source is a Google Doc, output filename is deterministic and unique:
-   - doc-<google-file-id>.json
-- This avoids collisions if multiple docs have the same title.
+- Filename mode is controlled by DOC_FILENAME_MODE:
+   - title (default): <doc-title>.json
+   - doc_id: doc-<google-file-id>.json
+- If using title mode, keep doc titles unique to avoid collisions.
 
 ## Notes
 
 - Keep JSON filenames unique in your Drive folder.
 - If a JSON file in Drive is renamed, a new filename is created in GitHub.
-- For Google Docs, renaming the doc does not change output filename because it is based on file ID.
+- For Google Docs in title mode, renaming a doc creates/updates a new GitHub filename based on new title.
+- For Google Docs in doc_id mode, renaming the doc does not change output filename.
 - Deleted Drive files are not auto-deleted in GitHub by this version.

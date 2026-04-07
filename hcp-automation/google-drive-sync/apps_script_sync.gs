@@ -7,6 +7,7 @@
  * - GITHUB_REPO: lakefront-leak-drain
  * - GITHUB_BRANCH: main
  * - DRIVE_FOLDER_ID: source folder containing JSON files and/or Google Docs with JSON text
+ * - DOC_FILENAME_MODE: title (default) or doc_id
  */
 
 function syncPendingTasksToGitHub() {
@@ -45,7 +46,7 @@ function syncPendingTasksToGitHub() {
       var sourceText = readSourceText_(fileId, mimeType);
       var jsonText = normalizeJsonText_(sourceText, name);
 
-      var targetFileName = buildTargetFileName_(name, fileId, mimeType);
+      var targetFileName = buildTargetFileName_(name, fileId, mimeType, cfg);
       var targetPath = "hcp-automation/pending-tasks/" + targetFileName;
       upsertGitHubFile_(cfg, targetPath, jsonText, "sync pending-task from drive: " + name);
 
@@ -67,7 +68,8 @@ function getConfig_() {
     owner: props.getProperty("GITHUB_OWNER"),
     repo: props.getProperty("GITHUB_REPO"),
     branch: props.getProperty("GITHUB_BRANCH") || "main",
-    driveFolderId: props.getProperty("DRIVE_FOLDER_ID")
+    driveFolderId: props.getProperty("DRIVE_FOLDER_ID"),
+    docFilenameMode: (props.getProperty("DOC_FILENAME_MODE") || "title").toLowerCase()
   };
 
   var missing = [];
@@ -78,6 +80,10 @@ function getConfig_() {
 
   if (missing.length > 0) {
     throw new Error("Missing Script Properties: " + missing.join(", "));
+  }
+
+  if (cfg.docFilenameMode !== "title" && cfg.docFilenameMode !== "doc_id") {
+    throw new Error("Invalid DOC_FILENAME_MODE. Use 'title' or 'doc_id'.");
   }
 
   return cfg;
@@ -142,8 +148,17 @@ function normalizeJsonText_(content, fileName) {
   }
 }
 
-function buildTargetFileName_(name, fileId, mimeType) {
+function buildTargetFileName_(name, fileId, mimeType, cfg) {
   if (mimeType === MimeType.GOOGLE_DOCS) {
+    if (cfg.docFilenameMode === "title") {
+      var baseName = name.replace(/\.json$/i, "");
+      var safeTitle = sanitizeFileName_(baseName);
+      if (!safeTitle) {
+        return "doc-" + sanitizeFileName_(fileId) + ".json";
+      }
+      return safeTitle + ".json";
+    }
+
     return "doc-" + sanitizeFileName_(fileId) + ".json";
   }
 
