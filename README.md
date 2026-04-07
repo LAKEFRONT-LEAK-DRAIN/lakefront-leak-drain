@@ -52,3 +52,32 @@ The repository now has a fully separate Live Video pipeline for Metricool and in
 This pipeline does not write to the original `video_feed.xml` or `video/` paths.
 
 # Trigger: organization repo transfer test 2026-04-05
+
+## Pending-tasks local auto-sync
+
+This repo includes a local watcher that monitors only hcp-automation/pending-tasks and auto-commits plus pushes whenever JSON files change.
+
+Scripts:
+
+- hcp-automation/scripts/watch_pending_tasks_sync.ps1
+- hcp-automation/scripts/register_pending_tasks_sync_task.ps1
+
+Enable at Windows logon:
+
+1. Open PowerShell in the repo root.
+2. Run:
+
+	powershell
+	pwsh ./hcp-automation/scripts/register_pending_tasks_sync_task.ps1
+
+What it does:
+
+- Watches hcp-automation/pending-tasks/*.json.
+- Stages only that folder.
+- Creates an auto commit with timestamp.
+- Pulls with rebase, then pushes to origin/main.
+
+Notes:
+
+- If push fails due to auth/network/conflict, the watcher keeps running and retries on the next file change.
+- To stop using it, remove the scheduled task named LakefrontPendingTasksAutoSync from Task Scheduler.
