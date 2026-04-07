@@ -46,7 +46,18 @@ if ([string]::IsNullOrWhiteSpace($addressId)) {
     throw "Address creation returned no addressId."
 }
 
-$jobResult = & "$PSScriptRoot/hcp_create_work.ps1" -customerId $customerId -addressId $addressId -jobTitle $data.job_title -priceCents ([int]$data.price_cents)
+$priceCentsRaw = "$($data.price_cents)"
+$priceCents = 0L
+
+if (-not [long]::TryParse($priceCentsRaw, [ref]$priceCents)) {
+    throw "Invalid price_cents value '$priceCentsRaw'. Provide a whole-number integer in cents."
+}
+
+if ($priceCents -le 0) {
+    throw "Invalid price_cents value '$priceCentsRaw'. Value must be greater than 0."
+}
+
+$jobResult = & "$PSScriptRoot/hcp_create_work.ps1" -customerId $customerId -addressId $addressId -jobTitle $data.job_title -priceCents $priceCents
 
 if ([string]::IsNullOrWhiteSpace($jobResult.jobId)) {
     throw "Job creation returned no jobId."

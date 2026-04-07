@@ -9,7 +9,7 @@ param(
     [string]$jobTitle,
 
     [Parameter(Mandatory = $true)]
-    [int]$priceCents,
+    [long]$priceCents,
 
     [string]$houseTech = "pro_0ea01a751b804d1e89a9cdaa7c1bbbc7"
 )
@@ -27,7 +27,7 @@ $headers = @{
     "Accept"        = "application/json"
 }
 
-$costCents = [int][math]::Round($priceCents * 0.50)
+$costCents = [long][math]::Round(([decimal]$priceCents) * 0.50, 0)
 
 $shieldNote = "--- SUMMARY OF WORK (COPY/PASTE) ---`n" +
               "I. SCOPE: $($jobTitle)`n" +
