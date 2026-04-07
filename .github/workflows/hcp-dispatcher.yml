@@ -1,0 +1,31 @@
+name: HCP Automation Dispatcher
+
+on:
+  push:
+    paths:
+      - 'hcp-automation/pending-tasks/**'
+
+jobs:
+  run-hcp-logic:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Process Pending Tasks
+        env:
+          HCP_API_TOKEN: ${{ secrets.HCP_API_TOKEN }}
+        shell: pwsh
+        run: |
+          # This script looks for any JSON file in the pending folder
+          $files = Get-ChildItem "hcp-automation/pending-tasks/*.json"
+          foreach ($file in $files) {
+              Write-Host "Processing $($file.Name)..."
+              
+              # Run your master logic (We will build the 'Master' next)
+              # For now, this just confirms the 'Ghost' is awake
+              Write-Host "Ghost is Awake. Secret Token is Active."
+              
+              # Move file to completed so it doesn't run twice
+              Move-Item $file.FullName "hcp-automation/completed-tasks/"
+          }
