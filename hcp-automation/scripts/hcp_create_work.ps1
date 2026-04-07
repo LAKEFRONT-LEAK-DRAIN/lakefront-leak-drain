@@ -1,6 +1,25 @@
-# 1. AUTHENTICATION & DEFAULTS
+param(
+    [Parameter(Mandatory = $true)]
+    [string]$customerId,
+
+    [Parameter(Mandatory = $true)]
+    [string]$addressId,
+
+    [Parameter(Mandatory = $true)]
+    [string]$jobTitle,
+
+    [Parameter(Mandatory = $true)]
+    [int]$priceCents,
+
+    [string]$houseTech = "pro_0ea01a751b804d1e89a9cdaa7c1bbbc7"
+)
+
+$ErrorActionPreference = "Stop"
+
 $apiKey = $env:HCP_API_TOKEN
-$houseTech = "pro_0ea01a751b804d1e89a9cdaa7c1bbbc7" # Lakefront Technician
+if ([string]::IsNullOrWhiteSpace($apiKey)) {
+    throw "HCP_API_TOKEN is missing."
+}
 
 $headers = @{
     "Authorization" = "Token $($apiKey)"
@@ -8,20 +27,13 @@ $headers = @{
     "Accept"        = "application/json"
 }
 
-# 2. DYNAMIC INPUTS (To be fed by the 'Pending-Tasks' JSON)
-$customerId = "INSERT_CUSTOMER_ID_HERE"
-$addressId  = "INSERT_ADDRESS_ID_HERE"
-$jobTitle   = "Restoration: Main Line & Repipe"
-$priceCents = 1000000 # $10,000.00
-$costCents  = $priceCents * 0.50 # THE 50% LOGIC
+$costCents = [int][math]::Round($priceCents * 0.50)
 
-# 3. THE SHIELD SUMMARY (Staging Area for Copy/Paste)
 $shieldNote = "--- SUMMARY OF WORK (COPY/PASTE) ---`n" +
               "I. SCOPE: $($jobTitle)`n" +
               "II. THE SHIELD: Successor Audit Required. Brittle Pipe Advisory.`n" +
               "III. MARGIN: 50% Cost Logic Applied."
 
-# 4. CONSTRUCT THE JOB BODY
 $body = @{
     customer_id = $customerId
     address_id  = $addressId
@@ -33,17 +45,16 @@ $body = @{
     }
     line_items = @(
         @{
-            name = $jobTitle
+            name       = $jobTitle
             unit_price = $priceCents
             unit_cost  = $costCents
-            quantity = 1
+            quantity   = 1
         }
     )
 } | ConvertTo-Json -Depth 10
 
-# 5. EXECUTE POST
-$url = "https://api.housecallpro.com/jobs"
-$response = Invoke-RestMethod -Uri $url -Method Post -Headers $headers -Body $body
+$response = Invoke-RestMethod -Uri "https://api.housecallpro.com/jobs" -Method Post -Headers $headers -Body $body
 
-Write-Host "SUCCESS: Job Created and Assigned to House Tech."
-Write-Host "JOB_ID: $($response.id)"
+[pscustomobject]@{
+    jobId = $response.id
+}

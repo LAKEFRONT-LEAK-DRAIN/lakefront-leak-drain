@@ -1,30 +1,56 @@
-# MASTER CONTROLLER: Runs the Full Sequence
-param($taskFile)
+[CmdletBinding()]
+param(
+    [Parameter(Mandatory = $true)]
+    [string]$taskFile
+)
 
-# 1. Load the Task Data
-$data = Get-Content $taskFile | ConvertFrom-Json
+$ErrorActionPreference = "Stop"
+
+if (-not (Test-Path -Path $taskFile)) {
+    throw "Task file not found: $taskFile"
+}
+
+$data = Get-Content -Path $taskFile -Raw | ConvertFrom-Json
+
+$requiredFields = @("first_name", "last_name", "street", "city", "job_title", "price_cents")
+foreach ($field in $requiredFields) {
+    if (-not $data.PSObject.Properties.Name.Contains($field) -or [string]::IsNullOrWhiteSpace("$($data.$field)")) {
+        throw "Task file is missing required field: $field"
+    }
+}
+
 $name = "$($data.first_name) $($data.last_name)"
-
 Write-Host "--- STARTING AUTOMATION FOR: $name ---"
 
-# 2. RUN SEARCH
-$searchResult = . "$PSScriptRoot/hcp_search_customer.ps1" -searchTerm $name
+$searchResult = & "$PSScriptRoot/hcp_search_customer.ps1" -searchTerm $name
 
-if ($searchResult -like "*MATCH FOUND*") {
-    $customerId = ($searchResult | Select-String "CUSTOMER_ID: (.*)").Matches.Groups[1].Value
+if ($searchResult.matchFound -and -not [string]::IsNullOrWhiteSpace($searchResult.customerId)) {
+    $customerId = $searchResult.customerId
     Write-Host "Using Existing Customer: $customerId"
-} else {
-    # 3. RUN CREATE CUSTOMER (If not found)
-    $createResult = . "$PSScriptRoot/hcp_create_customer.ps1" -firstName $data.first_name -lastName $data.last_name
-    $customerId = ($createResult | Select-String "NEW_CUSTOMER_ID: (.*)").Matches.Groups[1].Value
+}
+else {
+    $createResult = & "$PSScriptRoot/hcp_create_customer.ps1" -firstName $data.first_name -lastName $data.last_name
+    $customerId = $createResult.customerId
+
+    if ([string]::IsNullOrWhiteSpace($customerId)) {
+        throw "Customer creation returned no customerId."
+    }
+
     Write-Host "Created New Customer: $customerId"
 }
 
-# 4. RUN ADDRESS LINKER
-$addrResult = . "$PSScriptRoot/hcp_add_address.ps1" -customerId $customerId -street $data.street -city $data.city
-$addressId = ($addrResult | Select-String "ADDRESS_ID: (.*)").Matches.Groups[1].Value
+$addrResult = & "$PSScriptRoot/hcp_add_address.ps1" -customerId $customerId -street $data.street -city $data.city
+$addressId = $addrResult.addressId
 
-# 5. RUN REVENUE ENGINE (Create Job)
-. "$PSScriptRoot/hcp_create_work.ps1" -customerId $customerId -addressId $addressId -jobTitle $data.job_title -priceCents $data.price_cents
+if ([string]::IsNullOrWhiteSpace($addressId)) {
+    throw "Address creation returned no addressId."
+}
 
+$jobResult = & "$PSScriptRoot/hcp_create_work.ps1" -customerId $customerId -addressId $addressId -jobTitle $data.job_title -priceCents ([int]$data.price_cents)
+
+if ([string]::IsNullOrWhiteSpace($jobResult.jobId)) {
+    throw "Job creation returned no jobId."
+}
+
+Write-Host "Job Created: $($jobResult.jobId)"
 Write-Host "--- AUTOMATION COMPLETE ---"

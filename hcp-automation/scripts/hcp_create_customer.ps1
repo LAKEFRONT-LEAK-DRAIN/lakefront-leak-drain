@@ -1,32 +1,44 @@
-# 1. AUTHENTICATION
+param(
+    [Parameter(Mandatory = $true)]
+    [string]$firstName,
+
+    [Parameter(Mandatory = $true)]
+    [string]$lastName,
+
+    [string]$mobile,
+    [string]$email,
+    [string]$note = "Created via Lakefront Automation Engine."
+)
+
+$ErrorActionPreference = "Stop"
+
 $apiKey = $env:HCP_API_TOKEN
+if ([string]::IsNullOrWhiteSpace($apiKey)) {
+    throw "HCP_API_TOKEN is missing."
+}
+
 $headers = @{
     "Authorization" = "Token $($apiKey)"
     "Content-Type"  = "application/json"
     "Accept"        = "application/json"
 }
 
-# 2. DATA INPUT (This will be fed by the 'Pending-Tasks' folder later)
-# For now, we use placeholders to test the logic
-$firstName = "TEST_FIRST"
-$lastName  = "TEST_LAST"
-$mobile    = "555-555-5555"
-$email     = "test@example.com"
-$note      = "Created via Lakefront Automation Engine."
-
-# 3. CONSTRUCT THE BODY
 $body = @{
     first_name = $firstName
     last_name  = $lastName
-    mobile_number = $mobile
-    email = $email
-    notes = $note
-} | ConvertTo-Json
+    notes      = $note
+}
 
-# 4. EXECUTE POST
-$url = "https://api.housecallpro.com/customers"
-$response = Invoke-RestMethod -Uri $url -Method Post -Headers $headers -Body $body
+if (-not [string]::IsNullOrWhiteSpace($mobile)) {
+    $body.mobile_number = $mobile
+}
 
-# 5. OUTPUT THE NEW ID (Crucial for the next steps)
-Write-Host "SUCCESS: Customer Created."
-Write-Host "NEW_CUSTOMER_ID: $($response.id)"
+if (-not [string]::IsNullOrWhiteSpace($email)) {
+    $body.email = $email
+}
+
+$response = Invoke-RestMethod -Uri "https://api.housecallpro.com/customers" -Method Post -Headers $headers -Body ($body | ConvertTo-Json)
+
+[pscustomobject]@{
+    customerId = $response.id
+}
