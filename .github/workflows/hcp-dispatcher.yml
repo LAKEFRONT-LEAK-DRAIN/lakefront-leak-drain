@@ -12,20 +12,37 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      - name: Process Pending Tasks
+      - name: Execute Lakefront Automation Engine
         env:
           HCP_API_TOKEN: ${{ secrets.HCP_API_TOKEN }}
         shell: pwsh
         run: |
-          # This script looks for any JSON file in the pending folder
-          $files = Get-ChildItem "hcp-automation/pending-tasks/*.json"
+          # 1. Identify all new tasks
+          $pendingFolder = "hcp-automation/pending-tasks"
+          $completedFolder = "hcp-automation/completed-tasks"
+          $scriptsFolder = "hcp-automation/scripts"
+          
+          $files = Get-ChildItem "$pendingFolder/*.json"
+          
+          if ($files.Count -eq 0) {
+              Write-Host "No pending tasks found. Exiting."
+              exit 0
+          }
+
           foreach ($file in $files) {
-              Write-Host "Processing $($file.Name)..."
+              Write-Host "--- STARTING PROCESSING: $($file.Name) ---"
               
-              # Run your master logic (We will build the 'Master' next)
-              # For now, this just confirms the 'Ghost' is awake
-              Write-Host "Ghost is Awake. Secret Token is Active."
-              
-              # Move file to completed so it doesn't run twice
-              Move-Item $file.FullName "hcp-automation/completed-tasks/"
+              try {
+                  # 2. Trigger the Master Controller
+                  # This runs the full Search -> Create -> Link -> Work sequence
+                  & "$scriptsFolder/hcp_master_controller.ps1" -taskFile $file.FullName
+                  
+                  # 3. Archive the Task on Success
+                  Move-Item -Path $file.FullName -Destination "$completedFolder/" -Force
+                  Write-Host "--- SUCCESS: $($file.Name) Moved to Completed ---"
+              }
+              catch {
+                  Write-Error "Failed to process $($file.Name): $($_.Exception.Message)"
+                  # Optional: Move to an 'errors' folder here if you create one
+              }
           }
