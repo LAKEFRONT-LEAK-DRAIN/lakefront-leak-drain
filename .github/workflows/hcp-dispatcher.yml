@@ -38,8 +38,19 @@ jobs:
                   & "$scriptsFolder/hcp_master_controller.ps1" -taskFile $file.FullName
                   
                   # 3. Archive the Task on Success
-                  Move-Item -Path $file.FullName -Destination "$completedFolder/" -Force
-                  Write-Host "--- SUCCESS: $($file.Name) Moved to Completed ---"
+                  if (-not (Test-Path $completedFolder)) {
+                    New-Item -Path $completedFolder -ItemType Directory -Force | Out-Null
+                  }
+
+                  $archivePath = Join-Path $completedFolder $file.Name
+                  if (Test-Path $archivePath) {
+                    $stamp = (Get-Date).ToString("yyyyMMdd-HHmmss-fff")
+                    $baseName = [System.IO.Path]::GetFileNameWithoutExtension($file.Name)
+                    $archivePath = Join-Path $completedFolder ("$baseName-$stamp$($file.Extension)")
+                  }
+
+                  Move-Item -Path $file.FullName -Destination $archivePath
+                  Write-Host "--- SUCCESS: $($file.Name) Archived as $(Split-Path $archivePath -Leaf) ---"
               }
               catch {
                   Write-Error "Failed to process $($file.Name): $($_.Exception.Message)"
