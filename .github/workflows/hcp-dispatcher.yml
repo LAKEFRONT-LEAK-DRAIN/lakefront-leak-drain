@@ -11,21 +11,37 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
       - name: Execute Lakefront Automation Engine
         env:
           HCP_API_TOKEN: ${{ secrets.HCP_API_TOKEN }}
         shell: pwsh
         run: |
-          # 1. Identify all new tasks
+          # 1. Identify tasks changed in this push only
           $pendingFolder = "hcp-automation/pending-tasks"
           $completedFolder = "hcp-automation/completed-tasks"
           $scriptsFolder = "hcp-automation/scripts"
-          
-          $files = Get-ChildItem "$pendingFolder/*.json"
-          
+
+          $beforeSha = "${{ github.event.before }}"
+          $afterSha = "${{ github.sha }}"
+
+          if ($beforeSha -match '^0+$') {
+            $changedPaths = git show --name-only --pretty="" $afterSha -- $pendingFolder
+          }
+          else {
+            $changedPaths = git diff --name-only $beforeSha $afterSha -- $pendingFolder
+          }
+
+          $files = @($changedPaths |
+            Where-Object { $_ -match '\.json$' } |
+            ForEach-Object { Join-Path $PWD $_ } |
+            Where-Object { Test-Path $_ } |
+            Get-Item)
+
           if ($files.Count -eq 0) {
-              Write-Host "No pending tasks found. Exiting."
+            Write-Host "No changed pending-task JSON files found in this push. Exiting."
               exit 0
           }
 
