@@ -13,7 +13,7 @@ Use this to keep hcp-automation/pending-tasks in GitHub synced from a Google Dri
 3. Go to https://script.google.com and create a new script project.
 4. Paste the code from apps_script_sync.gs into the editor.
 5. Open Project Settings -> Script properties and set:
-   - GITHUB_TOKEN
+   - GITHUB_TOKEN = (paste your token here — do NOT save it in this file)
    - GITHUB_OWNER = lakefrontleakanddrain-design
    - GITHUB_REPO = lakefront-leak-drain
    - GITHUB_BRANCH = main
