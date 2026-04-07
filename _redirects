@@ -8,3 +8,5 @@
 /live-video-feed-v2.xml  /Live_Video_Feed.xml  200!
 /video-feed.xml  /video_feed.xml  200!
 /video-feed-experiment.xml  /video_feed_experiment.xml  200!
+/hcp-webhook  /.netlify/functions/hcp-webhook  200
+/hcp-webhook/  /.netlify/functions/hcp-webhook  200
