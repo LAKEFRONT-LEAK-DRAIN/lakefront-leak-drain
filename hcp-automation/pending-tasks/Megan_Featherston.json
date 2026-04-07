@@ -1,16 +1,1 @@
-{
-  "first_name": "Megan",
-  "last_name": "Featherston",
-  "street": "8707 GROVESIDE DR",
-  "city": "STRONGSVILLE",
-  "state": "OH",
-  "zip": "44118",
-  "phone": "216-505-7765",
-  "email": "who.b00yah@gmail.com",
-  "job_title": "Estimate: basement pipe replacement, exterior water line replacement, reroute water heater feed",
-  "price_cents": 100,
-  "requested_technician": "Richard Cooper",
-  "requested_schedule": "Tomorrow at 9:00 AM",
-  "service_summary": "Customer wants an estimate to replace basement plumbing pipes, replace exterior water lines, and reroute a water heater feed.",
-  "source": "copilot_mobile_intake"
-}
+{"task": "Complete the architectural design docs.", "assignedTo": "Megan Featherston", "dueDate": "2026-04-12"}
