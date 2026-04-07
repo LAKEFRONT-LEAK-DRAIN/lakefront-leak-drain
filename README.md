@@ -81,3 +81,12 @@ Notes:
 
 - If push fails due to auth/network/conflict, the watcher keeps running and retries on the next file change.
 - To stop using it, remove the scheduled task named LakefrontPendingTasksAutoSync from Task Scheduler.
+
+## Pending-tasks cloud sync (Google Drive -> GitHub)
+
+If you want sync to run even when your local computer is off, use Google Apps Script.
+
+- Setup guide: hcp-automation/google-drive-sync/README.md
+- Script file: hcp-automation/google-drive-sync/apps_script_sync.gs
+
+This writes Drive JSON updates directly into hcp-automation/pending-tasks on GitHub, which triggers the existing HCP dispatcher workflow automatically.
