@@ -18,9 +18,9 @@ exports.handler = async (event, context) => {
     
     // 2. Log the event for Gemini to audit via Netlify Logs
     console.log("--- NEW HCP EVENT RECEIVED ---");
-    console.log("Event Type:", payload.type);
+    console.log("Event Type:", payload.event);
     console.log("Customer:", payload.customer?.first_name, payload.customer?.last_name);
-    console.log("Object ID:", payload.id);
+    console.log("Object ID:", payload.customer?.id);
     console.log("Full Payload:", JSON.stringify(payload, null, 2));
 
     /**
