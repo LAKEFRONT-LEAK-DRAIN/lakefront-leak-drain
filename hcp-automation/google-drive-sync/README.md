@@ -17,7 +17,7 @@ Use this to keep hcp-automation/pending-tasks in GitHub synced from a Google Dri
    - GITHUB_OWNER = lakefrontleakanddrain-design
    - GITHUB_REPO = lakefront-leak-drain
    - GITHUB_BRANCH = main
-   - DRIVE_FOLDER_ID = your folder id
+   - DRIVE_FOLDER_ID = 1GtobaFzFgmif5nXUsXUD0xJrWvPsl5X2
 6. Create a fine-grained GitHub token with Contents read/write on this repo.
 7. Run syncPendingTasksToGitHub once manually and approve permissions.
 8. In Apps Script, add a Trigger:
