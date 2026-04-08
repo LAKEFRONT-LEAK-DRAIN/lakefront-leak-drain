@@ -133,13 +133,15 @@ def main() -> int:
             if parsed.scheme.lower() != "https" or not parsed.netloc:
                 fail(f"Item {idx} {field_name} must be an absolute HTTPS URL: {value}")
 
-        # Metricool feed format:
-        # - link/guid: HTML page URL for post body
-        # - enclosure/media:content: direct MP4 URL for media attachment
-        if ".mp4" in link.lower():
-            fail(f"Item {idx} link should be an HTML page URL, not an MP4 URL: {link}")
-        if ".mp4" in guid.lower():
-            fail(f"Item {idx} guid should be an HTML page URL, not an MP4 URL: {guid}")
+        # Metricool feed format may use either:
+        # - HTML page link/guid + MP4 enclosure, or
+        # - direct MP4 link/guid + MP4 enclosure.
+        link_is_mp4 = ".mp4" in link.lower()
+        guid_is_mp4 = ".mp4" in guid.lower()
+        if link_is_mp4 != guid_is_mp4:
+            fail(
+                f"Item {idx} link/guid media style mismatch: link={link}, guid={guid}"
+            )
 
         if ".mp4" not in enclosure_url.lower():
             fail(f"Item {idx} enclosure is not an MP4 URL: {enclosure_url}")

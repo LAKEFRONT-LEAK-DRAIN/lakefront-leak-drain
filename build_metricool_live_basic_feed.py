@@ -6,7 +6,6 @@ from pathlib import Path
 
 SOURCE_FEED = Path("Live_Video_Feed.xml")
 OUTPUT_FEED = Path("metricool-live-basic.xml")
-MEDIA_NS = "http://search.yahoo.com/mrss/"
 
 
 def text_of(node: ET.Element | None, fallback: str = "") -> str:
@@ -43,8 +42,6 @@ def find_media_thumbnail_url(item: ET.Element) -> str:
 
 
 def build_basic_feed() -> None:
-    ET.register_namespace("media", MEDIA_NS)
-
     source_tree = ET.parse(SOURCE_FEED)
     source_root = source_tree.getroot()
     source_channel = source_root.find("channel")
@@ -66,23 +63,16 @@ def build_basic_feed() -> None:
         raise ValueError("Top source item is missing enclosure URL")
 
     version = pub_date_to_version(item_pub_date)
-    # Use the HTML page link (not the .mp4 URL) so Metricool doesn't inject
-    # a raw video file URL into the post body text.
-    page_link = text_of(source_item.find("link"), "")
-    item_link = page_link if page_link else add_version_param(enclosure_url, version)
-    versioned_enclosure_url = add_version_param(enclosure_url, version)
-    thumb_url = find_media_thumbnail_url(source_item) or ""
+    # Metricool reliably treats feed items as video posts when link/guid/enclosure
+    # all point directly to an MP4 URL.
+    item_link = add_version_param(enclosure_url, version)
 
     # Strict validation: abort if any output URL is empty
     if not item_link:
         raise ValueError("Output item link is empty after versioning")
-    if not versioned_enclosure_url:
-        raise ValueError("Output enclosure URL is empty after versioning")
-    # Use the clean .mp4 URL (no ?v= query param) for enclosure/media:content
-    # so Metricool can identify it as a video by the file extension.
-    media_url = enclosure_url
+    media_url = item_link
 
-    rss = ET.Element("rss", {"version": "2.0", "xmlns:media": MEDIA_NS})
+    rss = ET.Element("rss", {"version": "2.0"})
     channel = ET.SubElement(rss, "channel")
     ET.SubElement(channel, "title").text = text_of(source_channel.find("title"), "Lakefront Live Video Feed")
     ET.SubElement(channel, "link").text = text_of(source_channel.find("link"), "https://lakefrontleakanddrain.com/")
@@ -102,18 +92,6 @@ def build_basic_feed() -> None:
         "enclosure",
         {"url": media_url, "length": enclosure_len or "0", "type": enclosure_type or "video/mp4"},
     )
-    ET.SubElement(
-        out_item,
-        "media:content",
-        {
-            "url": media_url,
-            "medium": "video",
-            "type": enclosure_type or "video/mp4",
-            "fileSize": enclosure_len or "0",
-        },
-    )
-    # Omit media:thumbnail in the Metricool feed so video enclosures are
-    # prioritized by consumers that otherwise choose image thumbnails.
 
     ET.indent(rss, space="  ")
     OUTPUT_FEED.write_text(
