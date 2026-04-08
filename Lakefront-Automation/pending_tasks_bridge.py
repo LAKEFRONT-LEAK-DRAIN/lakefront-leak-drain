@@ -25,27 +25,60 @@ def sanitize_filename(value: str) -> str:
     return sanitized
 
 
+def normalize_optional_text(value: Any) -> str:
+    text = str(value or "").strip()
+    if not text or text.lower() in {"none", "null", "n/a", "na"}:
+        return ""
+    return text
+
+
+def derive_job_title(payload: Dict[str, Any]) -> str:
+    explicit_title = normalize_optional_text(payload.get("job_title", ""))
+    if explicit_title:
+        return explicit_title
+
+    service_summary = normalize_optional_text(
+        payload.get("service_summary", payload.get("scope", ""))
+    )
+    if not service_summary:
+        return "General plumbing service"
+
+    first_sentence = re.split(r"[.!?\n]", service_summary, maxsplit=1)[0].strip()
+    if first_sentence:
+        return first_sentence[:120]
+
+    return "General plumbing service"
+
+
 def parse_request_payload(payload: Dict[str, Any]) -> Dict[str, Any]:
     required = ["first_name", "last_name", "street", "city", "job_title"]
     for key in required:
-        if not str(payload.get(key, "")).strip():
+        if key == "job_title":
+            candidate_value = derive_job_title(payload)
+        else:
+            candidate_value = str(payload.get(key, "")).strip()
+        if not candidate_value:
             raise ValueError(f"Missing required field: {key}")
 
     result = {
         "first_name": str(payload["first_name"]).strip(),
         "last_name": str(payload["last_name"]).strip(),
-        "company_name": str(payload.get("company_name", payload.get("company", ""))).strip(),
+        "company_name": normalize_optional_text(
+            payload.get("company_name", payload.get("company", ""))
+        ),
         "street": str(payload["street"]).strip(),
         "city": str(payload["city"]).strip(),
         "state": str(payload.get("state", "OH")).strip(),
         "zip": str(payload.get("zip", payload.get("zip_code", ""))).strip(),
-        "phone": str(payload.get("phone", "")).strip(),
-        "email": str(payload.get("email", "")).strip(),
-        "job_title": str(payload["job_title"]).strip(),
+        "phone": normalize_optional_text(payload.get("phone", "")),
+        "email": normalize_optional_text(payload.get("email", "")),
+        "job_title": derive_job_title(payload),
         "price_cents": int(payload.get("price_cents", 100)),
-        "requested_technician": str(payload.get("requested_technician", "")).strip(),
-        "requested_schedule": str(payload.get("requested_schedule", "")).strip(),
-        "service_summary": str(payload.get("service_summary", payload.get("scope", payload["job_title"]))).strip(),
+        "requested_technician": normalize_optional_text(payload.get("requested_technician", "")),
+        "requested_schedule": normalize_optional_text(payload.get("requested_schedule", "")),
+        "service_summary": normalize_optional_text(
+            payload.get("service_summary", payload.get("scope", derive_job_title(payload)))
+        ),
         "source": str(payload.get("source", "gemini_bridge_api")).strip(),
     }
 
@@ -197,6 +230,7 @@ def intake_from_text() -> Any:
         "service_summary, price_cents, requested_schedule, requested_technician\n\n"
         "Rules:\n"
         "- The note may be written as labeled phrases or one field per line; use the labels when present\n"
+        "- job_title must never be \"None\" or blank; if only a service summary is given, infer a short job title from it\n"
         "- requested_schedule should contain the customer's preferred timing in plain English\n"
         "- requested_technician should contain the technician name or pro_ ID if one is given\n"
         "- state defaults to \"OH\" if not mentioned\n"
