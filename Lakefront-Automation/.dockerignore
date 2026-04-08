@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.log
+credentials.json
+token.json
+.env
+.env.*
+.git
