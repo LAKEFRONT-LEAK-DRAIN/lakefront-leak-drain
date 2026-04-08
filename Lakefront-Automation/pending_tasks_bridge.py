@@ -171,23 +171,6 @@ def healthz() -> Any:
     return jsonify({"ok": True})
 
 
-@app.get("/debug-gemini")
-def debug_gemini() -> Any:
-    """Temporary: lists available Gemini models and confirms key is set."""
-    gemini_key = os.getenv("GEMINI_API_KEY", "").strip()
-    key_preview = gemini_key[:6] + "..." if len(gemini_key) > 6 else "(empty)"
-    list_url = f"https://generativelanguage.googleapis.com/v1beta/models?key={gemini_key}"
-    req = request.Request(list_url, method="GET")
-    try:
-        with request.urlopen(req, timeout=15) as resp:
-            data = json.loads(resp.read().decode("utf-8"))
-            names = [m.get("name") for m in data.get("models", []) if "flash" in m.get("name", "").lower()]
-            return jsonify({"key_preview": key_preview, "flash_models": names})
-    except error.HTTPError as exc:
-        body = exc.read().decode("utf-8")
-        return jsonify({"key_preview": key_preview, "error": body}), 500
-
-
 @app.post("/intake")
 def intake_from_text() -> Any:
     ok, err = authorize_or_401()
@@ -222,7 +205,7 @@ def intake_from_text() -> Any:
 
     gemini_url = (
         "https://generativelanguage.googleapis.com/v1beta/models/"
-        f"gemini-1.5-flash:generateContent?key={gemini_key}"
+        f"gemini-2.5-flash:generateContent?key={gemini_key}"
     )
     gemini_body = {"contents": [{"parts": [{"text": prompt}]}]}
     raw_body = json.dumps(gemini_body).encode("utf-8")
