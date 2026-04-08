@@ -11,6 +11,9 @@ param(
     [Parameter(Mandatory = $true)]
     [long]$priceCents,
 
+    [string]$serviceSummary,
+    [string]$requestedSchedule,
+    [string]$requestedTechnician,
     [string]$houseTech = "pro_0ea01a751b804d1e89a9cdaa7c1bbbc7"
 )
 
@@ -29,15 +32,32 @@ $headers = @{
 
 $costCents = [long][math]::Round(([decimal]$priceCents) * 0.50, 0)
 
+$assignedTechId = $houseTech
+if (-not [string]::IsNullOrWhiteSpace($requestedTechnician) -and $requestedTechnician -like "pro_*") {
+    $assignedTechId = $requestedTechnician
+}
+
 $shieldNote = "--- SUMMARY OF WORK (COPY/PASTE) ---`n" +
               "I. SCOPE: $($jobTitle)`n" +
               "II. THE SHIELD: Successor Audit Required. Brittle Pipe Advisory.`n" +
               "III. MARGIN: 50% Cost Logic Applied."
 
+if (-not [string]::IsNullOrWhiteSpace($serviceSummary)) {
+    $shieldNote += "`nIV. SERVICE SUMMARY: $serviceSummary"
+}
+
+if (-not [string]::IsNullOrWhiteSpace($requestedSchedule)) {
+    $shieldNote += "`nV. REQUESTED SCHEDULE: $requestedSchedule"
+}
+
+if (-not [string]::IsNullOrWhiteSpace($requestedTechnician)) {
+    $shieldNote += "`nVI. REQUESTED TECHNICIAN: $requestedTechnician"
+}
+
 $body = @{
     customer_id = $customerId
     address_id  = $addressId
-    assigned_employee_ids = @($houseTech)
+    assigned_employee_ids = @($assignedTechId)
     notes = $shieldNote
     schedule = @{
         anytime = $true

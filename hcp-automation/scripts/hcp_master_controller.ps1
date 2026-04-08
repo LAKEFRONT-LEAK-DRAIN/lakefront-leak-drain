@@ -19,6 +19,25 @@ foreach ($field in $requiredFields) {
     }
 }
 
+function Normalize-OptionalContactValue {
+    param(
+        [Parameter()]
+        [AllowNull()]
+        [string]$Value
+    )
+
+    $trimmed = "$Value".Trim()
+    if ([string]::IsNullOrWhiteSpace($trimmed)) {
+        return ""
+    }
+
+    if ($trimmed -match '^(?i:none|null|n/?a|na)$') {
+        return ""
+    }
+
+    return $trimmed
+}
+
 $name = "$($data.first_name) $($data.last_name)"
 Write-Host "--- STARTING AUTOMATION FOR: $name ---"
 
@@ -29,7 +48,10 @@ if ($searchResult.matchFound -and -not [string]::IsNullOrWhiteSpace($searchResul
     Write-Host "Using Existing Customer: $customerId"
 }
 else {
-    $createResult = & "$PSScriptRoot/hcp_create_customer.ps1" -firstName $data.first_name -lastName $data.last_name
+    $companyName = Normalize-OptionalContactValue -Value "$($data.company_name)"
+    $mobile = Normalize-OptionalContactValue -Value "$($data.phone)"
+    $email = Normalize-OptionalContactValue -Value "$($data.email)"
+    $createResult = & "$PSScriptRoot/hcp_create_customer.ps1" -firstName $data.first_name -lastName $data.last_name -companyName $companyName -mobile $mobile -email $email
     $customerId = $createResult.customerId
 
     if ([string]::IsNullOrWhiteSpace($customerId)) {
@@ -37,13 +59,6 @@ else {
     }
 
     Write-Host "Created New Customer: $customerId"
-}
-
-$addrResult = & "$PSScriptRoot/hcp_add_address.ps1" -customerId $customerId -street $data.street -city $data.city
-$addressId = $addrResult.addressId
-
-if ([string]::IsNullOrWhiteSpace($addressId)) {
-    throw "Address creation returned no addressId."
 }
 
 $priceCentsRaw = "$($data.price_cents)"
@@ -57,7 +72,28 @@ if ($priceCents -le 0) {
     throw "Invalid price_cents value '$priceCentsRaw'. Value must be greater than 0."
 }
 
-$jobResult = & "$PSScriptRoot/hcp_create_work.ps1" -customerId $customerId -addressId $addressId -jobTitle $data.job_title -priceCents $priceCents
+$state = Normalize-OptionalContactValue -Value "$($data.state)"
+if ([string]::IsNullOrWhiteSpace($state)) {
+    $state = "OH"
+}
+
+$zip = Normalize-OptionalContactValue -Value "$($data.zip)"
+if ([string]::IsNullOrWhiteSpace($zip)) {
+    $zip = "44101"
+}
+
+$addrResult = & "$PSScriptRoot/hcp_add_address.ps1" -customerId $customerId -street $data.street -city $data.city -state $state -zip $zip
+$addressId = $addrResult.addressId
+
+if ([string]::IsNullOrWhiteSpace($addressId)) {
+    throw "Address creation returned no addressId."
+}
+
+$serviceSummary = Normalize-OptionalContactValue -Value "$($data.service_summary)"
+$requestedSchedule = Normalize-OptionalContactValue -Value "$($data.requested_schedule)"
+$requestedTechnician = Normalize-OptionalContactValue -Value "$($data.requested_technician)"
+
+$jobResult = & "$PSScriptRoot/hcp_create_work.ps1" -customerId $customerId -addressId $addressId -jobTitle $data.job_title -priceCents $priceCents -serviceSummary $serviceSummary -requestedSchedule $requestedSchedule -requestedTechnician $requestedTechnician
 
 if ([string]::IsNullOrWhiteSpace($jobResult.jobId)) {
     throw "Job creation returned no jobId."

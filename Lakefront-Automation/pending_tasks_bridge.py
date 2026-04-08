@@ -34,6 +34,7 @@ def parse_request_payload(payload: Dict[str, Any]) -> Dict[str, Any]:
     result = {
         "first_name": str(payload["first_name"]).strip(),
         "last_name": str(payload["last_name"]).strip(),
+        "company_name": str(payload.get("company_name", payload.get("company", ""))).strip(),
         "street": str(payload["street"]).strip(),
         "city": str(payload["city"]).strip(),
         "state": str(payload.get("state", "OH")).strip(),
@@ -192,7 +193,7 @@ def intake_from_text() -> Any:
         "following spoken note and return ONLY a valid JSON object with no markdown, "
         "no explanation, no code fences.\n\n"
         "Fields to extract (use exact key names):\n"
-        "first_name, last_name, street, city, state, zip, phone, email, job_title, "
+        "first_name, last_name, company_name, street, city, state, zip, phone, email, job_title, "
         "service_summary, price_cents\n\n"
         "Rules:\n"
         "- state defaults to \"OH\" if not mentioned\n"
