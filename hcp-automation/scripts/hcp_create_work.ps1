@@ -30,11 +30,77 @@ $headers = @{
     "Accept"        = "application/json"
 }
 
+function Resolve-RequestedTechnicianId {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$RequestedTechnician,
+
+        [Parameter(Mandatory = $true)]
+        [hashtable]$Headers
+    )
+
+    $needle = $RequestedTechnician.Trim()
+    if ([string]::IsNullOrWhiteSpace($needle)) {
+        return $null
+    }
+
+    if ($needle -like "pro_*") {
+        return $needle
+    }
+
+    $needleLower = $needle.ToLowerInvariant()
+    $page = 1
+    $pageSize = 100
+
+    while ($true) {
+        $url = "https://api.housecallpro.com/employees?page=$page&page_size=$pageSize"
+        $resp = Invoke-RestMethod -Uri $url -Method Get -Headers $Headers
+
+        $employees = @($resp.employees)
+        if ($employees.Count -eq 0) {
+            break
+        }
+
+        foreach ($employee in $employees) {
+            $fullName = ("$($employee.first_name) $($employee.last_name)").Trim()
+            if ($fullName.ToLowerInvariant() -eq $needleLower) {
+                return "$($employee.id)"
+            }
+        }
+
+        foreach ($employee in $employees) {
+            $fullName = ("$($employee.first_name) $($employee.last_name)").Trim().ToLowerInvariant()
+            $email = ("$($employee.email)").Trim().ToLowerInvariant()
+            $mobile = ("$($employee.mobile_number)").Trim().ToLowerInvariant()
+            if (
+                $fullName.Contains($needleLower) -or
+                $needleLower.Contains($fullName) -or
+                $email -eq $needleLower -or
+                $mobile -eq $needleLower
+            ) {
+                return "$($employee.id)"
+            }
+        }
+
+        $totalPages = [int]$resp.total_pages
+        if ($page -ge $totalPages) {
+            break
+        }
+
+        $page += 1
+    }
+
+    return $null
+}
+
 $costCents = [long][math]::Round(([decimal]$priceCents) * 0.50, 0)
 
 $assignedTechId = $houseTech
-if (-not [string]::IsNullOrWhiteSpace($requestedTechnician) -and $requestedTechnician -like "pro_*") {
-    $assignedTechId = $requestedTechnician
+if (-not [string]::IsNullOrWhiteSpace($requestedTechnician)) {
+    $resolvedId = Resolve-RequestedTechnicianId -RequestedTechnician $requestedTechnician -Headers $headers
+    if (-not [string]::IsNullOrWhiteSpace($resolvedId)) {
+        $assignedTechId = $resolvedId
+    }
 }
 
 $shieldNote = "--- SUMMARY OF WORK (COPY/PASTE) ---`n" +
