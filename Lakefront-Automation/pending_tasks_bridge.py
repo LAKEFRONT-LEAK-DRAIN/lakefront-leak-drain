@@ -50,6 +50,23 @@ def derive_job_title(payload: Dict[str, Any]) -> str:
     return "General plumbing service"
 
 
+def parse_price_cents(value: Any) -> int:
+    text = normalize_optional_text(value)
+    if not text:
+        return 0
+
+    cleaned = text.replace("$", "").replace(",", "").strip().lower()
+    if cleaned.endswith("cents"):
+        cleaned = cleaned.replace("cents", "").strip()
+    if cleaned.endswith("cent"):
+        cleaned = cleaned.replace("cent", "").strip()
+
+    try:
+        return int(float(cleaned))
+    except ValueError as exc:
+        raise ValueError(f"Invalid price_cents value: {value}") from exc
+
+
 def parse_request_payload(payload: Dict[str, Any]) -> Dict[str, Any]:
     required = ["first_name", "last_name", "street", "city", "job_title"]
     for key in required:
@@ -73,7 +90,7 @@ def parse_request_payload(payload: Dict[str, Any]) -> Dict[str, Any]:
         "phone": normalize_optional_text(payload.get("phone", "")),
         "email": normalize_optional_text(payload.get("email", "")),
         "job_title": derive_job_title(payload),
-        "price_cents": int(payload.get("price_cents", 100)),
+        "price_cents": parse_price_cents(payload.get("price_cents", 0)),
         "requested_technician": normalize_optional_text(payload.get("requested_technician", "")),
         "requested_schedule": normalize_optional_text(payload.get("requested_schedule", "")),
         "service_summary": normalize_optional_text(
@@ -82,8 +99,8 @@ def parse_request_payload(payload: Dict[str, Any]) -> Dict[str, Any]:
         "source": str(payload.get("source", "gemini_bridge_api")).strip(),
     }
 
-    if result["price_cents"] <= 0:
-        raise ValueError("price_cents must be greater than 0")
+    if result["price_cents"] < 0:
+        raise ValueError("price_cents cannot be negative")
 
     if result["price_cents"] > 9_000_000_000_000:
         raise ValueError("price_cents is too large")
@@ -234,8 +251,8 @@ def intake_from_text() -> Any:
         "- requested_schedule should contain the customer's preferred timing in plain English\n"
         "- requested_technician should contain the technician name or pro_ ID if one is given\n"
         "- state defaults to \"OH\" if not mentioned\n"
-        "- price_cents defaults to 100 if not mentioned, otherwise convert dollars to "
-        "cents (multiply by 100)\n"
+        "- price_cents defaults to 0 if not mentioned\n"
+        "- If a dollar amount is given, convert dollars to cents (multiply by 100)\n"
         "- source should always be \"gemini_bridge_api\"\n"
         "- Return ONLY the JSON object, nothing else\n\n"
         f"Spoken note:\n{raw_text}"

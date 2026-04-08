@@ -68,8 +68,8 @@ if (-not [long]::TryParse($priceCentsRaw, [ref]$priceCents)) {
     throw "Invalid price_cents value '$priceCentsRaw'. Provide a whole-number integer in cents."
 }
 
-if ($priceCents -le 0) {
-    throw "Invalid price_cents value '$priceCentsRaw'. Value must be greater than 0."
+if ($priceCents -lt 0) {
+    throw "Invalid price_cents value '$priceCentsRaw'. Value cannot be negative."
 }
 
 $state = Normalize-OptionalContactValue -Value "$($data.state)"
