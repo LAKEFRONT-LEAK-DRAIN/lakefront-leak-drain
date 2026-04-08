@@ -171,6 +171,82 @@ def healthz() -> Any:
     return jsonify({"ok": True})
 
 
+@app.post("/intake")
+def intake_from_text() -> Any:
+    ok, err = authorize_or_401()
+    if not ok:
+        return err
+
+    payload = flask_request.get_json(silent=True)
+    if not isinstance(payload, dict) or not str(payload.get("text", "")).strip():
+        return jsonify({"error": "JSON body with 'text' field required"}), 400
+
+    raw_text = str(payload["text"]).strip()
+
+    gemini_key = os.getenv("GEMINI_API_KEY", "").strip()
+    if not gemini_key:
+        return jsonify({"error": "Server misconfigured: GEMINI_API_KEY missing"}), 500
+
+    prompt = (
+        "You are a JSON extraction assistant. Extract customer intake fields from the "
+        "following spoken note and return ONLY a valid JSON object with no markdown, "
+        "no explanation, no code fences.\n\n"
+        "Fields to extract (use exact key names):\n"
+        "first_name, last_name, street, city, state, zip, phone, email, job_title, "
+        "service_summary, price_cents\n\n"
+        "Rules:\n"
+        "- state defaults to \"OH\" if not mentioned\n"
+        "- price_cents defaults to 100 if not mentioned, otherwise convert dollars to "
+        "cents (multiply by 100)\n"
+        "- source should always be \"gemini_bridge_api\"\n"
+        "- Return ONLY the JSON object, nothing else\n\n"
+        f"Spoken note:\n{raw_text}"
+    )
+
+    gemini_url = (
+        "https://generativelanguage.googleapis.com/v1beta/models/"
+        f"gemini-2.0-flash:generateContent?key={gemini_key}"
+    )
+    gemini_body = {"contents": [{"parts": [{"text": prompt}]}]}
+    raw_body = json.dumps(gemini_body).encode("utf-8")
+    req = request.Request(
+        gemini_url,
+        method="POST",
+        data=raw_body,
+        headers={"Content-Type": "application/json"},
+    )
+    try:
+        with request.urlopen(req, timeout=30) as resp:
+            g_result = json.loads(resp.read().decode("utf-8"))
+    except error.HTTPError as exc:
+        g_result = json.loads(exc.read().decode("utf-8"))
+        return jsonify({"error": f"Gemini API error: {g_result}"}), 500
+
+    try:
+        assert isinstance(g_result, dict)
+        extracted_text = g_result["candidates"][0]["content"]["parts"][0]["text"].strip()
+        extracted_text = re.sub(r"^```[a-z]*\n?", "", extracted_text)
+        extracted_text = re.sub(r"\n?```$", "", extracted_text).strip()
+        parsed = json.loads(extracted_text)
+    except Exception as exc:
+        return jsonify({"error": f"Gemini parse failed: {exc}", "raw": g_result}), 500
+
+    try:
+        normalized = parse_request_payload(parsed)
+        filename = choose_filename(normalized, str(parsed.get("filename", "")))
+        pushed = upsert_pending_task(normalized, filename)
+        return jsonify({
+            "ok": True,
+            "filename": filename,
+            "file_path": pushed["file_path"],
+            "commit_sha": pushed["commit_sha"],
+        })
+    except ValueError as exc:
+        return jsonify({"error": str(exc)}), 400
+    except Exception as exc:
+        return jsonify({"error": str(exc)}), 500
+
+
 @app.post("/create-pending-task")
 def create_pending_task() -> Any:
     ok, err = authorize_or_401()
