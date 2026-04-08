@@ -183,20 +183,18 @@ if (-not [string]::IsNullOrWhiteSpace($requestedTechnician)) {
 Write-Host "Technician assignment: source=$assignmentSource requested='$requestedTechnician' assigned_id='$assignedTechId'"
 
 $shieldNote = "--- SUMMARY OF WORK (COPY/PASTE) ---`n" +
-              "I. SCOPE: $($jobTitle)`n" +
-              "II. THE SHIELD: Successor Audit Required. Brittle Pipe Advisory.`n" +
-              "III. MARGIN: 50% Cost Logic Applied."
+              "I. SCOPE: $($jobTitle)"
 
 if (-not [string]::IsNullOrWhiteSpace($serviceSummary)) {
-    $shieldNote += "`nIV. SERVICE SUMMARY: $serviceSummary"
+    $shieldNote += "`nII. SERVICE SUMMARY: $serviceSummary"
 }
 
 if (-not [string]::IsNullOrWhiteSpace($requestedSchedule)) {
-    $shieldNote += "`nV. REQUESTED SCHEDULE: $requestedSchedule"
+    $shieldNote += "`nIII. REQUESTED SCHEDULE: $requestedSchedule"
 }
 
 if (-not [string]::IsNullOrWhiteSpace($requestedTechnician)) {
-    $shieldNote += "`nVI. REQUESTED TECHNICIAN: $requestedTechnician"
+    $shieldNote += "`nIV. REQUESTED TECHNICIAN: $requestedTechnician"
 }
 
 $requestedStart = Parse-RequestedStartTime -RequestedSchedule $requestedSchedule
