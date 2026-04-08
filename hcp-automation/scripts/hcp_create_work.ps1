@@ -112,6 +112,29 @@ function Parse-RequestedStartTime {
     return $start
 }
 
+function Get-HttpErrorBody {
+    param(
+        [Parameter(Mandatory = $true)]
+        [System.Exception]$Exception
+    )
+
+    try {
+        $resp = $Exception.Response
+        if ($null -eq $resp) {
+            return ""
+        }
+        $stream = $resp.GetResponseStream()
+        if ($null -eq $stream) {
+            return ""
+        }
+        $reader = New-Object System.IO.StreamReader($stream)
+        return $reader.ReadToEnd()
+    }
+    catch {
+        return ""
+    }
+}
+
 $costCents = [long][math]::Round(([decimal]$priceCents) * 0.50, 0)
 
 $assignedTechId = $houseTech
@@ -173,19 +196,46 @@ $response = Invoke-RestMethod -Uri "https://api.housecallpro.com/jobs" -Method P
 
 if ($null -ne $requestedStart -and -not [string]::IsNullOrWhiteSpace("$($response.id)")) {
     $requestedEnd = $requestedStart.AddHours(2)
-    $appointmentBody = @{
-        start_time = $requestedStart.ToString("yyyy-MM-ddTHH:mm:ss")
-        end_time = $requestedEnd.ToString("yyyy-MM-ddTHH:mm:ss")
-        arrival_window_minutes = 0
-        dispatched_employees_ids = @($assignedTechId)
-    } | ConvertTo-Json -Depth 6
+    $appointmentUrl = "https://api.housecallpro.com/jobs/$($response.id)/appointments"
 
-    try {
-        $appointmentUrl = "https://api.housecallpro.com/jobs/$($response.id)/appointments"
-        $appointmentResponse = Invoke-RestMethod -Uri $appointmentUrl -Method Post -Headers $headers -Body $appointmentBody
-        Write-Host "Schedule assignment: appointment created id='$($appointmentResponse.id)' for job_id='$($response.id)'"
+    $appointmentBodies = @(
+        @{
+            start_time = $requestedStart.ToString("o")
+            end_time = $requestedEnd.ToString("o")
+            arrival_window_minutes = 0
+            dispatched_employees_ids = @($assignedTechId)
+        },
+        @{
+            start_time = $requestedStart.ToString("yyyy-MM-ddTHH:mm:ss")
+            end_time = $requestedEnd.ToString("yyyy-MM-ddTHH:mm:ss")
+            arrival_window_minutes = 0
+            dispatched_employees_ids = @($assignedTechId)
+        },
+        @{
+            start_time = $requestedStart.ToString("o")
+            end_time = $requestedEnd.ToString("o")
+            arrival_window_minutes = 0
+            dispatched_employee_ids = @($assignedTechId)
+        }
+    )
+
+    $appointmentCreated = $false
+    for ($i = 0; $i -lt $appointmentBodies.Count; $i++) {
+        $attempt = $i + 1
+        $appointmentBodyJson = $appointmentBodies[$i] | ConvertTo-Json -Depth 6
+        try {
+            $appointmentResponse = Invoke-RestMethod -Uri $appointmentUrl -Method Post -Headers $headers -Body $appointmentBodyJson
+            Write-Host "Schedule assignment: appointment created id='$($appointmentResponse.id)' for job_id='$($response.id)' attempt=$attempt"
+            $appointmentCreated = $true
+            break
+        }
+        catch {
+            $httpErrorBody = Get-HttpErrorBody -Exception $_.Exception
+            Write-Host "Schedule assignment: appointment attempt=$attempt failed for job_id='$($response.id)' error='$($_.Exception.Message)' body='$httpErrorBody'"
+        }
     }
-    catch {
+
+    if (-not $appointmentCreated) {
         Write-Host "Schedule assignment: appointment creation failed for job_id='$($response.id)'; job remains anytime"
     }
 }
