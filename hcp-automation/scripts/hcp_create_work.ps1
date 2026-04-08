@@ -93,6 +93,39 @@ function Resolve-RequestedTechnicianId {
     return $null
 }
 
+function Build-SchedulePayload {
+    param(
+        [Parameter()]
+        [AllowEmptyString()]
+        [string]$RequestedSchedule
+    )
+
+    if ([string]::IsNullOrWhiteSpace($RequestedSchedule)) {
+        return @{
+            anytime = $true
+            anytime_start_date = (Get-Date).ToString("yyyy-MM-dd")
+        }
+    }
+
+    $start = [datetime]::MinValue
+    if (-not [datetime]::TryParse($RequestedSchedule, [ref]$start)) {
+        return @{
+            anytime = $true
+            anytime_start_date = (Get-Date).ToString("yyyy-MM-dd")
+        }
+    }
+
+    $end = $start.AddHours(2)
+    return @{
+        anytime = $false
+        anytime_start_date = $start.ToString("yyyy-MM-dd")
+        scheduled_start = $start.ToString("yyyy-MM-ddTHH:mm:ssK")
+        scheduled_end = $end.ToString("yyyy-MM-ddTHH:mm:ssK")
+        arrival_window_start = $start.ToString("yyyy-MM-ddTHH:mm:ssK")
+        arrival_window_end = $end.ToString("yyyy-MM-ddTHH:mm:ssK")
+    }
+}
+
 $costCents = [long][math]::Round(([decimal]$priceCents) * 0.50, 0)
 
 $assignedTechId = $houseTech
@@ -123,15 +156,21 @@ if (-not [string]::IsNullOrWhiteSpace($requestedTechnician)) {
     $shieldNote += "`nVI. REQUESTED TECHNICIAN: $requestedTechnician"
 }
 
+$schedulePayload = Build-SchedulePayload -RequestedSchedule $requestedSchedule
+$timedAttempt = ($schedulePayload.anytime -eq $false)
+if ($timedAttempt) {
+    Write-Host "Schedule assignment: source=requested requested='$requestedSchedule' scheduled_start='$($schedulePayload.scheduled_start)'"
+}
+else {
+    Write-Host "Schedule assignment: source=default-anytime requested='$requestedSchedule'"
+}
+
 $body = @{
     customer_id = $customerId
     address_id  = $addressId
     assigned_employee_ids = @($assignedTechId)
     notes = $shieldNote
-    schedule = @{
-        anytime = $true
-        anytime_start_date = (Get-Date).ToString("yyyy-MM-dd")
-    }
+    schedule = $schedulePayload
     line_items = @(
         @{
             name       = $jobTitle
@@ -142,7 +181,36 @@ $body = @{
     )
 } | ConvertTo-Json -Depth 10
 
-$response = Invoke-RestMethod -Uri "https://api.housecallpro.com/jobs" -Method Post -Headers $headers -Body $body
+try {
+    $response = Invoke-RestMethod -Uri "https://api.housecallpro.com/jobs" -Method Post -Headers $headers -Body $body
+}
+catch {
+    if ($timedAttempt) {
+        Write-Host "Schedule assignment: timed payload rejected by HCP, falling back to anytime"
+        $fallbackBody = @{
+            customer_id = $customerId
+            address_id  = $addressId
+            assigned_employee_ids = @($assignedTechId)
+            notes = $shieldNote
+            schedule = @{
+                anytime = $true
+                anytime_start_date = (Get-Date).ToString("yyyy-MM-dd")
+            }
+            line_items = @(
+                @{
+                    name       = $jobTitle
+                    unit_price = $priceCents
+                    unit_cost  = $costCents
+                    quantity   = 1
+                }
+            )
+        } | ConvertTo-Json -Depth 10
+        $response = Invoke-RestMethod -Uri "https://api.housecallpro.com/jobs" -Method Post -Headers $headers -Body $fallbackBody
+    }
+    else {
+        throw
+    }
+}
 
 [pscustomobject]@{
     jobId = $response.id
