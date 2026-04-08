@@ -1,0 +1,18 @@
+{
+  "first_name": "Alexus",
+  "last_name": "New Uechi",
+  "company_name": "Children\u2019s services",
+  "street": "8707 Groveside dr",
+  "city": "Strongsville",
+  "state": "OH",
+  "zip": "44113",
+  "phone": "9857182372",
+  "email": "Who.b00yah@gmail.com",
+  "job_title": "Plumbing Services",
+  "price_cents": 0,
+  "requested_technician": "Richard Cooper",
+  "requested_schedule": "Today 5 pm",
+  "service_summary": "Customer states they have a leak in their bathroom and a hot water heater that needs to be replaced and the main line needs to be hydrojetted.",
+  "source": "gemini_bridge_api",
+  "created_at_utc": "2026-04-08T16:55:25+00:00"
+}
