@@ -205,7 +205,7 @@ def intake_from_text() -> Any:
 
     gemini_url = (
         "https://generativelanguage.googleapis.com/v1beta/models/"
-        f"gemini-2.0-flash:generateContent?key={gemini_key}"
+        f"gemini-1.5-flash:generateContent?key={gemini_key}"
     )
     gemini_body = {"contents": [{"parts": [{"text": prompt}]}]}
     raw_body = json.dumps(gemini_body).encode("utf-8")
