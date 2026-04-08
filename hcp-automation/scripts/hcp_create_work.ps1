@@ -104,8 +104,42 @@ function Parse-RequestedStartTime {
         return $null
     }
 
+    $raw = $RequestedSchedule.Trim()
+    $lower = $raw.ToLowerInvariant()
+    $today = (Get-Date).Date
+
+    # Handle common natural phrases first (today/tomorrow + time).
+    if ($lower -match "^today(?:\s+at)?\s+(.+)$") {
+        $timePart = $Matches[1].Trim()
+        $raw = "{0} {1}" -f $today.ToString("yyyy-MM-dd"), $timePart
+    }
+    elseif ($lower -match "^tomorrow(?:\s+at)?\s+(.+)$") {
+        $timePart = $Matches[1].Trim()
+        $raw = "{0} {1}" -f $today.AddDays(1).ToString("yyyy-MM-dd"), $timePart
+    }
+    elseif ($lower -match "^\d{1,2}(?::\d{2})?\s*(am|pm)$") {
+        # Time-only input means "today at" that time.
+        $raw = "{0} {1}" -f $today.ToString("yyyy-MM-dd"), $raw
+    }
+
     $start = [datetime]::MinValue
-    if (-not [datetime]::TryParse($RequestedSchedule, [ref]$start)) {
+    $styles = [System.Globalization.DateTimeStyles]::AssumeLocal
+    $formats = @(
+        "yyyy-MM-dd h:mmtt",
+        "yyyy-MM-dd h:mm tt",
+        "yyyy-MM-dd htt",
+        "yyyy-MM-dd h tt",
+        "yyyy-MM-dd H:mm",
+        "M/d/yyyy h:mmtt",
+        "M/d/yyyy h:mm tt",
+        "M/d/yyyy H:mm"
+    )
+
+    if (
+        -not [datetime]::TryParseExact($raw, $formats, [System.Globalization.CultureInfo]::InvariantCulture, $styles, [ref]$start) -and
+        -not [datetime]::TryParse($raw, [System.Globalization.CultureInfo]::InvariantCulture, $styles, [ref]$start) -and
+        -not [datetime]::TryParse($raw, [ref]$start)
+    ) {
         return $null
     }
 
