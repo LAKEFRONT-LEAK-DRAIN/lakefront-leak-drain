@@ -11,7 +11,7 @@
   "price_cents": 100,
   "requested_technician": "",
   "requested_schedule": "",
-  "service_summary": "None",
+  "service_summary": "Cancel",
   "source": "gemini_bridge_api",
-  "created_at_utc": "2026-04-08T03:18:28+00:00"
+  "created_at_utc": "2026-04-08T03:21:35+00:00"
 }
