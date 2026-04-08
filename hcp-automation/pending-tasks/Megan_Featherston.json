@@ -1,1 +1,17 @@
-{"task": "Complete the architectural design docs.", "assignedTo": "Megan Featherston", "dueDate": "2026-04-12"}
+{
+  "first_name": "Megan",
+  "last_name": "Featherston",
+  "street": "123 Lake Ave",
+  "city": "Cleveland",
+  "state": "OH",
+  "zip": "44102",
+  "phone": "216-555-0199",
+  "email": "megan@example.com",
+  "job_title": "Leak inspection",
+  "price_cents": 10000,
+  "requested_technician": "",
+  "requested_schedule": "",
+  "service_summary": "Customer reports leak under kitchen sink.",
+  "source": "gemini_bridge_api",
+  "created_at_utc": "2026-04-08T02:12:14+00:00"
+}
