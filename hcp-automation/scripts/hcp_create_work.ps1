@@ -207,15 +207,11 @@ else {
     Write-Host "Schedule assignment: source=default-anytime requested='$requestedSchedule'"
 }
 
-$body = @{
+$jobPayload = @{
     customer_id = $customerId
     address_id  = $addressId
     assigned_employee_ids = @($assignedTechId)
     notes = $shieldNote
-    schedule = @{
-        anytime = $true
-        anytime_start_date = (Get-Date).ToString("yyyy-MM-dd")
-    }
     line_items = @(
         @{
             name       = $jobTitle
@@ -224,7 +220,16 @@ $body = @{
             quantity   = 1
         }
     )
-} | ConvertTo-Json -Depth 10
+}
+
+if ($null -eq $requestedStart) {
+    $jobPayload.schedule = @{
+        anytime = $true
+        anytime_start_date = (Get-Date).ToString("yyyy-MM-dd")
+    }
+}
+
+$body = $jobPayload | ConvertTo-Json -Depth 10
 
 $response = Invoke-RestMethod -Uri "https://api.housecallpro.com/jobs" -Method Post -Headers $headers -Body $body
 
@@ -232,22 +237,25 @@ if ($null -ne $requestedStart -and -not [string]::IsNullOrWhiteSpace("$($respons
     $requestedEnd = $requestedStart.AddHours(2)
     $appointmentUrl = "https://api.housecallpro.com/jobs/$($response.id)/appointments"
 
+    $startOffset = [datetimeoffset]::new($requestedStart, [System.TimeZoneInfo]::Local.GetUtcOffset($requestedStart))
+    $endOffset = [datetimeoffset]::new($requestedEnd, [System.TimeZoneInfo]::Local.GetUtcOffset($requestedEnd))
+
     $appointmentBodies = @(
         @{
-            start_time = $requestedStart.ToString("o")
-            end_time = $requestedEnd.ToString("o")
+            start_time = $startOffset.ToString("o")
+            end_time = $endOffset.ToString("o")
             arrival_window_minutes = 0
             dispatched_employees_ids = @($assignedTechId)
         },
         @{
-            start_time = $requestedStart.ToString("yyyy-MM-ddTHH:mm:ss")
-            end_time = $requestedEnd.ToString("yyyy-MM-ddTHH:mm:ss")
+            start_time = $startOffset.ToString("yyyy-MM-ddTHH:mm:sszzz")
+            end_time = $endOffset.ToString("yyyy-MM-ddTHH:mm:sszzz")
             arrival_window_minutes = 0
             dispatched_employees_ids = @($assignedTechId)
         },
         @{
-            start_time = $requestedStart.ToString("o")
-            end_time = $requestedEnd.ToString("o")
+            start_time = $startOffset.ToString("o")
+            end_time = $endOffset.ToString("o")
             arrival_window_minutes = 0
             dispatched_employee_ids = @($assignedTechId)
         }
