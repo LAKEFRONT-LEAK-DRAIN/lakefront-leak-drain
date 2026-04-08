@@ -96,12 +96,15 @@ function Resolve-RequestedTechnicianId {
 $costCents = [long][math]::Round(([decimal]$priceCents) * 0.50, 0)
 
 $assignedTechId = $houseTech
+$assignmentSource = "default"
 if (-not [string]::IsNullOrWhiteSpace($requestedTechnician)) {
     $resolvedId = Resolve-RequestedTechnicianId -RequestedTechnician $requestedTechnician -Headers $headers
     if (-not [string]::IsNullOrWhiteSpace($resolvedId)) {
         $assignedTechId = $resolvedId
+        $assignmentSource = "requested"
     }
 }
+Write-Host "Technician assignment: source=$assignmentSource requested='$requestedTechnician' assigned_id='$assignedTechId'"
 
 $shieldNote = "--- SUMMARY OF WORK (COPY/PASTE) ---`n" +
               "I. SCOPE: $($jobTitle)`n" +
