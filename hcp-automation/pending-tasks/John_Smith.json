@@ -1,17 +1,18 @@
 {
   "first_name": "John",
   "last_name": "Smith",
+  "company_name": "Smith Properties",
   "street": "456 Elm Street",
   "city": "Parma",
-  "state": "Ohio",
+  "state": "OH",
   "zip": "44129",
   "phone": "440-555-0100",
-  "email": "None",
-  "job_title": "None",
-  "price_cents": 15000,
-  "requested_technician": "",
-  "requested_schedule": "",
-  "service_summary": "kitchen sink leaking",
+  "email": "john@smithprop.com",
+  "job_title": "Kitchen sink leak",
+  "price_cents": 25000,
+  "requested_technician": "pro_testtech123",
+  "requested_schedule": "tomorrow morning",
+  "service_summary": "Slow leak under sink and trap replacement needed",
   "source": "gemini_bridge_api",
-  "created_at_utc": "2026-04-08T02:57:13+00:00"
+  "created_at_utc": "2026-04-08T13:37:59+00:00"
 }
