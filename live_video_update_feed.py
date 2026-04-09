@@ -47,6 +47,25 @@ OPEN_METEO_URL = "https://api.open-meteo.com/v1/forecast"
 GENERATED_VIDEO_DIR = BASE_DIR / VIDEO_PAGE_DIR / GENERATED_VIDEO_SUBDIR
 GENERATED_VIDEO_URL_PREFIX = f"{SITE_BASE_URL}/{VIDEO_PAGE_DIR}/{GENERATED_VIDEO_SUBDIR}"
 
+
+def get_env_float(name, default):
+    raw = (os.environ.get(name, "") or "").strip()
+    if not raw:
+        return float(default)
+    try:
+        return float(raw)
+    except ValueError:
+        return float(default)
+
+
+ETHNICITY_BLEND_WEIGHTS = {
+    "caucasian": get_env_float("CAST_WEIGHT_CAUCASIAN", 45),
+    "african_american": get_env_float("CAST_WEIGHT_AFRICAN_AMERICAN", 20),
+    "hispanic_latino": get_env_float("CAST_WEIGHT_HISPANIC_LATINO", 15),
+    "asian": get_env_float("CAST_WEIGHT_ASIAN", 10),
+    "middle_eastern_multiracial": get_env_float("CAST_WEIGHT_MIDDLE_EASTERN_MULTIRACIAL", 10),
+}
+
 PLUMBING_TERMS = [
     "drain",
     "sewer",
@@ -700,16 +719,29 @@ Use the candidate number only.
 
 
 def pick_on_screen_ethnicity_guidance():
-    roll = random.random()
-    if roll < 0.70:
-        return "Primarily Caucasian adults in the scene"
-    if roll < 0.78:
-        return "Primarily African American adults in the scene"
-    if roll < 0.86:
-        return "Primarily Hispanic/Latino adults in the scene"
-    if roll < 0.93:
-        return "Primarily Asian adults in the scene"
-    return "Primarily Middle Eastern or multiracial adults in the scene"
+    weighted_guidance = [
+        ("Primarily Caucasian adults in the scene", max(0.0, ETHNICITY_BLEND_WEIGHTS.get("caucasian", 0.0))),
+        ("Primarily African American adults in the scene", max(0.0, ETHNICITY_BLEND_WEIGHTS.get("african_american", 0.0))),
+        ("Primarily Hispanic/Latino adults in the scene", max(0.0, ETHNICITY_BLEND_WEIGHTS.get("hispanic_latino", 0.0))),
+        ("Primarily Asian adults in the scene", max(0.0, ETHNICITY_BLEND_WEIGHTS.get("asian", 0.0))),
+        (
+            "Primarily Middle Eastern or multiracial adults in the scene",
+            max(0.0, ETHNICITY_BLEND_WEIGHTS.get("middle_eastern_multiracial", 0.0)),
+        ),
+    ]
+
+    total_weight = sum(weight for _, weight in weighted_guidance)
+    if total_weight <= 0:
+        return random.choice([label for label, _ in weighted_guidance])
+
+    roll = random.random() * total_weight
+    running = 0.0
+    for label, weight in weighted_guidance:
+        running += weight
+        if roll <= running:
+            return label
+
+    return weighted_guidance[-1][0]
 
 
 def pick_commercial_visual_scene():
