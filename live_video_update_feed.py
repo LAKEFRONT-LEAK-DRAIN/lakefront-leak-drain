@@ -724,6 +724,7 @@ def pick_commercial_visual_scene():
 
 
 def build_gemini_video_prompt(title, description, cta):
+    ethnicity_guidance = pick_on_screen_ethnicity_guidance()
     visual_scene = pick_commercial_visual_scene()
     prompt_parts = [
         "Create a realistic short social video for a Cleveland commercial plumbing company serving B2B facilities teams.",
@@ -731,6 +732,7 @@ def build_gemini_video_prompt(title, description, cta):
         f"Message: {description} {cta}".strip(),
         "The scene must be 100% commercial plumbing only and must never imply residential service.",
         f"Primary scene direction: {visual_scene}",
+        f"People casting guidance: {ethnicity_guidance}.",
         "Plumbing standards: all equipment, pipes, fixtures, and utility setups MUST strictly reflect United States commercial plumbing codes and visual norms, with standard U.S. commercial pipe sizing and OSHA-compliant environments.",
         "Plumbing standards exclusions: absolutely no European-style plumbing fixtures and no boilers.",
         "Technician appearance: if a person is shown, they must appear as a certified commercial plumbing contractor using professional PPE.",
