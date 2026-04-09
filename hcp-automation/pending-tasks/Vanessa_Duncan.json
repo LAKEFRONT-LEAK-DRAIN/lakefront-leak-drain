@@ -1,0 +1,18 @@
+{
+  "first_name": "Vanessa",
+  "last_name": "Duncan",
+  "company_name": "Choice home warranty",
+  "street": "705 E. 254th St.",
+  "city": "Euclid",
+  "state": "OH",
+  "zip": "44132",
+  "phone": "2165384107",
+  "email": "Mzneenee4u2@gmail.com",
+  "job_title": "Basement Shower Leak Repair",
+  "price_cents": 10000,
+  "requested_technician": "Richard Cooper",
+  "requested_schedule": "Today 2:30 pm",
+  "service_summary": "Plumbing system issue leak in the house shower in the basement is flooding and water seems to be coming from the bottom of the shower all over the floor.",
+  "source": "gemini_bridge_api",
+  "created_at_utc": "2026-04-09T17:28:41+00:00"
+}
