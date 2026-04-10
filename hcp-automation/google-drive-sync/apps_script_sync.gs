@@ -61,7 +61,7 @@ function syncPendingTasksToGitHub() {
 }
 
 function getConfig_() {
-  var props = PropertiesService.getScriptProperties();
+  var props = getScriptPropertiesWithRetry_();
 
   var cfg = {
     githubToken: props.getProperty("GITHUB_TOKEN"),
@@ -90,7 +90,15 @@ function getConfig_() {
 }
 
 function getState_() {
-  var raw = PropertiesService.getScriptProperties().getProperty("SYNC_STATE_JSON");
+  var raw;
+  try {
+    raw = getPropertyWithRetry_("SYNC_STATE_JSON");
+  } catch (err) {
+    // Transient Apps Script storage issues should not fail a whole sync run.
+    Logger.log("Could not read SYNC_STATE_JSON; continuing with empty state. " + err);
+    return {};
+  }
+
   if (!raw) {
     return {};
   }
@@ -104,7 +112,70 @@ function getState_() {
 }
 
 function setState_(stateObj) {
-  PropertiesService.getScriptProperties().setProperty("SYNC_STATE_JSON", JSON.stringify(stateObj));
+  setPropertyWithRetry_("SYNC_STATE_JSON", JSON.stringify(stateObj));
+}
+
+function getScriptPropertiesWithRetry_() {
+  var attempts = 4;
+  var delayMs = 250;
+  var lastErr;
+
+  for (var i = 1; i <= attempts; i++) {
+    try {
+      return PropertiesService.getScriptProperties();
+    } catch (err) {
+      lastErr = err;
+      if (i < attempts) {
+        Utilities.sleep(delayMs);
+        delayMs *= 2;
+      }
+    }
+  }
+
+  throw new Error("Failed to access Script Properties after retries: " + lastErr);
+}
+
+function getPropertyWithRetry_(key) {
+  var attempts = 4;
+  var delayMs = 250;
+  var lastErr;
+
+  for (var i = 1; i <= attempts; i++) {
+    try {
+      var props = getScriptPropertiesWithRetry_();
+      return props.getProperty(key);
+    } catch (err) {
+      lastErr = err;
+      if (i < attempts) {
+        Utilities.sleep(delayMs);
+        delayMs *= 2;
+      }
+    }
+  }
+
+  throw new Error("Failed reading Script Property '" + key + "' after retries: " + lastErr);
+}
+
+function setPropertyWithRetry_(key, value) {
+  var attempts = 4;
+  var delayMs = 250;
+  var lastErr;
+
+  for (var i = 1; i <= attempts; i++) {
+    try {
+      var props = getScriptPropertiesWithRetry_();
+      props.setProperty(key, value);
+      return;
+    } catch (err) {
+      lastErr = err;
+      if (i < attempts) {
+        Utilities.sleep(delayMs);
+        delayMs *= 2;
+      }
+    }
+  }
+
+  throw new Error("Failed writing Script Property '" + key + "' after retries: " + lastErr);
 }
 
 function isSupportedSource_(name, mimeType) {
