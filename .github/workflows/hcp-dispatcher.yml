@@ -45,6 +45,8 @@ jobs:
               exit 0
           }
 
+          $failedFiles = @()
+
           foreach ($file in $files) {
               Write-Host "--- STARTING PROCESSING: $($file.Name) ---"
               
@@ -70,6 +72,11 @@ jobs:
               }
               catch {
                   Write-Error "Failed to process $($file.Name): $($_.Exception.Message)"
+                  $failedFiles += $file.Name
                   # Optional: Move to an 'errors' folder here if you create one
               }
+          }
+
+          if ($failedFiles.Count -gt 0) {
+            throw "One or more pending tasks failed to process: $($failedFiles -join ', ')"
           }

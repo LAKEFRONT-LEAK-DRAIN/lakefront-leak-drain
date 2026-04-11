@@ -122,6 +122,23 @@ function Parse-RequestedStartTime {
         $raw = "{0} {1}" -f $today.ToString("yyyy-MM-dd"), $raw
     }
 
+    # Handle common range input by using the range start (e.g., "Monday 4/13/2026 11-3 pm" -> "Monday 4/13/2026 11 pm").
+    if ($raw -match "^(?<datePart>.+?)\s+(?<startHour>\d{1,2})(?::(?<startMinute>\d{2}))?\s*-\s*(?<endHour>\d{1,2})(?::(?<endMinute>\d{2}))?\s*(?<ampm>am|pm)$") {
+        $datePart = $Matches["datePart"].Trim()
+        $startHour = $Matches["startHour"]
+        $startMinute = $Matches["startMinute"]
+        $ampm = $Matches["ampm"]
+
+        $startToken = if ([string]::IsNullOrWhiteSpace($startMinute)) {
+            "$startHour $ampm"
+        }
+        else {
+            "$startHour`:$startMinute $ampm"
+        }
+
+        $raw = "$datePart $startToken"
+    }
+
     $start = [datetime]::MinValue
     $styles = [System.Globalization.DateTimeStyles]::AssumeLocal
     $formats = @(
