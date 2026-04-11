@@ -98,6 +98,8 @@ exports.handler = async function handler(event) {
 
     const addr = Array.isArray(best.addresses) ? best.addresses[0] : null;
     return json(200, {
+      customerId: best.id || '',
+      addressId: addr?.id || '',
       firstName: best.first_name || '',
       lastName: best.last_name || '',
       email: best.email || '',

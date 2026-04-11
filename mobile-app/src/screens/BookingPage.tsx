@@ -93,6 +93,8 @@ const services = [
 ];
 
 type LookupPayload = {
+  customerId?: string;
+  addressId?: string;
   firstName?: string;
   lastName?: string;
   phone?: string;
@@ -117,6 +119,8 @@ export default function BookingPage() {
   const [city, setCity] = useState('');
   const [bestTime, setBestTime] = useState('');
   const [notes, setNotes] = useState('');
+  const [customerId, setCustomerId] = useState('');
+  const [addressId, setAddressId] = useState('');
   const [lookupPhone, setLookupPhone] = useState('');
   const [lookupEmail, setLookupEmail] = useState('');
   const [lookupMessage, setLookupMessage] = useState('');
@@ -125,6 +129,10 @@ export default function BookingPage() {
   const [windowLoading, setWindowLoading] = useState(false);
   const [windowError, setWindowError] = useState('');
   const [windows, setWindows] = useState<BookingWindow[]>([]);
+  const [selectedWindow, setSelectedWindow] = useState<BookingWindow | null>(null);
+  const [bookingLoading, setBookingLoading] = useState(false);
+  const [bookingError, setBookingError] = useState('');
+  const [bookingSuccess, setBookingSuccess] = useState<{ jobId: string; invoiceNumber?: string } | null>(null);
 
   const bookingHref = useMemo(() => {
     const url = new URL(hcpUrls.book);
@@ -164,6 +172,8 @@ export default function BookingPage() {
         throw new Error(data.error ?? `Lookup failed (${res.status})`);
       }
 
+      setCustomerId(data.customerId ?? '');
+      setAddressId(data.addressId ?? '');
       setFirstName(data.firstName ?? '');
       setLastName(data.lastName ?? '');
       setPhone(data.phone ?? cleanPhone);
@@ -347,8 +357,13 @@ export default function BookingPage() {
                   <button
                     type="button"
                     key={`${slot.start_time}-${slot.end_time}`}
-                    style={styles.slotBtn}
-                    onClick={() => setBestTime(label)}
+                    style={{
+                      ...styles.slotBtn,
+                      background: selectedWindow?.start_time === slot.start_time ? colors.aqua : undefined,
+                      color: selectedWindow?.start_time === slot.start_time ? colors.onAqua : undefined,
+                      fontWeight: selectedWindow?.start_time === slot.start_time ? font.weightBlack : undefined,
+                    }}
+                    onClick={() => { setSelectedWindow(slot); setBestTime(label); }}
                   >
                     {label}
                   </button>
@@ -366,9 +381,62 @@ export default function BookingPage() {
           />
         </div>
 
-        <a href={bookingHref} target="_blank" rel="noopener noreferrer" style={styles.btnPrimary}>
-          Continue to Booking →
-        </a>
+        {bookingSuccess ? (
+          <div style={{ ...styles.card, textAlign: 'center' }}>
+            <div style={{ fontSize: '2.5rem', marginBottom: spacing.sm }}>✅</div>
+            <div style={{ fontSize: font.sizeLg, fontWeight: font.weightBlack, color: colors.navy, marginBottom: spacing.sm }}>
+              Booking Submitted!
+            </div>
+            <div style={{ fontSize: font.sizeSm, color: colors.muted }}>
+              {bookingSuccess.invoiceNumber ? `Job #${bookingSuccess.invoiceNumber} created.` : 'Request received.'} We'll call to confirm your appointment.
+            </div>
+          </div>
+        ) : (
+          <>
+            {bookingError ? <div style={styles.statusErr}>{bookingError}</div> : null}
+            <button
+              type="button"
+              style={{ ...styles.btnPrimary, opacity: bookingLoading ? 0.7 : 1 }}
+              disabled={bookingLoading}
+              onClick={async () => {
+                if (!customerId || !addressId) {
+                  window.open(bookingHref, '_blank', 'noopener,noreferrer');
+                  return;
+                }
+                setBookingError('');
+                setBookingLoading(true);
+                try {
+                  const res = await fetch('/.netlify/functions/hcp-create-booking', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      customerId,
+                      addressId,
+                      service,
+                      notes,
+                      scheduledStart: selectedWindow?.start_time,
+                      scheduledEnd: selectedWindow?.end_time,
+                    }),
+                  });
+                  const data = await res.json() as { jobId?: string; invoiceNumber?: string; error?: string };
+                  if (!res.ok) throw new Error(data.error ?? 'Booking failed.');
+                  setBookingSuccess({ jobId: data.jobId ?? '', invoiceNumber: data.invoiceNumber });
+                } catch (err) {
+                  setBookingError(err instanceof Error ? err.message : 'Booking failed. Please try again.');
+                } finally {
+                  setBookingLoading(false);
+                }
+              }}
+            >
+              {bookingLoading ? 'Submitting...' : customerId ? 'Book Appointment' : 'Continue to Booking →'}
+            </button>
+            {!customerId && (
+              <div style={{ fontSize: font.sizeSm, color: colors.muted, textAlign: 'center', marginTop: spacing.xs }}>
+                Use "Find My Details" above to book in one tap.
+              </div>
+            )}
+          </>
+        )}
       </div>
     </div>
   );
