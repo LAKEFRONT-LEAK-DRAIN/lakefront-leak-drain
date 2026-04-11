@@ -1,4 +1,5 @@
 const API_BASE = 'https://api.housecallpro.com';
+const nodemailer = require('nodemailer');
 
 function json(statusCode, body) {
   return {
@@ -12,11 +13,21 @@ function json(statusCode, body) {
 }
 
 async function sendNotificationEmail({ invoiceNumber, jobId, firstName, lastName, phone, email, address, city, service, notes, scheduledStart, scheduledEnd }) {
-  const resendKey = process.env.RESEND_API_KEY;
+  const smtpHost = process.env.SMTP_HOST;
+  const smtpPort = parseInt(process.env.SMTP_PORT || '587', 10);
+  const smtpUser = process.env.SMTP_USER;
+  const smtpPass = process.env.SMTP_PASS;
   const toEmail = process.env.NOTIFICATION_EMAIL;
-  const fromEmail = process.env.NOTIFICATION_FROM || 'bookings@lakefrontleakanddrain.com';
+  const fromEmail = process.env.NOTIFICATION_FROM || smtpUser;
 
-  if (!resendKey || !toEmail) return; // silently skip if not configured
+  if (!smtpHost || !smtpUser || !smtpPass || !toEmail) return; // skip if not configured
+
+  const transporter = nodemailer.createTransport({
+    host: smtpHost,
+    port: smtpPort,
+    secure: smtpPort === 465,
+    auth: { user: smtpUser, pass: smtpPass },
+  });
 
   const scheduleText = scheduledStart
     ? `${new Date(scheduledStart).toLocaleString('en-US', { timeZone: 'America/New_York', dateStyle: 'full', timeStyle: 'short' })} – ${new Date(scheduledEnd).toLocaleTimeString('en-US', { timeZone: 'America/New_York', timeStyle: 'short' })}`
@@ -37,19 +48,12 @@ async function sendNotificationEmail({ invoiceNumber, jobId, firstName, lastName
     <p style="margin-top:20px"><a href="https://pro.housecallpro.com/jobs" style="background:#071b32;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;font-weight:bold">Open in HouseCall Pro →</a></p>
   `;
 
-  await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${resendKey}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      from: fromEmail,
-      to: [toEmail],
-      subject: `📋 New Booking: ${firstName} ${lastName} – ${service || 'Service Request'}`,
-      html,
-    }),
-  }).catch(() => {}); // best-effort, don't fail booking if email fails
+  await transporter.sendMail({
+    from: fromEmail,
+    to: toEmail,
+    subject: `📋 New Booking: ${firstName} ${lastName} – ${service || 'Service Request'}`,
+    html,
+  }).catch(() => {}); // best-effort
 }
 
 exports.handler = async function handler(event) {
