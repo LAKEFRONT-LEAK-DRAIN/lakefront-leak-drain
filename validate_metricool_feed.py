@@ -47,6 +47,41 @@ def is_site_url(url: str) -> bool:
     return host in SITE_HOSTS
 
 
+def has_mp4_extension(url: str) -> bool:
+    parsed = urlparse(url)
+    return parsed.path.strip().lower().endswith(".mp4")
+
+
+def has_mp4_filename_in_disposition(content_disposition: str) -> bool:
+    value = (content_disposition or "").strip().lower()
+    return ".mp4" in value
+
+
+def looks_like_mp4_signature(url: str) -> bool:
+    try:
+        response = requests.get(
+            url,
+            allow_redirects=True,
+            timeout=REQUEST_TIMEOUT_SECONDS,
+            stream=True,
+            headers={"User-Agent": USER_AGENT, "Range": "bytes=0-63"},
+        )
+    except Exception:
+        return False
+
+    try:
+        if response.status_code >= 400:
+            return False
+
+        head = response.raw.read(64, decode_content=True)
+        # MP4 brands are stored in the file type box; "ftyp" appears near byte 4.
+        return b"ftyp" in (head or b"")[0:32]
+    except Exception:
+        return False
+    finally:
+        response.close()
+
+
 def ensure_remote_video_headers(item_idx: int, url: str) -> None:
     try:
         response = requests.head(
@@ -63,7 +98,24 @@ def ensure_remote_video_headers(item_idx: int, url: str) -> None:
 
     content_type = (response.headers.get("Content-Type") or "").strip().lower()
     if "video/mp4" not in content_type:
-        fail(f"Item {item_idx} enclosure Content-Type is not video/mp4: {content_type or '[missing]'}")
+        content_disposition = (response.headers.get("Content-Disposition") or "").strip()
+        is_generic_octet_stream = content_type in {"application/octet-stream", "binary/octet-stream"}
+        if not is_generic_octet_stream:
+            fail(f"Item {item_idx} enclosure Content-Type is not video/mp4: {content_type or '[missing]'}")
+
+        if not has_mp4_extension(url) and not has_mp4_filename_in_disposition(content_disposition):
+            fail(
+                f"Item {item_idx} enclosure Content-Type is generic binary without MP4 path/disposition evidence: {content_type or '[missing]'}"
+            )
+
+        if not looks_like_mp4_signature(url):
+            fail(
+                f"Item {item_idx} enclosure returned generic binary and failed MP4 signature check: {url}"
+            )
+
+        print(
+            f"Item {item_idx}: accepted generic binary Content-Type after MP4 signature verification: {url}"
+        )
 
     # Enforce strict CORS/range requirements only for first-party assets.
     # External CDNs (e.g., Pixabay) are allowed as long as they return valid MP4s.
