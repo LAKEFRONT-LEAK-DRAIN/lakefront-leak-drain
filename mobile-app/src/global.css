@@ -1,0 +1,76 @@
+/* Lakefront Leak & Drain – Global PWA Styles */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+:root {
+  --navy: #071b32;
+  --aqua: #00adb5;
+  --portal-blue: #0f77cc;
+  --bg: #f4f8fb;
+  --card: #ffffff;
+  --ink: #0f172a;
+  --muted: #334155;
+  --warning: #f59e0b;
+  --success: #10b981;
+  --error: #ef4444;
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 18px;
+  --radius-pill: 999px;
+  --shadow-card: 0 2px 12px rgba(7,27,50,0.08);
+  --font: system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;
+}
+
+html, body {
+  height: 100%;
+  font-family: var(--font);
+  font-size: 15px;
+  color: var(--ink);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overscroll-behavior-y: none;
+}
+
+#root {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+  font-family: var(--font);
+}
+
+input, select, textarea {
+  font-family: var(--font);
+  font-size: 15px;
+}
+
+/* Utility classes */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  white-space: nowrap;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(7,27,50,0.15); border-radius: 4px; }
