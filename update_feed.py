@@ -2,6 +2,7 @@ import os
 import requests
 import re
 import random
+import time
 from pathlib import Path
 from google import genai
 from datetime import datetime, timedelta
@@ -15,6 +16,35 @@ FEED_PATH = BASE_DIR / 'feed.xml'
 DEFAULT_LINK = 'https://lakefrontleakanddrain.com/'
 DEFAULT_IMAGE = 'https://lakefrontleakanddrain.com/logo.jpg'
 RECENT_IMAGE_LOOKBACK = 40
+GENAI_MODELS = ['gemini-2.5-flash', 'gemini-2.0-flash']
+
+
+def _is_transient_genai_error(exc):
+    text = str(exc).upper()
+    return any(code in text for code in ('503', 'UNAVAILABLE', '429', 'RESOURCE_EXHAUSTED', 'DEADLINE_EXCEEDED'))
+
+
+def generate_text_with_fallback(prompt, fallback_text, context_name):
+    """Generate text from Gemini with retries and model fallback, returning fallback_text on failure."""
+    delays = [1, 3, 6]
+
+    for model in GENAI_MODELS:
+        for attempt, delay in enumerate(delays, start=1):
+            try:
+                resp = client.models.generate_content(model=model, contents=prompt)
+                text = (resp.text or '').strip()
+                if text:
+                    return text
+                raise RuntimeError(f"Empty response from model {model}")
+            except Exception as e:
+                print(f"{context_name}: attempt {attempt} on {model} failed: {e}")
+                if attempt < len(delays) and _is_transient_genai_error(e):
+                    time.sleep(delay)
+                    continue
+                break
+
+    print(f"{context_name}: using fallback text after model retries were exhausted")
+    return fallback_text
 
 def get_image_length(image_url):
     """Get actual image file size, fallback to reasonable default."""
@@ -42,8 +72,13 @@ def generate_topic():
         "Output ONLY the Title and a highly descriptive 2-word image search keyword separated by a pipe. "
         "Example: Spring Sump Pump | flooded basement"
     )
-    resp = client.models.generate_content(model='gemini-2.5-flash', contents=prompt)
-    text = resp.text.strip()
+    fallback_title = f"Cleveland Plumbing Tip for {datetime.utcnow().strftime('%B')}"
+    fallback_pair = f"{fallback_title} | plumbing safety"
+    text = generate_text_with_fallback(
+        prompt=prompt,
+        fallback_text=fallback_pair,
+        context_name='Topic generation'
+    )
     try:
         title, search_keyword = [x.strip() for x in text.split('|', 1)]
     except Exception:
@@ -167,8 +202,16 @@ def get_image_url(search_keyword, recent_image_keys):
 def generate_description(title):
     """Asks AI to write the actual blog tip"""
     prompt = f"Write a 2-sentence helpful plumbing tip for Cleveland residents about '{title}'. Use a friendly, professional tone. Output ONLY the text."
-    resp = client.models.generate_content(model='gemini-2.5-flash', contents=prompt)
-    return resp.text.strip()
+    fallback = (
+        "In Cleveland, protect exposed plumbing by insulating outdoor pipes and disconnecting garden hoses before "
+        "temperatures drop to prevent freeze damage. If you notice reduced flow, frost buildup, or damp spots, "
+        "schedule a professional inspection early to avoid costly pipe bursts and water damage."
+    )
+    return generate_text_with_fallback(
+        prompt=prompt,
+        fallback_text=fallback,
+        context_name='Description generation'
+    )
 
 def get_next_post_id(lines):
     """Get the next post ID by finding the highest existing ID"""
