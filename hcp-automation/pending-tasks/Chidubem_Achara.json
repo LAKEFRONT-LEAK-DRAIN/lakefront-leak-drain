@@ -1,0 +1,18 @@
+{
+  "first_name": "Chidubem",
+  "last_name": "Achara",
+  "company_name": "Choice home warranty",
+  "street": "38077 North BROOKS DR",
+  "city": "WILLOUGHBY",
+  "state": "OH",
+  "zip": "44094",
+  "phone": "2165265021",
+  "email": "",
+  "job_title": "Plumbing Stoppage Repair",
+  "price_cents": 10000,
+  "requested_technician": "Justin Cowger",
+  "requested_schedule": "Monday 4/13/2026 11-3 pm",
+  "service_summary": "Plumbing stoppage. Sink not draining in the kitchen.",
+  "source": "gemini_bridge_api",
+  "created_at_utc": "2026-04-11T19:40:45+00:00"
+}
