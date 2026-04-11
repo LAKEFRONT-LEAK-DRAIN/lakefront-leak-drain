@@ -38,6 +38,7 @@ USE_GEMINI_GENERATED_VIDEO = os.environ.get("USE_GEMINI_GENERATED_VIDEO", "false
 GEMINI_VIDEO_MODEL = os.environ.get("GEMINI_VIDEO_MODEL", "veo-3.1-generate-preview").strip() or "veo-3.1-generate-preview"
 GEMINI_VIDEO_ASPECT_RATIO = os.environ.get("GEMINI_VIDEO_ASPECT_RATIO", "9:16").strip() or "9:16"
 GEMINI_VIDEO_RESOLUTION = os.environ.get("GEMINI_VIDEO_RESOLUTION", "720p").strip() or "720p"
+GEMINI_VIDEO_DURATION_SECONDS = 15
 GENERATED_VIDEO_SUBDIR = os.environ.get("GENERATED_VIDEO_SUBDIR", "generated").strip() or "generated"
 
 CLEVELAND_LAT = 41.4993
@@ -746,30 +747,32 @@ def pick_on_screen_ethnicity_guidance():
 
 def pick_commercial_visual_scene():
     scenes = [
-        "A cinematic shot of a professional plumbing technician in a high-vis safety vest and hard hat inspecting a large-diameter interior main water line and commercial water meter assembly in a brightly lit facility utility room.",
-        "A wide shot of a commercial property exterior where a plumbing contractor in safety gear is inspecting an underground main sewer line cleanout next to a large corporate office building.",
-        "A close-up of a plumber's hands operating a commercial hydro-jetting machine to clear a main drain line on a commercial concrete floor under bright lighting.",
-        "A professional plumbing technician holding a digital tablet, standing in front of a complex wall of exposed copper pipes, pressure gauges, and commercial main water manifolds inside a facility.",
-        "A wide shot of a clean, modern commercial restroom facility where a uniformed plumbing technician is inspecting commercial-grade sinks and automated fixtures.",
+        "A cinematic establishing shot of a modern commercial utility room with exposed main water lines, pressure gauges, and meter assemblies under clean industrial lighting.",
+        "A wide shot of a commercial property exterior focusing on an access point for an underground main sewer cleanout near a large office building.",
+        "A detailed close-up of high-pressure hydro-jetting equipment and hoses flushing a commercial main drain line on a concrete service floor.",
+        "A smooth tracking shot through a large commercial mechanical corridor with labeled plumbing manifolds, shutoff valves, and insulated pipe runs.",
+        "A wide shot of a clean commercial restroom facility highlighting commercial-grade sinks, flush valves, and drain performance with no people in frame.",
     ]
     return random.choice(scenes)
 
 
 def build_gemini_video_prompt(title, description, cta):
-    ethnicity_guidance = pick_on_screen_ethnicity_guidance()
     visual_scene = pick_commercial_visual_scene()
     prompt_parts = [
         "Create a realistic short social video for a Cleveland commercial plumbing company serving B2B facilities teams.",
         f"Topic: {title}.",
         f"Message: {description} {cta}".strip(),
+        f"Target runtime: exactly {GEMINI_VIDEO_DURATION_SECONDS} seconds.",
         "The scene must be 100% commercial plumbing only and must never imply residential service.",
         f"Primary scene direction: {visual_scene}",
-        f"People casting guidance: {ethnicity_guidance}.",
+        "Direction: use B-roll style scene coverage and environment shots, not a talking-head format.",
+        "No on-camera speaking people. No visible lip-syncing, interviews, or direct-to-camera presenters.",
+        "Audio direction: narration must be voice-over only in clear English with a neutral United States accent.",
+        "If any people appear incidentally, they must remain in the background and never speak on camera.",
         "Plumbing standards: all equipment, pipes, fixtures, and utility setups MUST strictly reflect United States commercial plumbing codes and visual norms, with standard U.S. commercial pipe sizing and OSHA-compliant environments.",
         "Plumbing standards exclusions: absolutely no European-style plumbing fixtures and no boilers.",
         "Technician appearance: if a person is shown, they must appear as a certified commercial plumbing contractor using professional PPE.",
         "Uniform constraints: all uniforms, safety vests, and hard hats must be completely blank, with no names, no name tags, no identifying logos, and no company branding.",
-        "Audio and language: if any speech, dialogue, or background voice is generated, it must be 100% English with a neutral United States accent.",
         "Negative constraints: forbid text overlays, floating words, subtitles, watermarks, company logos, and brand marks anywhere in scene elements, walls, tools, clothing, or equipment.",
         "Style exclusions: forbid cartoonish, illustrated, or animated styles.",
         "Style: realistic, clean, professional, commercial B2B, vertical short-form social media clip.",
@@ -786,6 +789,7 @@ def generate_gemini_video_asset(title, description, cta, slug):
     config = types.GenerateVideosConfig(
         aspect_ratio=GEMINI_VIDEO_ASPECT_RATIO,
         resolution=GEMINI_VIDEO_RESOLUTION,
+        duration_seconds=GEMINI_VIDEO_DURATION_SECONDS,
     )
 
     operation = client.models.generate_videos(
