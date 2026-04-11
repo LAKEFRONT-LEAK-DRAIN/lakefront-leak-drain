@@ -837,12 +837,17 @@ def get_video_url(title, search_keyword, recent_video_ids=None, description="", 
         pexels_candidates = fetch_pexels_video_candidates(PEXELS_REFERENCE_QUERY)
         if pexels_candidates:
             fresh_candidates = [c for c in pexels_candidates if canonical_video_id(c.get("video_url")) not in recent_video_ids]
-            chosen_pool = fresh_candidates if fresh_candidates else pexels_candidates
-            selected = random.choice(chosen_pool)
-            video_url = selected.get("video_url") or DEFAULT_VIDEO
-            thumb_url = selected.get("thumb_url") or ""
-            print("Video selected via Pexels reference query")
-            return video_url, thumb_url
+            ranking_pool = fresh_candidates if fresh_candidates else pexels_candidates
+            selected = choose_best_aligned_candidate(title, description, cta, ranking_pool)
+            if selected:
+                video_url = selected.get("video_url") or DEFAULT_VIDEO
+                thumb_url = selected.get("thumb_url") or ""
+                print("Video selected via Pexels reference query (topic-ranked)")
+                if fresh_candidates:
+                    print("Selected a fresh (non-recent) Pexels clip")
+                else:
+                    print("No fresh Pexels candidates found; reused an older clip")
+                return video_url, thumb_url
     except Exception as e:
         print(f"Pexels reference query failed: {e}")
 
