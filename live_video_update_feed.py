@@ -32,13 +32,13 @@ RECENT_VIDEO_LOOKBACK = 12
 ALLOW_PEXELS_FALLBACK = os.environ.get("ALLOW_PEXELS_FALLBACK", "false").strip().lower() == "true"
 ENFORCE_TEXT_VIDEO_ALIGNMENT = os.environ.get("ENFORCE_TEXT_VIDEO_ALIGNMENT", "true").strip().lower() == "true"
 ALIGNMENT_MAX_CANDIDATES = 18
+PEXELS_REFERENCE_QUERY = os.environ.get("PEXELS_REFERENCE_QUERY", "plumbing").strip() or "plumbing"
 MAX_VIDEO_WIDTH = int(os.environ.get("MAX_VIDEO_WIDTH", "1920"))
 REQUIRE_VERTICAL_VIDEO = os.environ.get("REQUIRE_VERTICAL_VIDEO", "true").strip().lower() == "true"
 USE_GEMINI_GENERATED_VIDEO = os.environ.get("USE_GEMINI_GENERATED_VIDEO", "false").strip().lower() == "true"
 GEMINI_VIDEO_MODEL = os.environ.get("GEMINI_VIDEO_MODEL", "veo-3.1-generate-preview").strip() or "veo-3.1-generate-preview"
 GEMINI_VIDEO_ASPECT_RATIO = os.environ.get("GEMINI_VIDEO_ASPECT_RATIO", "9:16").strip() or "9:16"
 GEMINI_VIDEO_RESOLUTION = os.environ.get("GEMINI_VIDEO_RESOLUTION", "720p").strip() or "720p"
-GEMINI_VIDEO_DURATION_SECONDS = 15
 GENERATED_VIDEO_SUBDIR = os.environ.get("GENERATED_VIDEO_SUBDIR", "generated").strip() or "generated"
 
 CLEVELAND_LAT = 41.4993
@@ -762,7 +762,6 @@ def build_gemini_video_prompt(title, description, cta):
         "Create a realistic short social video for a Cleveland commercial plumbing company serving B2B facilities teams.",
         f"Topic: {title}.",
         f"Message: {description} {cta}".strip(),
-        f"Target runtime: exactly {GEMINI_VIDEO_DURATION_SECONDS} seconds.",
         "The scene must be 100% commercial plumbing only and must never imply residential service.",
         f"Primary scene direction: {visual_scene}",
         "Direction: use B-roll style scene coverage and environment shots, not a talking-head format.",
@@ -789,7 +788,6 @@ def generate_gemini_video_asset(title, description, cta, slug):
     config = types.GenerateVideosConfig(
         aspect_ratio=GEMINI_VIDEO_ASPECT_RATIO,
         resolution=GEMINI_VIDEO_RESOLUTION,
-        duration_seconds=GEMINI_VIDEO_DURATION_SECONDS,
     )
 
     operation = client.models.generate_videos(
@@ -833,6 +831,20 @@ def get_video_url(title, search_keyword, recent_video_ids=None, description="", 
         except Exception as e:
             print(f"Gemini video generation failed, trying stock fallback sources: {e}")
             gemini_failed = True
+
+    print(f"Trying Pexels reference query first: {PEXELS_REFERENCE_QUERY}")
+    try:
+        pexels_candidates = fetch_pexels_video_candidates(PEXELS_REFERENCE_QUERY)
+        if pexels_candidates:
+            fresh_candidates = [c for c in pexels_candidates if canonical_video_id(c.get("video_url")) not in recent_video_ids]
+            chosen_pool = fresh_candidates if fresh_candidates else pexels_candidates
+            selected = random.choice(chosen_pool)
+            video_url = selected.get("video_url") or DEFAULT_VIDEO
+            thumb_url = selected.get("thumb_url") or ""
+            print("Video selected via Pexels reference query")
+            return video_url, thumb_url
+    except Exception as e:
+        print(f"Pexels reference query failed: {e}")
 
     if ENFORCE_TEXT_VIDEO_ALIGNMENT:
         alignment_queries = generate_alignment_queries(title, description, cta, search_keyword)
