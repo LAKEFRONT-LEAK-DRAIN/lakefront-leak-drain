@@ -42,7 +42,6 @@ exports.handler = async function handler(event) {
     customer_id: customerId,
     address_id: addressId,
     notes: descriptionParts.join('\n') || undefined,
-    lead_source: 'Mobile App',
   };
 
   if (scheduledStart && scheduledEnd) {
