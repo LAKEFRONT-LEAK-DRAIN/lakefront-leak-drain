@@ -416,6 +416,12 @@ export default function BookingPage() {
                       notes,
                       scheduledStart: selectedWindow?.start_time,
                       scheduledEnd: selectedWindow?.end_time,
+                      firstName,
+                      lastName,
+                      phone,
+                      email,
+                      address,
+                      city,
                     }),
                   });
                   const data = await res.json() as { jobId?: string; invoiceNumber?: string; error?: string };
