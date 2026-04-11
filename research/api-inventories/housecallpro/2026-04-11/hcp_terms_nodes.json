@@ -1,0 +1,41 @@
+[
+  {
+    "id": 101478126,
+    "name": "toc",
+    "slug": null,
+    "stable_id": null,
+    "snapshot": {
+      "type": "table_of_contents",
+      "summary": ""
+    },
+    "node": {
+      "uri": "/toc.json"
+    }
+  },
+  {
+    "id": 101478125,
+    "name": "Housecall Pro API Terms of Service",
+    "slug": "api-terms",
+    "stable_id": "k5n8spwqgr3g5",
+    "snapshot": {
+      "type": "article",
+      "summary": "By accessing or using Housecall Pro APIs, you agree to the following TERMS OF SERVICE"
+    },
+    "node": {
+      "uri": "/docs/Terms-of-Service.md"
+    }
+  },
+  {
+    "id": 101478127,
+    "name": "styleguide",
+    "slug": null,
+    "stable_id": null,
+    "snapshot": {
+      "type": "styleguide",
+      "summary": ""
+    },
+    "node": {
+      "uri": "/.stoplight/styleguide.json"
+    }
+  }
+]

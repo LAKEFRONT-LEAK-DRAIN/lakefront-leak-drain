@@ -1,0 +1,472 @@
+[
+  {
+    "name": "Add a line item to a Job",
+    "uri": "/reference/housecall.v1.yaml/paths/~1jobs~1{job_id}~1line_items/post",
+    "stable_id": "99ba8250597cd"
+  },
+  {
+    "name": "Add an Attachment to a Job",
+    "uri": "/reference/housecall.v1.yaml/paths/~1jobs~1{job_id}~1attachments/post",
+    "stable_id": "c4ea6b1217b22"
+  },
+  {
+    "name": "Add job note",
+    "uri": "/reference/housecall.v1.yaml/paths/~1jobs~1{job_id}~1notes/post",
+    "stable_id": "62185fa6f6afc"
+  },
+  {
+    "name": "Add job tag",
+    "uri": "/reference/housecall.v1.yaml/paths/~1jobs~1{job_id}~1tags/post",
+    "stable_id": "f9f47b5268bae"
+  },
+  {
+    "name": "Approve estimate options",
+    "uri": "/reference/housecall.v1.yaml/paths/~1estimates~1options~1approve/post",
+    "stable_id": "3a4df6de2ea28"
+  },
+  {
+    "name": "Booking Windows",
+    "uri": "/reference/housecall.v1.yaml/paths/~1company~1schedule_availability~1booking_windows/get",
+    "stable_id": "c80920efe7ef1"
+  },
+  {
+    "name": "Bulk update a job's input materials",
+    "uri": "/reference/housecall.v1.yaml/paths/~1jobs~1{job_id}~1job_input_materials~1bulk_update/put",
+    "stable_id": "ecc9f7a5d84bc"
+  },
+  {
+    "name": "Bulk update a job's line items",
+    "uri": "/reference/housecall.v1.yaml/paths/~1jobs~1{job_id}~1line_items~1bulk_update/put",
+    "stable_id": "79a5ef20427d5"
+  },
+  {
+    "name": "Bulk update estimate option line items",
+    "uri": "/reference/housecall.v1.yaml/paths/~1estimates~1{estimate_id}~1options~1{option_id}~1line_items~1bulk_update/put",
+    "stable_id": "b3e4391f7853f"
+  },
+  {
+    "name": "Convert Lead to Estimate or Job",
+    "uri": "/reference/housecall.v1.yaml/paths/~1leads~1{id}~1convert/post",
+    "stable_id": "d9c8a89ed4e4c"
+  },
+  {
+    "name": "Create a Job",
+    "uri": "/reference/housecall.v1.yaml/paths/~1jobs/post",
+    "stable_id": "2dcf481ed7d69"
+  },
+  {
+    "name": "Create a tag",
+    "uri": "/reference/housecall.v1.yaml/paths/~1tags/post",
+    "stable_id": "57748227f1f99"
+  },
+  {
+    "name": "Create a Webhook Subscription",
+    "uri": "/reference/housecall.v1.yaml/paths/~1webhooks~1subscription/post",
+    "stable_id": "5ba16ca259135"
+  },
+  {
+    "name": "Create an Address on a Customer",
+    "uri": "/reference/housecall.v1.yaml/paths/~1customers~1{customer_id}~1addresses/post",
+    "stable_id": "6cf593d8a90ca"
+  },
+  {
+    "name": "Create an estimate",
+    "uri": "/reference/housecall.v1.yaml/paths/~1estimates/post",
+    "stable_id": "4004d373be14c"
+  },
+  {
+    "name": "Create an estimate option",
+    "uri": "/reference/housecall.v1.yaml/paths/~1estimates~1{estimate_id}~1options/post",
+    "stable_id": "7c8b4860d6947"
+  },
+  {
+    "name": "Create appointment",
+    "uri": "/reference/housecall.v1.yaml/paths/~1jobs~1{job_id}~1appointments/post",
+    "stable_id": "103994b2aaa2d"
+  },
+  {
+    "name": "Create Customer",
+    "uri": "/reference/housecall.v1.yaml/paths/~1customers/post",
+    "stable_id": "4e0bf8c4d65d7"
+  },
+  {
+    "name": "Create Estimate option attachment",
+    "uri": "/reference/housecall.v1.yaml/paths/~1estimates~1{estimate_id}~1options~1{option_id}~1attachments/post",
+    "stable_id": "4ab88e001feec"
+  },
+  {
+    "name": "Create Estimate option link",
+    "uri": "/reference/housecall.v1.yaml/paths/~1estimates~1{estimate_id}~1options~1{option_id}~1links/post",
+    "stable_id": "67182797c6885"
+  },
+  {
+    "name": "Create Estimate option note",
+    "uri": "/reference/housecall.v1.yaml/paths/~1estimates~1{estimate_id}~1options~1{option_id}~1notes/post",
+    "stable_id": "090b9a9974b5f"
+  },
+  {
+    "name": "Create Job Link",
+    "uri": "/reference/housecall.v1.yaml/paths/~1jobs~1{job_id}~1links/post",
+    "stable_id": "083bf9924aa4b"
+  },
+  {
+    "name": "Create Job Type",
+    "uri": "/reference/housecall.v1.yaml/paths/~1job_fields~1job_types/post",
+    "stable_id": "9bb36a0fd34de"
+  },
+  {
+    "name": "Create Lead",
+    "uri": "/reference/housecall.v1.yaml/paths/~1leads/post",
+    "stable_id": "8961eaf9f1c28"
+  },
+  {
+    "name": "Create lead source",
+    "uri": "/reference/housecall.v1.yaml/paths/~1lead_sources/post",
+    "stable_id": "8aeb70ebd6aa2"
+  },
+  {
+    "name": "Create Material",
+    "uri": "/reference/housecall.v1.yaml/paths/~1api~1price_book~1materials/post",
+    "stable_id": "e404d4b30ea0d"
+  },
+  {
+    "name": "Create Material Category",
+    "uri": "/reference/housecall.v1.yaml/paths/~1api~1price_book~1material_categories/post",
+    "stable_id": "25d2f95973fcf"
+  },
+  {
+    "name": "Create Price Form",
+    "uri": "/reference/housecall.v1.yaml/paths/~1api~1price_book~1price_forms/post",
+    "stable_id": "4wuj7qqkofhzc"
+  },
+  {
+    "name": "Decline estimate options",
+    "uri": "/reference/housecall.v1.yaml/paths/~1estimates~1options~1decline/post",
+    "stable_id": "29c6b44d432d6"
+  },
+  {
+    "name": "Delete a single line item for a job",
+    "uri": "/reference/housecall.v1.yaml/paths/~1jobs~1{job_id}~1line_items~1{id}/delete",
+    "stable_id": "0c05c275eede7"
+  },
+  {
+    "name": "Delete a Webhook Subscription",
+    "uri": "/reference/housecall.v1.yaml/paths/~1webhooks~1subscription/delete",
+    "stable_id": "8975f43bc8163"
+  },
+  {
+    "name": "Delete appointment",
+    "uri": "/reference/housecall.v1.yaml/paths/~1jobs~1{job_id}~1appointments~1{appointment_id}/delete",
+    "stable_id": "f77a317dc865b"
+  },
+  {
+    "name": "Delete estimate option note",
+    "uri": "/reference/housecall.v1.yaml/paths/~1estimates~1{estimate_id}~1options~1{option_id}~1notes~1{note_id}/delete",
+    "stable_id": "69f56d41204d0"
+  },
+  {
+    "name": "Delete job note",
+    "uri": "/reference/housecall.v1.yaml/paths/~1jobs~1{job_id}~1notes~1{note_id}/delete",
+    "stable_id": "e3423d7dc7d5f"
+  },
+  {
+    "name": "Delete job schedule",
+    "uri": "/reference/housecall.v1.yaml/paths/~1jobs~1{job_id}~1schedule/delete",
+    "stable_id": "7c3db70353a4f"
+  },
+  {
+    "name": "Delete Material",
+    "uri": "/reference/housecall.v1.yaml/paths/~1api~1price_book~1materials~1{uuid}/delete",
+    "stable_id": "35ff428b41018"
+  },
+  {
+    "name": "Delete Material Category",
+    "uri": "/reference/housecall.v1.yaml/paths/~1api~1price_book~1material_categories~1{uuid}/delete",
+    "stable_id": "dhq3lfytvth93"
+  },
+  {
+    "name": "Delete Price Form",
+    "uri": "/reference/housecall.v1.yaml/paths/~1api~1price_book~1price_forms~1{uuid}/delete",
+    "stable_id": "eghd88vvk0dst"
+  },
+  {
+    "name": "Disable Application",
+    "uri": "/reference/housecall.v1.yaml/paths/~1application~1disable/post",
+    "stable_id": "afffd764c851a"
+  },
+  {
+    "name": "Dispatch job to employees",
+    "uri": "/reference/housecall.v1.yaml/paths/~1jobs~1{job_id}~1dispatch/put",
+    "stable_id": "7395e7ae9c4e7"
+  },
+  {
+    "name": "Enable Application",
+    "uri": "/reference/housecall.v1.yaml/paths/~1application~1enable/post",
+    "stable_id": "b33fcc2506f60"
+  },
+  {
+    "name": "Get a Customer's Address",
+    "uri": "/reference/housecall.v1.yaml/paths/~1customers~1{customer_id}~1addresses~1{address_id}/get",
+    "stable_id": "721b19310aa3b"
+  },
+  {
+    "name": "Get a Job",
+    "uri": "/reference/housecall.v1.yaml/paths/~1jobs~1{id}/get",
+    "stable_id": "bbabd67bed1ab"
+  },
+  {
+    "name": "Get a single estimate by ID",
+    "uri": "/reference/housecall.v1.yaml/paths/~1estimates~1{estimate_id}/get",
+    "stable_id": "eae5e9c092ef2"
+  },
+  {
+    "name": "Get All of a Customer's Addresses",
+    "uri": "/reference/housecall.v1.yaml/paths/~1customers~1{customer_id}~1addresses/get",
+    "stable_id": "abdc4e24d762b"
+  },
+  {
+    "name": "Get Application",
+    "uri": "/reference/housecall.v1.yaml/paths/~1application/get",
+    "stable_id": "35c1c5c92ada7"
+  },
+  {
+    "name": "Get Appointments",
+    "uri": "/reference/housecall.v1.yaml/paths/~1jobs~1{job_id}~1appointments/get",
+    "stable_id": "512e91c37033f"
+  },
+  {
+    "name": "Get Checklists",
+    "uri": "/reference/housecall.v1.yaml/paths/~1checklists/get",
+    "stable_id": "3e1b482a296a3"
+  },
+  {
+    "name": "Get Company",
+    "uri": "/reference/housecall.v1.yaml/paths/~1company/get",
+    "stable_id": "24a5d891a80a8"
+  },
+  {
+    "name": "Get Customer",
+    "uri": "/reference/housecall.v1.yaml/paths/~1customers~1{customer_id}/get",
+    "stable_id": "7599b1ec89338"
+  },
+  {
+    "name": "Get Customers",
+    "uri": "/reference/housecall.v1.yaml/paths/~1customers/get",
+    "stable_id": "042bd3bf861ae"
+  },
+  {
+    "name": "Get Employees",
+    "uri": "/reference/housecall.v1.yaml/paths/~1employees/get",
+    "stable_id": "303ee235f23fa"
+  },
+  {
+    "name": "Get Estimates",
+    "uri": "/reference/housecall.v1.yaml/paths/~1estimates/get",
+    "stable_id": "e430ba3d520a0"
+  },
+  {
+    "name": "Get Events",
+    "uri": "/reference/housecall.v1.yaml/paths/~1events/get",
+    "stable_id": "5f8b2b787f4ba"
+  },
+  {
+    "name": "Get Invoice by UUID",
+    "uri": "/reference/housecall.v1.yaml/paths/~1api~1invoices~1{uuid}/get",
+    "stable_id": "0ae16219c3e58"
+  },
+  {
+    "name": "Get Invoices",
+    "uri": "/reference/housecall.v1.yaml/paths/~1invoices/get",
+    "stable_id": "65ce9f430d605"
+  },
+  {
+    "name": "Get Job Invoices",
+    "uri": "/reference/housecall.v1.yaml/paths/~1jobs~1{job_id}~1invoices/get",
+    "stable_id": "eb1f5b5f17290"
+  },
+  {
+    "name": "Get Job Types",
+    "uri": "/reference/housecall.v1.yaml/paths/~1job_fields~1job_types/get",
+    "stable_id": "0c6fb36d5730d"
+  },
+  {
+    "name": "Get Jobs",
+    "uri": "/reference/housecall.v1.yaml/paths/~1jobs/get",
+    "stable_id": "6c97704da8bf3"
+  },
+  {
+    "name": "Get Lead",
+    "uri": "/reference/housecall.v1.yaml/paths/~1leads~1{id}/get",
+    "stable_id": "fc11c266161fe"
+  },
+  {
+    "name": "Get Lead Sources",
+    "uri": "/reference/housecall.v1.yaml/paths/~1lead_sources/get",
+    "stable_id": "7444a4f65ed77"
+  },
+  {
+    "name": "Get Leads",
+    "uri": "/reference/housecall.v1.yaml/paths/~1leads/get",
+    "stable_id": "278974bc87e32"
+  },
+  {
+    "name": "Get Material Categories",
+    "uri": "/reference/housecall.v1.yaml/paths/~1api~1price_book~1material_categories/get",
+    "stable_id": "77aaf46f5b3db"
+  },
+  {
+    "name": "Get Materials",
+    "uri": "/reference/housecall.v1.yaml/paths/~1api~1price_book~1materials/get",
+    "stable_id": "c219023ddca6b"
+  },
+  {
+    "name": "Get Pipeline Statuses",
+    "uri": "/reference/housecall.v1.yaml/paths/~1pipeline~1statuses/get",
+    "stable_id": "2becd985fca25"
+  },
+  {
+    "name": "Get Price Book Services",
+    "uri": "/reference/housecall.v1.yaml/paths/~1api~1price_book~1services/get",
+    "stable_id": "b68be85878ece"
+  },
+  {
+    "name": "Get Price Form",
+    "uri": "/reference/housecall.v1.yaml/paths/~1api~1price_book~1price_forms~1{uuid}/get",
+    "stable_id": "k1ehlpxj1v3tj"
+  },
+  {
+    "name": "Get Price Forms",
+    "uri": "/reference/housecall.v1.yaml/paths/~1api~1price_book~1price_forms/get",
+    "stable_id": "e9b15f38e151b"
+  },
+  {
+    "name": "Get Routes",
+    "uri": "/reference/housecall.v1.yaml/paths/~1routes/get",
+    "stable_id": "8d0d12e41a38b"
+  },
+  {
+    "name": "Get Service Zones",
+    "uri": "/reference/housecall.v1.yaml/paths/~1service_zones/get",
+    "stable_id": "38b31504822e9"
+  },
+  {
+    "name": "Get tags",
+    "uri": "/reference/housecall.v1.yaml/paths/~1tags/get",
+    "stable_id": "e8fa7b29f8a8b"
+  },
+  {
+    "name": "Get the event via ID.",
+    "uri": "/reference/housecall.v1.yaml/paths/~1events~1{event_id}/get",
+    "stable_id": "fe60e7ed64a85"
+  },
+  {
+    "name": "List estimate option line items",
+    "uri": "/reference/housecall.v1.yaml/paths/~1estimates~1{estimate_id}~1options~1{option_id}~1line_items/get",
+    "stable_id": "781468fb5da47"
+  },
+  {
+    "name": "Lists all job input materials for a job",
+    "uri": "/reference/housecall.v1.yaml/paths/~1jobs~1{job_id}~1job_input_materials/get",
+    "stable_id": "024edad38a2a2"
+  },
+  {
+    "name": "Lists all line items for a job",
+    "uri": "/reference/housecall.v1.yaml/paths/~1jobs~1{job_id}~1line_items/get",
+    "stable_id": "1c84b6c79b94f"
+  },
+  {
+    "name": "Lists all line items for a lead",
+    "uri": "/reference/housecall.v1.yaml/paths/~1leads~1{lead_id}~1line_items/get",
+    "stable_id": "cd0213842e8a4"
+  },
+  {
+    "name": "Lock Job",
+    "uri": "/reference/housecall.v1.yaml/paths/~1jobs~1{job_id}~1lock/post",
+    "stable_id": "90211f98061d0"
+  },
+  {
+    "name": "Lock Jobs",
+    "uri": "/reference/housecall.v1.yaml/paths/~1jobs~1lock/post",
+    "stable_id": "30432b125d051"
+  },
+  {
+    "name": "Preview Invoice by UUID",
+    "uri": "/reference/housecall.v1.yaml/paths/~1api~1invoices~1{uuid}~1preview/get",
+    "stable_id": "ae40a9286ba7c"
+  },
+  {
+    "name": "Remove job tag",
+    "uri": "/reference/housecall.v1.yaml/paths/~1jobs~1{job_id}~1tags~1{tag_id}/delete",
+    "stable_id": "f34ea2077256c"
+  },
+  {
+    "name": "Schedule Windows",
+    "uri": "/reference/housecall.v1.yaml/paths/~1company~1schedule_availability/get",
+    "stable_id": "898190c92fb8b"
+  },
+  {
+    "name": "Update a company's schedule windows",
+    "uri": "/reference/housecall.v1.yaml/paths/~1company~1schedule_availability/put",
+    "stable_id": "ec4094ae3e2ee"
+  },
+  {
+    "name": "Update a Job Type",
+    "uri": "/reference/housecall.v1.yaml/paths/~1job_fields~1job_types~1{job_type_id}/put",
+    "stable_id": "dc6d0dcb18b9f"
+  },
+  {
+    "name": "Update a single line item for a job",
+    "uri": "/reference/housecall.v1.yaml/paths/~1jobs~1{job_id}~1line_items~1{id}/put",
+    "stable_id": "7b05bc804ebcc"
+  },
+  {
+    "name": "Update a tag",
+    "uri": "/reference/housecall.v1.yaml/paths/~1tags~1{tag_id}/put",
+    "stable_id": "9965c13d208a4"
+  },
+  {
+    "name": "Update Appointment",
+    "uri": "/reference/housecall.v1.yaml/paths/~1jobs~1{job_id}~1appointments~1{appointment_id}/put",
+    "stable_id": "73a76653b30c1"
+  },
+  {
+    "name": "Update Customer",
+    "uri": "/reference/housecall.v1.yaml/paths/~1customers~1{customer_id}/put",
+    "stable_id": "b1c3acd657849"
+  },
+  {
+    "name": "Update estimate option schedule",
+    "uri": "/reference/housecall.v1.yaml/paths/~1estimates~1{estimate_id}~1options~1{option_id}~1schedule/put",
+    "stable_id": "4a4b976948016"
+  },
+  {
+    "name": "Update job schedule",
+    "uri": "/reference/housecall.v1.yaml/paths/~1jobs~1{job_id}~1schedule/put",
+    "stable_id": "1d344f58672f9"
+  },
+  {
+    "name": "Update Lead Source",
+    "uri": "/reference/housecall.v1.yaml/paths/~1lead_sources~1{lead_source_id}/put",
+    "stable_id": "c5737e1658aaa"
+  },
+  {
+    "name": "Update Material",
+    "uri": "/reference/housecall.v1.yaml/paths/~1api~1price_book~1materials~1{uuid}/put",
+    "stable_id": "832782fbff0e1"
+  },
+  {
+    "name": "Update Material Category",
+    "uri": "/reference/housecall.v1.yaml/paths/~1api~1price_book~1material_categories~1{uuid}/put",
+    "stable_id": "2f4a77cf0af98"
+  },
+  {
+    "name": "Update Pipeline Status",
+    "uri": "/reference/housecall.v1.yaml/paths/~1pipeline~1statuses/put",
+    "stable_id": "a018f522c3136"
+  },
+  {
+    "name": "Update Price Form",
+    "uri": "/reference/housecall.v1.yaml/paths/~1api~1price_book~1price_forms~1{uuid}/put",
+    "stable_id": "jnx0gdqplve86"
+  }
+]

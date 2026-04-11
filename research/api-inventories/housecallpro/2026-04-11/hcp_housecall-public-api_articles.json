@@ -1,0 +1,22 @@
+[
+  {
+    "name": "Authentication",
+    "uri": "/docs/authentication.md"
+  },
+  {
+    "name": "Changelog",
+    "uri": "/docs/changelog.md"
+  },
+  {
+    "name": "Multi-location Enabled APIs",
+    "uri": "/docs/franchise.md"
+  },
+  {
+    "name": "Pricebook API",
+    "uri": "/docs/pricebook.md"
+  },
+  {
+    "name": "Webhooks",
+    "uri": "/docs/webhooks.md"
+  }
+]

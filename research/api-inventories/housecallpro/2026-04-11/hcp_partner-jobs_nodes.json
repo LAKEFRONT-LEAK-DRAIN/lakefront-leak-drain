@@ -1,0 +1,379 @@
+[
+  {
+    "id": 63353537,
+    "name": "PartnerJobAddressCreate",
+    "slug": null,
+    "stable_id": "c82385339c0e0",
+    "snapshot": {
+      "type": "model",
+      "summary": ""
+    },
+    "node": {
+      "uri": "/reference/job-inbox.v1.yaml/components/schemas/PartnerJobAddressCreate"
+    }
+  },
+  {
+    "id": 63353538,
+    "name": "PartnerLead",
+    "slug": null,
+    "stable_id": "32da7062e85d1",
+    "snapshot": {
+      "type": "model",
+      "summary": ""
+    },
+    "node": {
+      "uri": "/reference/job-inbox.v1.yaml/components/schemas/PartnerLead"
+    }
+  },
+  {
+    "id": 63353536,
+    "name": "PartnerJobCustomerCreate",
+    "slug": null,
+    "stable_id": "34df7a6b45660",
+    "snapshot": {
+      "type": "model",
+      "summary": "If customer fields are not supplied, then `id` is required"
+    },
+    "node": {
+      "uri": "/reference/job-inbox.v1.yaml/components/schemas/PartnerJobCustomerCreate"
+    }
+  },
+  {
+    "id": 66775232,
+    "name": "ArrivalWindow",
+    "slug": null,
+    "stable_id": "5362b3ffcca73",
+    "snapshot": {
+      "type": "model",
+      "summary": ""
+    },
+    "node": {
+      "uri": "/reference/job-inbox.v1.yaml/components/schemas/ArrivalWindow"
+    }
+  },
+  {
+    "id": 63353544,
+    "name": "TimeRange",
+    "slug": null,
+    "stable_id": "b8cb0dc86f503",
+    "snapshot": {
+      "type": "model",
+      "summary": ""
+    },
+    "node": {
+      "uri": "/reference/job-inbox.v1.yaml/components/schemas/TimeRange"
+    }
+  },
+  {
+    "id": 63353540,
+    "name": "PartnerLeadCustomerCreate",
+    "slug": null,
+    "stable_id": "11e4f00c8f83e",
+    "snapshot": {
+      "type": "model",
+      "summary": "If customer fields are not supplied, then `id` is required"
+    },
+    "node": {
+      "uri": "/reference/job-inbox.v1.yaml/components/schemas/PartnerLeadCustomerCreate"
+    }
+  },
+  {
+    "id": 63353541,
+    "name": "PartnerLeadAddress",
+    "slug": null,
+    "stable_id": "c5873b634fd13",
+    "snapshot": {
+      "type": "model",
+      "summary": ""
+    },
+    "node": {
+      "uri": "/reference/job-inbox.v1.yaml/components/schemas/PartnerLeadAddressCreate"
+    }
+  },
+  {
+    "id": 59958944,
+    "name": "PartnerJob",
+    "slug": null,
+    "stable_id": "0e2c1899dad87",
+    "snapshot": {
+      "type": "model",
+      "summary": ""
+    },
+    "node": {
+      "uri": "/reference/job-inbox.v1.yaml/components/schemas/PartnerJob"
+    }
+  },
+  {
+    "id": 63353539,
+    "name": "PartnerLeadCreate",
+    "slug": null,
+    "stable_id": "13184447eb0e7",
+    "snapshot": {
+      "type": "model",
+      "summary": ""
+    },
+    "node": {
+      "uri": "/reference/job-inbox.v1.yaml/components/schemas/PartnerLeadCreate"
+    }
+  },
+  {
+    "id": 59958948,
+    "name": "toc",
+    "slug": null,
+    "stable_id": null,
+    "snapshot": {
+      "type": "table_of_contents",
+      "summary": ""
+    },
+    "node": {
+      "uri": "/toc.json"
+    }
+  },
+  {
+    "id": 59958943,
+    "name": "PartnerJobCreate",
+    "slug": null,
+    "stable_id": "0692dbbded265",
+    "snapshot": {
+      "type": "model",
+      "summary": ""
+    },
+    "node": {
+      "uri": "/reference/job-inbox.v1.yaml/components/schemas/PartnerJobCreate"
+    }
+  },
+  {
+    "id": 59958937,
+    "name": "Appendix",
+    "slug": null,
+    "stable_id": "92587bcb45dc0",
+    "snapshot": {
+      "type": "article",
+      "summary": "Africa/Algiers"
+    },
+    "node": {
+      "uri": "/docs/Appendix.md"
+    }
+  },
+  {
+    "id": 65212415,
+    "name": "PartnerFee",
+    "slug": null,
+    "stable_id": "47fc19ba413a8",
+    "snapshot": {
+      "type": "model",
+      "summary": ""
+    },
+    "node": {
+      "uri": "/reference/job-inbox.v1.yaml/components/schemas/PartnerFee"
+    }
+  },
+  {
+    "id": 63353542,
+    "name": "PartnerLeadLineItem",
+    "slug": null,
+    "stable_id": "c4631d4b215cc",
+    "snapshot": {
+      "type": "model",
+      "summary": ""
+    },
+    "node": {
+      "uri": "/reference/job-inbox.v1.yaml/components/schemas/PartnerLeadLineItem"
+    }
+  },
+  {
+    "id": 59958939,
+    "name": "Webhooks",
+    "slug": null,
+    "stable_id": "46e9e1be07621",
+    "snapshot": {
+      "type": "article",
+      "summary": "Webhooks are custom callbacks the Housecall provides to developers to make them aware of useful events triggered by our Pros."
+    },
+    "node": {
+      "uri": "/docs/webhooks.md"
+    }
+  },
+  {
+    "id": 59958938,
+    "name": "Authentication",
+    "slug": null,
+    "stable_id": "b87d37ae48a0d",
+    "snapshot": {
+      "type": "article",
+      "summary": "Housecall Pro uses both API keys and OAuth 2.0 as means of authenticating with our API."
+    },
+    "node": {
+      "uri": "/docs/authentication.md"
+    }
+  },
+  {
+    "id": 114454921,
+    "name": "PartnerJobCreatePricing",
+    "slug": null,
+    "stable_id": "dbb0a8b3b15e3",
+    "snapshot": {
+      "type": "model",
+      "summary": "Partner job pricing structure. If present, at least one field must be present."
+    },
+    "node": {
+      "uri": "/reference/job-inbox.v1.yaml/components/schemas/PartnerJobCreatePricing"
+    }
+  },
+  {
+    "id": 114454922,
+    "name": "PartnerJobCreatePricingAmount",
+    "slug": null,
+    "stable_id": "9e6760e2adc7a",
+    "snapshot": {
+      "type": "model",
+      "summary": "If not null, at least 1 field must be present"
+    },
+    "node": {
+      "uri": "/reference/job-inbox.v1.yaml/components/schemas/PartnerJobCreatePricingAmount"
+    }
+  },
+  {
+    "id": 114454924,
+    "name": "PartnerJobCreatePricingLimitedAmount",
+    "slug": null,
+    "stable_id": "571faec377d19",
+    "snapshot": {
+      "type": "model",
+      "summary": "Partner job minimum or maximum amount"
+    },
+    "node": {
+      "uri": "/reference/job-inbox.v1.yaml/components/schemas/PartnerJobCreatePricingLimitedAmount"
+    }
+  },
+  {
+    "id": 114454925,
+    "name": "PartnerJobCreatePricingCost",
+    "slug": null,
+    "stable_id": "26ae5008acfd0",
+    "snapshot": {
+      "type": "model",
+      "summary": "Partner job pricing cost"
+    },
+    "node": {
+      "uri": "/reference/job-inbox.v1.yaml/components/schemas/PartnerJobCreatePricingCost"
+    }
+  },
+  {
+    "id": 114454926,
+    "name": "PartnerJobCreatePaymentProcessingTime",
+    "slug": null,
+    "stable_id": "7d547d344e766",
+    "snapshot": {
+      "type": "model",
+      "summary": "When partner will pay pro. If you don't need this, send null on this object."
+    },
+    "node": {
+      "uri": "/reference/job-inbox.v1.yaml/components/schemas/PartnerJobCreatePaymentProcessingTime"
+    }
+  },
+  {
+    "id": 114454923,
+    "name": "PartnerJobCreatePricingEstimatedAmount",
+    "slug": null,
+    "stable_id": "d858f1227f1b1",
+    "snapshot": {
+      "type": "model",
+      "summary": "Partner job estimated amount"
+    },
+    "node": {
+      "uri": "/reference/job-inbox.v1.yaml/components/schemas/PartnerJobCreatePricingEstimatedAmount"
+    }
+  },
+  {
+    "id": 82399608,
+    "name": "Schedule",
+    "slug": null,
+    "stable_id": "3c8f65314ea89",
+    "snapshot": {
+      "type": "model",
+      "summary": "Date and time for the pro to arrive at the customer site. This can be exact or flexible. Leave null if no schedule is intended."
+    },
+    "node": {
+      "uri": "/reference/job-inbox.v1.yaml/components/schemas/PartnerJobCreateSchedule"
+    }
+  },
+  {
+    "id": 59958945,
+    "name": "Schedule",
+    "slug": null,
+    "stable_id": "b99126830fc27",
+    "snapshot": {
+      "type": "model",
+      "summary": "Date and time for the pro to arrive at the customer site. This can be exact or flexible."
+    },
+    "node": {
+      "uri": "/reference/job-inbox.v1.yaml/components/schemas/Schedule"
+    }
+  },
+  {
+    "id": 90879579,
+    "name": "Create Partner Lead",
+    "slug": null,
+    "stable_id": "5eaff5362bb15",
+    "snapshot": {
+      "type": "http_operation",
+      "summary": "Create a partner lead"
+    },
+    "node": {
+      "uri": "/reference/job-inbox.v1.yaml/paths/~1partner_leads/post"
+    }
+  },
+  {
+    "id": 59958947,
+    "name": "Update Partner Job",
+    "slug": null,
+    "stable_id": "d436575ee382f",
+    "snapshot": {
+      "type": "http_operation",
+      "summary": "Updates an existing partner job"
+    },
+    "node": {
+      "uri": "/reference/job-inbox.v1.yaml/paths/~1partner_jobs~1{partner_job_id}/put"
+    }
+  },
+  {
+    "id": 90879580,
+    "name": "Update Partner Lead",
+    "slug": null,
+    "stable_id": "74dd440a603f6",
+    "snapshot": {
+      "type": "http_operation",
+      "summary": "Updates an existing partner lead"
+    },
+    "node": {
+      "uri": "/reference/job-inbox.v1.yaml/paths/~1partner_leads~1{partner_lead_id}/put"
+    }
+  },
+  {
+    "id": 59958940,
+    "name": "Job Inbox V1",
+    "slug": null,
+    "stable_id": "e3f87115c739f",
+    "snapshot": {
+      "type": "http_service",
+      "summary": "HousecallPro Job Inbox API V1"
+    },
+    "node": {
+      "uri": "/reference/job-inbox.v1.yaml"
+    }
+  },
+  {
+    "id": 59958946,
+    "name": "Create Partner Job",
+    "slug": null,
+    "stable_id": "41b2730b72714",
+    "snapshot": {
+      "type": "http_operation",
+      "summary": "Create a partner job"
+    },
+    "node": {
+      "uri": "/reference/job-inbox.v1.yaml/paths/~1partner_jobs/post"
+    }
+  }
+]

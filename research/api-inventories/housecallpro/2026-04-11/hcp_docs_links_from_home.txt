@@ -1,0 +1,3 @@
+https://docs.housecallpro.com/docs/housecall-public-api
+https://docs.housecallpro.com/docs/partner-jobs
+https://docs.housecallpro.com/docs/terms

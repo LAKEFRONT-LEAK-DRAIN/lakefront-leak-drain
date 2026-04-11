@@ -1,0 +1,22 @@
+[
+  {
+    "name": "Create Partner Job",
+    "uri": "/reference/job-inbox.v1.yaml/paths/~1partner_jobs/post",
+    "stable_id": "41b2730b72714"
+  },
+  {
+    "name": "Create Partner Lead",
+    "uri": "/reference/job-inbox.v1.yaml/paths/~1partner_leads/post",
+    "stable_id": "5eaff5362bb15"
+  },
+  {
+    "name": "Update Partner Job",
+    "uri": "/reference/job-inbox.v1.yaml/paths/~1partner_jobs~1{partner_job_id}/put",
+    "stable_id": "d436575ee382f"
+  },
+  {
+    "name": "Update Partner Lead",
+    "uri": "/reference/job-inbox.v1.yaml/paths/~1partner_leads~1{partner_lead_id}/put",
+    "stable_id": "74dd440a603f6"
+  }
+]
