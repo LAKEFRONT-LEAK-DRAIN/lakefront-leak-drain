@@ -1,0 +1,437 @@
+[
+  {
+    "id": 63353537,
+    "name": "PartnerJobAddressCreate",
+    "stable_id": "c82385339c0e0",
+    "node": {
+      "uri": "/reference/job-inbox.v1.yaml/components/schemas/PartnerJobAddressCreate"
+    },
+    "snapshot": {
+      "id": 54907428,
+      "type": "model",
+      "summary": "",
+      "data": "{\"title\":\"PartnerJobAddressCreate\",\"type\":\"object\",\"properties\":{\"street\":{\"type\":\"string\"},\"street_line_2\":{\"type\":\"string\"},\"city\":{\"type\":\"string\"},\"state\":{\"type\":\"string\"},\"zip\":{\"type\":\"string\"},\"country\":{\"type\":\"string\"}},\"required\":[\"street\",\"city\",\"state\",\"zip\"],\"$schema\":\"http://json-schema.org/draft-07/schema#\"}",
+      "spec": "oas3"
+    }
+  },
+  {
+    "id": 63353538,
+    "name": "PartnerLead",
+    "stable_id": "32da7062e85d1",
+    "node": {
+      "uri": "/reference/job-inbox.v1.yaml/components/schemas/PartnerLead"
+    },
+    "snapshot": {
+      "id": 58314236,
+      "type": "model",
+      "summary": "",
+      "data": "{\"title\":\"PartnerLead\",\"x-examples\":{},\"allOf\":[{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"}}},{\"$ref\":\"#/components/schemas/PartnerLeadCreate\"}],\"$schema\":\"http://json-schema.org/draft-07/schema#\",\"x-stoplight\":{\"id\":\"32da7062e85d1\"}}",
+      "spec": "oas3"
+    }
+  },
+  {
+    "id": 63353536,
+    "name": "PartnerJobCustomerCreate",
+    "stable_id": "34df7a6b45660",
+    "node": {
+      "uri": "/reference/job-inbox.v1.yaml/components/schemas/PartnerJobCustomerCreate"
+    },
+    "snapshot": {
+      "id": 72564699,
+      "type": "model",
+      "summary": "If customer fields are not supplied, then `id` is required",
+      "data": "{\"title\":\"PartnerJobCustomerCreate\",\"type\":\"object\",\"description\":\"If customer fields are not supplied, then `id` is required\",\"properties\":{\"first_name\":{\"type\":\"string\"},\"last_name\":{\"type\":\"string\"},\"email\":{\"type\":\"string\"},\"notifications_enabled\":{\"type\":\"boolean\",\"description\":\"Notify customer when their jobs are updated. We recommend it for the best experience\",\"enum\":[true,false]},\"phone\":{\"type\":\"string\",\"description\":\"10 digits\"},\"address\":{\"$ref\":\"#/components/schemas/PartnerJobAddressCreate\"},\"id\":{\"type\":\"string\",\"description\":\"ID of a known customer. Required if other customer details are not entered\"}},\"required\":[\"first_name\",\"last_name\",\"notifications_enabled\"],\"$schema\":\"http://json-schema.org/draft-07/schema#\"}",
+      "spec": "oas3"
+    }
+  },
+  {
+    "id": 66775232,
+    "name": "ArrivalWindow",
+    "stable_id": "5362b3ffcca73",
+    "node": {
+      "uri": "/reference/job-inbox.v1.yaml/components/schemas/ArrivalWindow"
+    },
+    "snapshot": {
+      "id": 57929504,
+      "type": "model",
+      "summary": "",
+      "data": "{\"title\":\"ArrivalWindow\",\"x-stoplight\":{\"id\":\"uqxgogy7ifl6e\"},\"type\":\"object\",\"properties\":{\"start_date\":{\"type\":\"string\",\"description\":\"Available start date (ex. `2021-06-29`)\"},\"end_date\":{\"type\":\"string\",\"description\":\"Available end date (ex. `2021-06-29`). If not supplied, defaults to same value as `start_date`\"},\"time_ranges\":{\"type\":\"array\",\"description\":\"If left emtpy, it will be considered that any time during the given date is available\",\"items\":{\"$ref\":\"#/components/schemas/TimeRange\"}}},\"required\":[\"start_date\"],\"$schema\":\"http://json-schema.org/draft-07/schema#\"}",
+      "spec": "oas3"
+    }
+  },
+  {
+    "id": 63353544,
+    "name": "TimeRange",
+    "stable_id": "b8cb0dc86f503",
+    "node": {
+      "uri": "/reference/job-inbox.v1.yaml/components/schemas/TimeRange"
+    },
+    "snapshot": {
+      "id": 57929505,
+      "type": "model",
+      "summary": "",
+      "data": "{\"title\":\"TimeRange\",\"x-stoplight\":{\"id\":\"vo573b6kd3da0\"},\"type\":\"object\",\"properties\":{\"start_time\":{\"type\":\"string\",\"description\":\"Start time (ex. `16:30:00`)\\n\\nNOTE: Must be before end time\"},\"end_time\":{\"type\":\"string\",\"description\":\"End time (ex. `17:30:00`)\\n\\nNOTE: Must be after start time\"}},\"required\":[\"start_time\"],\"$schema\":\"http://json-schema.org/draft-07/schema#\"}",
+      "spec": "oas3"
+    }
+  },
+  {
+    "id": 63353540,
+    "name": "PartnerLeadCustomerCreate",
+    "stable_id": "11e4f00c8f83e",
+    "node": {
+      "uri": "/reference/job-inbox.v1.yaml/components/schemas/PartnerLeadCustomerCreate"
+    },
+    "snapshot": {
+      "id": 76356027,
+      "type": "model",
+      "summary": "If customer fields are not supplied, then `id` is required",
+      "data": "{\"title\":\"PartnerLeadCustomerCreate\",\"type\":\"object\",\"description\":\"If customer fields are not supplied, then `id` is required\",\"properties\":{\"first_name\":{\"type\":\"string\"},\"last_name\":{\"type\":\"string\"},\"email\":{\"type\":\"string\"},\"notifications_enabled\":{\"type\":\"boolean\",\"description\":\"Notify customer when their jobs are updated. We recommend it for the best experience\"},\"phone\":{\"type\":\"string\",\"description\":\"10 digits\"},\"address\":{\"$ref\":\"#/components/schemas/PartnerLeadAddressCreate\"},\"id\":{\"type\":\"string\",\"description\":\"ID of a known customer. Required if other customer details are not entered\"}},\"required\":[\"first_name\",\"last_name\",\"phone\"],\"$schema\":\"http://json-schema.org/draft-07/schema#\"}",
+      "spec": "oas3"
+    }
+  },
+  {
+    "id": 63353541,
+    "name": "PartnerLeadAddress",
+    "stable_id": "c5873b634fd13",
+    "node": {
+      "uri": "/reference/job-inbox.v1.yaml/components/schemas/PartnerLeadAddressCreate"
+    },
+    "snapshot": {
+      "id": 76055173,
+      "type": "model",
+      "summary": "",
+      "data": "{\"title\":\"PartnerLeadAddress\",\"type\":\"object\",\"properties\":{\"street\":{\"type\":\"string\"},\"street_line_2\":{\"type\":\"string\"},\"city\":{\"type\":\"string\"},\"state\":{\"type\":\"string\"},\"zip\":{\"type\":\"string\"},\"country\":{\"type\":\"string\"}},\"$schema\":\"http://json-schema.org/draft-07/schema#\"}",
+      "spec": "oas3"
+    }
+  },
+  {
+    "id": 59958944,
+    "name": "PartnerJob",
+    "stable_id": "0e2c1899dad87",
+    "node": {
+      "uri": "/reference/job-inbox.v1.yaml/components/schemas/PartnerJob"
+    },
+    "snapshot": {
+      "id": 58314234,
+      "type": "model",
+      "summary": "",
+      "data": "{\"title\":\"PartnerJob\",\"x-examples\":{},\"allOf\":[{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"}}},{\"$ref\":\"#/components/schemas/PartnerJobCreate\"}],\"$schema\":\"http://json-schema.org/draft-07/schema#\",\"x-stoplight\":{\"id\":\"0e2c1899dad87\"}}",
+      "spec": "oas3"
+    }
+  },
+  {
+    "id": 63353539,
+    "name": "PartnerLeadCreate",
+    "stable_id": "13184447eb0e7",
+    "node": {
+      "uri": "/reference/job-inbox.v1.yaml/components/schemas/PartnerLeadCreate"
+    },
+    "snapshot": {
+      "id": 124596870,
+      "type": "model",
+      "summary": "",
+      "data": "{\"title\":\"PartnerLeadCreate\",\"type\":\"object\",\"description\":\"\",\"properties\":{\"external_id\":{\"type\":\"string\",\"description\":\"Your identifier for this job outside of Housecall Pro\"},\"service_category_name\":{\"type\":\"string\",\"description\":\"The industry of the job, below are some examples, more values can be found in [Appendix](docs/Appendix.md) file:\\n * `Carpet Cleaning`\\n * `Heating & Air Conditioning`\\n * `Plumbing`\\n * `Electrical`\\n * `Handyman`\\n * `Appliances`\\n * `Pest Control`\\n * `Garage`\\n * `Water Heater`\\n\"},\"line_items\":{\"type\":\"array\",\"minItems\":1,\"description\":\"The first line item name will be the name of the lead\",\"items\":{\"$ref\":\"#/components/schemas/PartnerLeadLineItem\"}},\"attachment_urls\":{\"type\":\"array\",\"description\":\"URLs of images, videos or files to be attached to the lead\",\"items\":{\"type\":\"string\"}},\"customer\":{\"$ref\":\"#/components/schemas/PartnerLeadCustomerCreate\"},\"notes\":{\"type\":\"string\",\"description\":\"Notes for the pro to see when receiving this lead\"},\"schedule\":{\"$ref\":\"#/components/schemas/Schedule\"},\"fees\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/PartnerFee\"}}},\"required\":[\"line_items\",\"customer\"],\"$schema\":\"http://json-schema.org/draft-07/schema#\",\"x-stoplight\":{\"id\":\"13184447eb0e7\"}}",
+      "spec": "oas3"
+    }
+  },
+  {
+    "id": 59958948,
+    "name": "toc",
+    "stable_id": null,
+    "node": {
+      "uri": "/toc.json"
+    },
+    "snapshot": {
+      "id": 271181449,
+      "type": "table_of_contents",
+      "summary": "",
+      "data": "{\"collapseTableOfContents\":false,\"items\":[{\"type\":\"item\",\"title\":\"Appendix\",\"uri\":\"/docs/Appendix.md\"},{\"type\":\"item\",\"title\":\"Authentication\",\"uri\":\"/docs/authentication.md\"},{\"type\":\"item\",\"title\":\"Webhooks\",\"uri\":\"/docs/webhooks.md\"},{\"type\":\"divider\",\"title\":\"APIS\"},{\"type\":\"group\",\"title\":\"Job Inbox V1\",\"uri\":\"/reference/job-inbox.v1.yaml\",\"items\":[{\"type\":\"group\",\"title\":\"Partner Jobs\",\"items\":[{\"type\":\"item\",\"title\":\"Create Partner Job\",\"uri\":\"/reference/job-inbox.v1.yaml/paths/~1partner_jobs/post\"},{\"type\":\"item\",\"title\":\"Update Partner Job\",\"uri\":\"/reference/job-inbox.v1.yaml/paths/~1partner_jobs~1{partner_job_id}/put\"}]},{\"type\":\"group\",\"title\":\"Partner Leads\",\"items\":[{\"type\":\"item\",\"title\":\"Create Partner Lead\",\"uri\":\"/reference/job-inbox.v1.yaml/paths/~1partner_leads/post\"},{\"type\":\"item\",\"title\":\"Update Partner Lead\",\"uri\":\"/reference/job-inbox.v1.yaml/paths/~1partner_leads~1{partner_lead_id}/put\"}]},{\"type\":\"group\",\"title\":\"Schemas\",\"items\":[{\"type\":\"item\",\"title\":\"PartnerJob\",\"uri\":\"/reference/job-inbox.v1.yaml/components/schemas/PartnerJob\"},{\"type\":\"item\",\"title\":\"PartnerJobCreate\",\"uri\":\"/reference/job-inbox.v1.yaml/components/schemas/PartnerJobCreate\"},{\"type\":\"item\",\"title\":\"PartnerJobCreatePricing\",\"uri\":\"/reference/job-inbox.v1.yaml/components/schemas/PartnerJobCreatePricing\"},{\"type\":\"item\",\"title\":\"PartnerJobCreatePricingAmount\",\"uri\":\"/reference/job-inbox.v1.yaml/components/schemas/PartnerJobCreatePricingAmount\"},{\"type\":\"item\",\"title\":\"PartnerJobCreatePricingEstimatedAmount\",\"uri\":\"/reference/job-inbox.v1.yaml/components/schemas/PartnerJobCreatePricingEstimatedAmount\"},{\"type\":\"item\",\"title\":\"PartnerJobCreatePricingLimitedAmount\",\"uri\":\"/reference/job-inbox.v1.yaml/components/schemas/PartnerJobCreatePricingLimitedAmount\"},{\"type\":\"item\",\"title\":\"PartnerJobCreatePricingCost\",\"uri\":\"/reference/job-inbox.v1.yaml/components/schemas/PartnerJobCreatePricingCost\"},{\"type\":\"item\",\"title\":\"PartnerJobCreatePaymentProcessingTime\",\"uri\":\"/reference/job-inbox.v1.yaml/components/schemas/PartnerJobCreatePaymentProcessingTime\"},{\"type\":\"item\",\"title\":\"PartnerJobCustomerCreate\",\"uri\":\"/reference/job-inbox.v1.yaml/components/schemas/PartnerJobCustomerCreate\"},{\"type\":\"item\",\"title\":\"PartnerJobAddressCreate\",\"uri\":\"/reference/job-inbox.v1.yaml/components/schemas/PartnerJobAddressCreate\"},{\"type\":\"item\",\"title\":\"PartnerLead\",\"uri\":\"/reference/job-inbox.v1.yaml/components/schemas/PartnerLead\"},{\"type\":\"item\",\"title\":\"PartnerLeadCreate\",\"uri\":\"/reference/job-inbox.v1.yaml/components/schemas/PartnerLeadCreate\"},{\"type\":\"item\",\"title\":\"PartnerLeadCustomerCreate\",\"uri\":\"/reference/job-inbox.v1.yaml/components/schemas/PartnerLeadCustomerCreate\"},{\"type\":\"item\",\"title\":\"PartnerLeadAddress\",\"uri\":\"/reference/job-inbox.v1.yaml/components/schemas/PartnerLeadAddressCreate\"},{\"type\":\"item\",\"title\":\"PartnerLeadLineItem\",\"uri\":\"/reference/job-inbox.v1.yaml/components/schemas/PartnerLeadLineItem\"},{\"type\":\"item\",\"title\":\"Schedule\",\"uri\":\"/reference/job-inbox.v1.yaml/components/schemas/PartnerJobCreateSchedule\"},{\"type\":\"item\",\"title\":\"Schedule\",\"uri\":\"/reference/job-inbox.v1.yaml/components/schemas/Schedule\"},{\"type\":\"item\",\"title\":\"ArrivalWindow\",\"uri\":\"/reference/job-inbox.v1.yaml/components/schemas/ArrivalWindow\"},{\"type\":\"item\",\"title\":\"TimeRange\",\"uri\":\"/reference/job-inbox.v1.yaml/components/schemas/TimeRange\"},{\"type\":\"item\",\"title\":\"PartnerFee\",\"uri\":\"/reference/job-inbox.v1.yaml/components/schemas/PartnerFee\"}],\"itemsType\":\"model\"}]}],\"version\":2}",
+      "spec": "table_of_contents"
+    }
+  },
+  {
+    "id": 59958943,
+    "name": "PartnerJobCreate",
+    "stable_id": "0692dbbded265",
+    "node": {
+      "uri": "/reference/job-inbox.v1.yaml/components/schemas/PartnerJobCreate"
+    },
+    "snapshot": {
+      "id": 153582396,
+      "type": "model",
+      "summary": "",
+      "data": "{\"title\":\"PartnerJobCreate\",\"type\":\"object\",\"description\":\"\",\"properties\":{\"external_id\":{\"type\":\"string\",\"description\":\"Your identifier for this job outside of Housecall Pro.\"},\"service_category_name\":{\"type\":\"string\",\"description\":\"The industry of the job, below are some examples, more values can be found in [Appendix](docs/Appendix.md) file:\\n * `Carpet Cleaning`\\n * `Heating & Air Conditioning`\\n * `Plumbing`\\n * `Electrical`\\n * `Handyman`\\n * `Appliances`\\n * `Pest Control`\\n * `Garage`\\n * `Water Heater`\\n\"},\"service_call_amount\":{\"type\":\"number\",\"description\":\"Minimum trip charge amount the Pro will get paid\"},\"estimated_amount\":{\"type\":\"number\",\"description\":\"Amount pro could get based on region and industry standards if he does the job\"},\"name\":{\"type\":\"string\",\"description\":\"The name of this job\"},\"customer\":{\"$ref\":\"#/components/schemas/PartnerJobCustomerCreate\"},\"expires_at\":{\"type\":\"string\",\"description\":\"Indicates the time when this job will no longer be available for distribution. After this time, the job will be auto-declined.\"},\"schedule\":{\"$ref\":\"#/components/schemas/PartnerJobCreateSchedule\"},\"pricing\":{\"$ref\":\"#/components/schemas/PartnerJobCreatePricing\"},\"attachment_urls\":{\"type\":\"array\",\"description\":\"URLs of images, videos or files to be attached to the lead\",\"items\":{\"type\":\"string\"}},\"notes\":{\"type\":\"string\"}},\"required\":[\"external_id\",\"service_category_name\",\"name\",\"customer\"],\"$schema\":\"http://json-schema.org/draft-07/schema#\",\"x-stoplight\":{\"id\":\"0692dbbded265\"}}",
+      "spec": "oas3"
+    }
+  },
+  {
+    "id": 59958937,
+    "name": "Appendix",
+    "stable_id": "92587bcb45dc0",
+    "node": {
+      "uri": "/docs/Appendix.md"
+    },
+    "snapshot": {
+      "id": 72564693,
+      "type": "article",
+      "summary": "Africa/Algiers",
+      "data": "# Appendix\n\n## Service Category\n\n| Name                       |\n| -------------------------- |\n| Air Duct Cleaning          |\n| Appliances                 |\n| Automotive                 |\n| Carpet Cleaning            |\n| Electrical                 |\n| Garage                     |\n| General Contractor         |\n| Handyman                   |\n| Heating & Air Conditioning |\n| Home Cleaning              |\n| Landscaping & Lawn         |\n| Pest Control               |\n| Plumbing                   |\n| Window & Exterior Cleaning |\n\n## Time zones\n\n- Africa/Algiers\n- Africa/Cairo\n- Africa/Casablanca\n- Africa/Harare\n- Africa/Johannesburg\n- Africa/Monrovia\n- Africa/Nairobi\n- America/Argentina/Buenos_Aires\n- America/Bogota\n- America/Caracas\n- America/Chicago\n- America/Chihuahua\n- America/Denver\n- America/Godthab\n- America/Guatemala\n- America/Guyana\n- America/Halifax\n- America/Indiana/Indianapolis\n- America/Juneau\n- America/La_Paz\n- America/Lima\n- America/Los_Angeles\n- America/Mazatlan\n- America/Mexico_City\n- America/Monterrey\n- America/Montevideo\n- America/New_York\n- America/Phoenix\n- America/Regina\n- America/Santiago\n- America/Sao_Paulo\n- America/St_Johns\n- America/Tijuana\n- Asia/Almaty\n- Asia/Baghdad\n- Asia/Baku\n- Asia/Bangkok\n- Asia/Chongqing\n- Asia/Colombo\n- Asia/Dhaka\n- Asia/Hong_Kong\n- Asia/Irkutsk\n- Asia/Jakarta\n- Asia/Jerusalem\n- Asia/Kabul\n- Asia/Kamchatka\n- Asia/Karachi\n- Asia/Kathmandu\n- Asia/Kolkata\n- Asia/Krasnoyarsk\n- Asia/Kuala_Lumpur\n- Asia/Kuwait\n- Asia/Magadan\n- Asia/Muscat\n- Asia/Novosibirsk\n- Asia/Rangoon\n- Asia/Riyadh\n- Asia/Seoul\n- Asia/Shanghai\n- Asia/Singapore\n- Asia/Taipei\n- Asia/Tashkent\n- Asia/Tbilisi\n- Asia/Tehran\n- Asia/Tokyo\n- Asia/Ulaanbaatar\n- Asia/Urumqi\n- Asia/Vladivostok\n- Asia/Yakutsk\n- Asia/Yekaterinburg\n- Asia/Yerevan\n- Atlantic/Azores\n- Atlantic/Cape_Verde\n- Atlantic/South_Georgia\n- Australia/Adelaide\n- Australia/Brisbane\n- Australia/Darwin\n- Australia/Hobart\n- Australia/Melbourne\n- Australia/Perth\n- Australia/Sydney\n- Etc/UTC\n- Europe/Amsterdam\n- Europe/Athens\n- Europe/Belgrade\n- Europe/Berlin\n- Europe/Bratislava\n- Europe/Brussels\n- Europe/Bucharest\n- Europe/Budapest\n- Europe/Copenhagen\n- Europe/Dublin\n- Europe/Helsinki\n- Europe/Istanbul\n- Europe/Kiev\n- Europe/Lisbon\n- Europe/Ljubljana\n- Europe/London\n- Europe/Madrid\n- Europe/Minsk\n- Europe/Moscow\n- Europe/Paris\n- Europe/Prague\n- Europe/Riga\n- Europe/Rome\n- Europe/Sarajevo\n- Europe/Skopje\n- Europe/Sofia\n- Europe/Stockholm\n- Europe/Tallinn\n- Europe/Vienna\n- Europe/Vilnius\n- Europe/Warsaw\n- Europe/Zagreb\n- Pacific/Apia\n- Pacific/Auckland\n- Pacific/Chatham\n- Pacific/Fakaofo\n- Pacific/Fiji\n- Pacific/Guadalcanal\n- Pacific/Guam\n- Pacific/Honolulu\n- Pacific/Majuro\n- Pacific/Midway\n- Pacific/Noumea\n- Pacific/Pago_Pago\n- Pacific/Port_Moresby\n- Pacific/Tongatapu\n",
+      "spec": "md"
+    }
+  },
+  {
+    "id": 65212415,
+    "name": "PartnerFee",
+    "stable_id": "47fc19ba413a8",
+    "node": {
+      "uri": "/reference/job-inbox.v1.yaml/components/schemas/PartnerFee"
+    },
+    "snapshot": {
+      "id": 56870777,
+      "type": "model",
+      "summary": "",
+      "data": "{\"title\":\"PartnerFee\",\"x-stoplight\":{\"id\":\"yregaxwzjm5ak\"},\"type\":\"object\",\"description\":\"\",\"properties\":{\"name\":{\"type\":\"string\"},\"amount\":{\"type\":\"integer\",\"description\":\"Amount in cents\\n\\ne.g. Value of 500 maps to $5.00\"}},\"$schema\":\"http://json-schema.org/draft-07/schema#\"}",
+      "spec": "oas3"
+    }
+  },
+  {
+    "id": 63353542,
+    "name": "PartnerLeadLineItem",
+    "stable_id": "c4631d4b215cc",
+    "node": {
+      "uri": "/reference/job-inbox.v1.yaml/components/schemas/PartnerLeadLineItem"
+    },
+    "snapshot": {
+      "id": 57136127,
+      "type": "model",
+      "summary": "",
+      "data": "{\"title\":\"PartnerLeadLineItem\",\"x-stoplight\":{\"id\":\"4gwo0c8jc0b7i\"},\"type\":\"object\",\"description\":\"\",\"properties\":{\"name\":{\"type\":\"string\"},\"kind\":{\"type\":\"string\",\"description\":\"Kind of this line item:\\n- `labor`\\n- `materials`\",\"default\":\"labor\"},\"unit_price\":{\"type\":\"integer\",\"description\":\"Amount in cents\\n\\ne.g. Value of 500 maps to $5.00\",\"default\":0},\"quantity\":{\"type\":\"number\",\"default\":\"1,0\"}},\"required\":[\"name\"],\"$schema\":\"http://json-schema.org/draft-07/schema#\"}",
+      "spec": "oas3"
+    }
+  },
+  {
+    "id": 59958939,
+    "name": "Webhooks",
+    "stable_id": "46e9e1be07621",
+    "node": {
+      "uri": "/docs/webhooks.md"
+    },
+    "snapshot": {
+      "id": 301975693,
+      "type": "article",
+      "summary": "Webhooks are custom callbacks the Housecall provides to developers to make them aware of useful events triggered by our Pros.",
+      "data": "# Webhooks\n\nWebhooks are custom callbacks the Housecall provides to developers to make them aware of useful events triggered by our Pros.\n\nTo have webhooks configured for your Company or Application send an email to <apideveloper@housecallpro.com>.\n\n## Partner Job Webhook Events\n\nEvent Name | Event Key | Description\n---------|----------|----------\nPartner Job Accepted | partner_job.accepted | HCP accepted the partner job (should always accept available job)\nPartner Job Declined | partner_job.declined | HCP declined the job because of one of the following reasons:<br>• HCP didn’t find any organization to match the partner job requirements<br>• All matching organizations declined the partner job<br>• Partner job expired\nPartner Job Assigned | partner_job.assigned | HCP assigned a Pro to do the partner job\nPartner Job Scheduled | partner_job.scheduled | The assigned Pro set a schedule for the job\nPartner Job Pro En Route | partner_job.pro_en_route | The assigned Pro is on his way to the customer\nPartner Job Started | partner_job.started | The assigned Pro started the partner job\nPartner Job Completed | partner_job.completed | The assigned Pro completed the partner job\nPartner Job Unassigned | partner_job.unassigned | The assigned Pro canceled the job, which makes the job available to other Pros\n\n### Partner Job Webhook Protocol\n\n#### Delivery headers\n\nHeader | Description\n---------|----------\nContent-Type | Always equal to: 'application/json'\nApi-Signature | HMAC hex digest of the timestamp and request body joined by '.' respectively, generated using the SHA-256 hash function and the partners secret as the HMAC key\nApi-Timestamp | Timestamp of the instant the event fired\n\n#### Webhook paylooad\n\n```json\n{\n  \"event\": \"partner_job.accepted\",\n  \"partner_job\": {\n    \"id\": \"string\",\n    \"name\": \"string\",\n    \"job_inbox_partner_id\": \"string\",\n    \"external_id\": \"string\",\n    \"total_amount\": 75.0,\n    \"paid_amount\": 0.0,\n    \"paid\": \"string\",\n    \"expires_at\": \"string\",\n    \"decline_reason\": \"string or null\",\n    \"status\": \"open\",\n    \"status_timestamps\": {\n      \"accepted_at\": \"2021-01-01T10:00:00Z\",\n      \"declined_at\": \"2021-01-01T10:00:00Z\",\n      \"assigned_at\": \"2021-01-01T10:00:00Z\",\n      \"scheduled_at\": \"2021-01-01T10:00:00Z\",\n      \"pro_en_route\": \"2021-01-01T10:00:00Z\",\n      \"started_at\": \"2021-01-01T10:00:00Z\",\n      \"completed_at\": \"2021-01-01T10:00:00Z\"\n    },\n    \"customer\": {\n      \"first_name\": \"string\",\n      \"last_name\": \"string\",\n      \"email\": \"string\",\n      \"phone_number\": \"string\",\n      \"notifications_enabled\": true\n    },\n    \"address\": {\n      \"street\": \"string\",\n      \"street_line2\": \"string\",\n      \"city\": \"string\",\n      \"state\": \"string\",\n      \"zip\": \"string\",\n      \"country\": \"string\"\n    },\n    \"schedule\": {\n      \"scheduled_start\": \"string\",\n      \"scheduled_end\": \"string\"\n    },\n    \"line_items\": [\n      {\n        \"name\": \"string\",\n        \"description\": \"string\",\n        \"unit_price\": 0.0,\n        \"quantity\": 1.0\n      }\n    ],\n    \"assigned_company\": { // null if unassigned\n      \"id\": \"string\",\n      \"name\": \"string\",\n      \"phone_number\": \"string\",\n      \"email\": \"string\",\n      \"website\": \"string\",\n      \"logo_url\": \"string\",\n      \"address\": {\n        \"street\": \"string\",\n        \"street_line_2\": \"string\",\n        \"city\": \"string\",\n        \"state\": \"string\",\n        \"zip\": \"string\",\n        \"country\": \"string\"\n      }\n    }\n  }\n}\n```\n\nPlease note that once the job gets past the `assigned` state, the payload will start including data related to the `Job` object that was created on the Service Pro's account. When the Service Pros complete the job and have added attachments, you will be able to fetch them from the provided URLs, like the following payload, but please note that these URLs expire, so if you need them, please fetch the attachments and don't just store the URLs.\n\n```json\n{\n  \"event\": \"partner_job.completed\",\n  \"partner_job\": {\n    \"id\": \"string\",\n    \"name\": \"string\",\n    \"job_inbox_partner_id\": \"string\",\n    \"external_id\": \"string\",\n    \"total_amount\": 75.0,\n    \"paid_amount\": 0.0,\n    \"paid\": \"string\",\n    \"expires_at\": \"string\",\n    \"decline_reason\": null,\n    \"status\": \"string\",\n    \"can_be_there_by\": \"string\",\n    \"status_timestamps\": {\n      \"accepted_at\": \"string\",\n      \"assigned_at\": \"string\",\n      \"declined_at\": null,\n      \"scheduled_at\": \"string\",\n      \"pro_en_route_at\": \"string\",\n      \"started_at\": \"string\",\n      \"completed_at\": \"string\"\n    },\n    \"partner\": {\n      \"uuid\": \"string\",\n      \"name\": \"string\",\n      \"logo_url\": \"string\",\n      \"email\": \"string\",\n      \"phone\": \"string\"\n    },\n    \"customer\": {\n      \"first_name\": \"string\",\n      \"last_name\": \"string\",\n      \"email\": \"string\",\n      \"phone_number\": null,\n      \"notifications_enabled\": false\n    },\n    \"address\": {\n      \"street\": \"string\",\n      \"street_line_2\": \"string\",\n      \"city\": \"string\",\n      \"state\": \"string\",\n      \"zip\": \"string\",\n      \"country\": \"string\"\n    },\n    \"schedule\": {\n      \"scheduled_start\": \"string\",\n      \"scheduled_end\": \"string\",\n      \"arrival_windows\": [\n        {\n          \"start_date\": \"string\",\n          \"end_date\": \"string\"\n        }\n      ]\n    },\n    \"line_items\": [],\n    \"assigned_company\": {\n      \"id\": \"string\",\n      \"name\": \"string\",\n      \"phone_number\": \"string\",\n      \"email\": \"string\",\n      \"website\": \"string\",\n      \"logo_url\": \"string\",\n      \"address\": {\n        \"street\": \"string\",\n        \"street_line_2\": \"string\",\n        \"city\": \"string\",\n        \"state\": \"string\",\n        \"zip\": \"string\",\n        \"country\": \"string\"\n      }\n    },\n    \"service_category\": {\n      \"id\": 152,\n      \"uuid\": \"string\",\n      \"asset_id\": \"string\",\n      \"name\": \"string\"\n    },\n    \"job\": {\n      \"id\": 1,\n      \"uuid\": \"string\",\n      \"name\": \"string\",\n      \"description\": \"string\",\n      \"amount\": 0,\n      \"organization_id\": 8280,\n      \"service_pro_id\": 9686,\n      \"presentable_job_status\": \"string\",\n      \"presentable_payment_status\": \"string\",\n      \"service_pro_name\": \"string\",\n      \"message_from_pro\": null,\n      \"display_invoice_number\": \"string\",\n      \"note\": \"string\",\n      \"time_zone\": \"string\",\n      \"customer_name\": \"string\",\n      \"customer_id\": 215834,\n      \"contact_first_name\": null,\n      \"contact_last_name\": null,\n      \"contact_phone\": null,\n      \"address\": {\n        \"id\": null,\n        \"street\": \"string\",\n        \"street_line_2\": \"string\",\n        \"city\": \"string\",\n        \"zip\": \"string\",\n        \"state\": \"string\",\n        \"time_zone\": \"string\",\n        \"country\": null\n      },\n      \"schedule\": {\n        \"start\": \"string\",\n        \"end\": \"string\",\n        \"arrival_window\": 240\n      },\n      \"status_timestamps\": {\n        \"scheduled_at\": \"string\",\n        \"on_my_way_at\": \"string\",\n        \"started_at\": \"string\",\n        \"completed_at\": \"string\"\n      },\n      \"line_items\": [],\n      \"service_pros\": [\n        {\n          \"id\": 9686,\n          \"uuid\": \"string\",\n          \"first_name\": \"string\",\n          \"last_name\": \"string\",\n          \"mobile_number\": \"string\",\n          \"email\": \"string\",\n          \"organization_uuid\": \"string\",\n          \"time_zone\": \"string\",\n          \"color_hex\": \"string\",\n          \"organization_affiliation\": {\n            \"role\": \"string\",\n            \"is_admin\": true,\n            \"is_poc\": false,\n            \"can_chat_with_customers\": true,\n            \"can_be_booked_online\": true\n          },\n          \"archived\": false,\n          \"hcp_assist\": false,\n          \"avatar_url\": \"string\",\n          \"avatar_url_thumb_round\": \"string\"\n        }\n      ],\n      \"entry_point\": \"string\",\n      \"customer_uuid\": \"string\",\n      \"original_estimate_id\": null,\n      \"attachments\": [\n        {\n          \"id\": \"string\",\n          \"file_name\": \"string\",\n          \"file_type\": \"string\",\n          \"url\": \"string\",\n          \"thumbnail_url\": \"string\"\n        }\n      ]\n    },\n    \"object\": \"partner_job\"\n  }\n}\n```\n\n## Partner Lead Webhook Events\n\nEvent Name | Event Key | Description\n---------|----------|----------\nPartner Lead Assigned | partner_lead.assigned | The partner lead was successfully delivered to the Assigned Pro's Job Inbox\nPartner Lead Converted | partner_lead.converted | The assigned Pro copied the partner lead to an estimate or a job\nPartner Lead Scheduled | partner_lead.scheduled | The assigned Pro set a schedule for the partner lead\nPartner Lead Pro En Route | partner_lead.pro_en_route | The assigned Pro is on their way to the customer\nPartner Lead Started | partner_lead.started | The assigned Pro started the partner lead\nPartner Lead Completed | partner_lead.completed | The assigned Pro completed the partner lead\nPartner Lead Unassigned | partner_lead.unassigned | The estimate or job associated with the partner lead was deleted or cancelled\nPartner Lead Sent | partner_lead.sent | The assigned Pro sent the partner lead estimate\n\n### Partner Lead Webhook Protocol\n\n#### Delivery headers\n\nHeader | Description\n---------|----------\nContent-Type | Always equal to: 'application/json'\nApi-Signature | HMAC hex digest of the timestamp and request body joined by '.' respectively, generated using the SHA-256 hash function and the partners secret as the HMAC key\nApi-Timestamp | Timestamp of the instant the event fired\n\n#### Webhook paylooad\n\n```json\n{\n  \"event\": \"partner_lead.completed\",\n  \"partner_lead\": {\n    \"id\": \"string\",\n    \"number\": 1,\n    \"job_inbox_partner_id\": \"string\",\n    \"external_id\": \"string\",\n    \"total_amount\": 75.0,\n    \"paid_amount\": 0.0,\n    \"paid\": \"string\",\n    \"status\": \"string\",\n    \"status_timestamps\": {\n      \"scheduled_at\": \"string or null\",\n      \"pro_en_route_at\": \"2021-01-01T10:00:00Z\",\n      \"started_at\": \"2021-01-01T10:00:00Z\",\n      \"completed_at\": \"2021-01-01T10:00:00Z\"\n    },\n    \"partner\": {\n      \"uuid\": \"string\",\n      \"name\": \"string\",\n      \"logo_url\": \"string\",\n      \"email\": \"string\",\n      \"phone\": \"string\"\n    },\n    \"customer\": {\n      \"first_name\": \"string\",\n      \"last_name\": \"string\",\n      \"email\": \"string\",\n      \"phone_number\": null,\n      \"notifications_enabled\": false\n    },\n    \"address\": {\n      \"street\": \"string\",\n      \"street_line_2\": \"string\",\n      \"city\": \"string\",\n      \"state\": \"string\",\n      \"zip\": \"string\",\n      \"country\": \"string\"\n    },\n    \"schedule\": {\n      \"scheduled_start\": \"string\",\n      \"scheduled_end\": \"string\",\n      \"arrival_windows\": [\n        {\n          \"start_date\": \"string\",\n          \"end_date\": \"string\"\n        }\n      ]\n    },\n    \"line_items\": [\n      {\n        \"name\": \"string\",\n        \"description\": \"string\",\n        \"unit_price\": 50.0,\n        \"quantity\": 1.5\n      }\n    ],\n    \"assigned_company\": { // null if unassigned\n      \"id\": \"string\",\n      \"name\": \"string\",\n      \"phone_number\": \"string\",\n      \"email\": \"string\",\n      \"website\": \"string\",\n      \"logo_url\": \"string\",\n      \"address\": {\n        \"street\": \"string\",\n        \"street_line_2\": \"string\",\n        \"city\": \"string\",\n        \"state\": \"string\",\n        \"zip\": \"string\",\n        \"country\": \"string\"\n      }\n    },\n    \"service_category\": {\n      \"id\": 100,\n      \"uuid\": \"string\",\n      \"asset_id\": \"string\",\n      \"name\": \"string\"\n    },\n    \"lead\": {\n      \"id\": 1,\n      \"uuid\": \"string\",\n      \"name\": \"string or null\",\n      \"description\": \"string\",\n      \"amount\": 7500,\n      \"organization_id\": 1,\n      \"service_pro_id\": 2,\n      \"presentable_job_status\": \"string\",\n      \"presentable_payment_status\": \"string\",\n      \"service_pro_name\": \"string\",\n      \"message_from_pro\": \"string or null\",\n      \"display_invoice_number\": \"string\",\n      \"note\": \"string\",\n      \"time_zone\": \"string\",\n      \"customer_name\": \"string\",\n      \"customer_id\": 10,\n      \"contact_first_name\": \"string or null\",\n      \"contact_last_name\": \"string or null\",\n      \"contact_phone\": \"string or null\",\n      \"address\": {\n        \"id\": 10,\n        \"street\": \"string\",\n        \"street_line_2\": \"string\",\n        \"city\": \"string\",\n        \"zip\": \"string\",\n        \"state\": \"string\",\n        \"time_zone\": \"string\",\n        \"country\": null\n      },\n      \"schedule\": {\n        \"start\": \"string\",\n        \"end\": \"string\",\n        \"arrival_window\": 240\n      },\n      \"status_timestamps\": {\n        \"scheduled_at\": \"string\",\n        \"on_my_way_at\": \"string\",\n        \"started_at\": \"string\",\n        \"completed_at\": \"string\"\n      },\n      \"line_items\": [\n        {\n          \"name\": \"string\",\n          \"description\": \"string\",\n          \"unit_price\": 5000,\n          \"quantity\": 1.5\n        }\n      ],\n      \"service_pros\": [\n        {\n          \"id\": 9686,\n          \"uuid\": \"string\",\n          \"first_name\": \"string\",\n          \"last_name\": \"string\",\n          \"mobile_number\": \"string\",\n          \"email\": \"string\",\n          \"organization_uuid\": \"string\",\n          \"time_zone\": \"string\",\n          \"color_hex\": \"string\",\n          \"organization_affiliation\": {\n            \"role\": \"string\",\n            \"is_admin\": true,\n            \"is_poc\": false,\n            \"can_chat_with_customers\": true,\n            \"can_be_booked_online\": true\n          },\n          \"archived\": false,\n          \"hcp_assist\": false,\n          \"avatar_url\": \"string\",\n          \"avatar_url_thumb_round\": \"string\"\n        }\n      ],\n      \"entry_point\": \"string\",\n      \"customer_uuid\": \"string\",\n      \"original_estimate_id\": null,\n      \"attachments\": [\n        {\n          \"id\": \"string\",\n          \"file_name\": \"string\",\n          \"file_type\": \"string\",\n          \"url\": \"string\",\n          \"thumbnail_url\": \"string\"\n        }\n      ]\n    },\n    \"object\": \"partner_lead\"\n  }\n}\n```\n",
+      "spec": "md"
+    }
+  },
+  {
+    "id": 59958938,
+    "name": "Authentication",
+    "stable_id": "b87d37ae48a0d",
+    "node": {
+      "uri": "/docs/authentication.md"
+    },
+    "snapshot": {
+      "id": 205115466,
+      "type": "article",
+      "summary": "Housecall Pro uses both API keys and OAuth 2.0 as means of authenticating with our API.",
+      "data": "# Authentication\n\nHousecall Pro uses both API keys and OAuth 2.0 as means of authenticating with our API. \n\nIf you intend to use Housecall Pro’s **matching algorithm** to find Pros to fulfill your service requests, you will use an **API key** for authentication. \n- Example: Your network does not have adequate coverage to fulfill a job, and you would like Housecall Pro to source a service provider for you\n\n\nIf you share **mutual Pros** with Housecall Pro, and intend to send jobs or leads directly to your in-network Pros, you will use **OAuth 2.0** for authentication. \n- Example: A Pro pays you for leads, which you would like to show up on a Pro’s Housecall calendar\n\nHousecall Pro expects the OAuth 2.0 acesss token or and API key to be included in all authenticated API requests to the server in the Authorization header that looks like the following:\n\n### API Key\n\n```bash\nAuthorization: Token 0046421dc0ba47ec87bef0c089415380\n```\n\n### OAuth 2.0\n\n```bash\nAuthorization: Bearer d7f65570a4714ae944fbe58acc05ffb20c29534170ac483a3683b91f8dfe9d43\n```\n\n\n> It is important to note that the headers must follow these exact formats, including “Token” or “Bearer” at the beginning of your header. If you receive an authentication error, please send your cURL command to jobinbox@housecallpro.com so we may investigate.\n\n\n## Setting up API Key Authorization\n\nIf you are already in the process of setting up a Partner Jobs integration with us, ask your engineering contact at Housecall Pro for an `API_KEY`.\n\nWe will create an account for you and use a third party tool to securely share your `API_KEY`. Housecall Pro expects the `API_KEY` to be included in all authenticated API requests to the server in the Authorization header.\n\n## Setting up OAuth 2.0 Authorization\n\nIf you are already in the process of setting up a Partner Jobs integration with us, please send your callback_url to your engineering contact at Housecall Pro and we will provide you with your CLIENT_ID and CLIENT_SECRET.\n\nOnce you have both of these credentials, you may begin the `AUTHORIZATION_CODE` OAuth flow.\n\n- Use the OAuth `AUTHORIZATION_CODE` link in order to initiate the OAuth flow.\n\n### Authorization code link\n\n```bash\ncurl -X GET https://pro.housecallpro.com/oauth/authorize?response_type=code&client_id=CLIENT_ID&redirect_uri=CALLBACK_URL\n```\n\n- After clicking the Authorization code link, the user will be prompted to log in to Housecall Pro in order to authenticate their identity, unless they are already logged in. Once authenticated, the user will be prompted to authorize the application to access their Housecall account.\n- Once the user authorizes the application, the server will redirect the user's agent to the provided `CALLBACK_URL` with an `AUTHORIZATION_CODE`. (EX: https://YOUR_WEBSITE_URL/callback?code=AUTHORIZATION_CODE)\n- The OAuth client will then request an access token from the api by passing the AUTHORIZATION_CODE along with the CLIENT_SECRET.\n\n### Request access token\n\n```bash\ncurl -X POST \\\nhttps://api.housecallpro.com/oauth/token \\\n-H 'Content-Type: application/json' \\\n-d '{\n  \"client_id\": \"CLIENT_ID\",\n  \"client_secret\": \"CLIENT_SECRET\",\n  \"grant_type\": \"authorization_code\",\n  \"code\": \"AUTHORIZATION_CODE\",\n  \"redirect_uri\": \"CALLBACK_URL\"\n}'\n```\n\n- If the authorization is successful, the api will respond with an OAuth 2.0 access token & an OAuth 2.0 refresh token to the application. You are now authorized! You may now use the token to access the pro's account through the api provided by housecall until the token expires or access is revoked.\n- Our OAuth 2.0 access token have finite lifetimes, use the refresh token granted in the original token grant to request a new access token when access token is expired. Refresh tokens may be requested without user interaction by the same process as requesting an access token, changing the grant_type from `authorization_code` to `refresh_token`.\n\n### Refresh access token\n\n```bash\ncurl -X POST \\\nhttps://api.housecallpro.com/oauth/token \\\n-H 'Content-Type: application/json' \\\n-d '{\n  \"client_id\": \"CLIENT_ID\",\n  \"client_secret\": \"CLIENT_SECRET\",\n  \"grant_type\": \"refresh_token\",\n  \"refresh_token\": \"the_refresh_token_value_goes_here\",\n  \"redirect_uri\": \"CALLBACK_URL\"\n}'\n```\n",
+      "spec": "md"
+    }
+  },
+  {
+    "id": 114454921,
+    "name": "PartnerJobCreatePricing",
+    "stable_id": "dbb0a8b3b15e3",
+    "node": {
+      "uri": "/reference/job-inbox.v1.yaml/components/schemas/PartnerJobCreatePricing"
+    },
+    "snapshot": {
+      "id": 102399810,
+      "type": "model",
+      "summary": "Partner job pricing structure. If present, at least one field must be present.",
+      "data": "{\"title\":\"PartnerJobCreatePricing\",\"type\":\"object\",\"description\":\"Partner job pricing structure. If present, at least one field must be present.\",\"properties\":{\"cost\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/PartnerJobCreatePricingCost\"}},\"amount\":{\"$ref\":\"#/components/schemas/PartnerJobCreatePricingAmount\"},\"payer\":{\"type\":\"string\"},\"pays_in\":{\"$ref\":\"#/components/schemas/PartnerJobCreatePaymentProcessingTime\"}},\"$schema\":\"http://json-schema.org/draft-07/schema#\"}",
+      "spec": "oas3"
+    }
+  },
+  {
+    "id": 114454922,
+    "name": "PartnerJobCreatePricingAmount",
+    "stable_id": "9e6760e2adc7a",
+    "node": {
+      "uri": "/reference/job-inbox.v1.yaml/components/schemas/PartnerJobCreatePricingAmount"
+    },
+    "snapshot": {
+      "id": 102399811,
+      "type": "model",
+      "summary": "If not null, at least 1 field must be present",
+      "data": "{\"title\":\"PartnerJobCreatePricingAmount\",\"type\":\"object\",\"description\":\"If not null, at least 1 field must be present\",\"properties\":{\"estimated_amount\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/PartnerJobCreatePricingEstimatedAmount\"}},\"minimum\":{\"$ref\":\"#/components/schemas/PartnerJobCreatePricingLimitedAmount\"},\"maximum\":{\"$ref\":\"#/components/schemas/PartnerJobCreatePricingLimitedAmount\"}},\"$schema\":\"http://json-schema.org/draft-07/schema#\"}",
+      "spec": "oas3"
+    }
+  },
+  {
+    "id": 114454924,
+    "name": "PartnerJobCreatePricingLimitedAmount",
+    "stable_id": "571faec377d19",
+    "node": {
+      "uri": "/reference/job-inbox.v1.yaml/components/schemas/PartnerJobCreatePricingLimitedAmount"
+    },
+    "snapshot": {
+      "id": 102399813,
+      "type": "model",
+      "summary": "Partner job minimum or maximum amount",
+      "data": "{\"title\":\"PartnerJobCreatePricingLimitedAmount\",\"type\":\"object\",\"description\":\"Partner job minimum or maximum amount\",\"properties\":{\"unit\":{\"type\":[\"string\",\"null\"],\"description\":\"If null, a fixed amount is assumed\"},\"currency\":{\"type\":\"string\",\"default\":\"USD\"},\"value\":{\"type\":\"number\"},\"allows_over\":{\"type\":\"string\",\"enum\":[\"no\",\"yes\",\"upon_approval\"]}},\"required\":[\"currency\",\"value\"],\"$schema\":\"http://json-schema.org/draft-07/schema#\"}",
+      "spec": "oas3"
+    }
+  },
+  {
+    "id": 114454925,
+    "name": "PartnerJobCreatePricingCost",
+    "stable_id": "26ae5008acfd0",
+    "node": {
+      "uri": "/reference/job-inbox.v1.yaml/components/schemas/PartnerJobCreatePricingCost"
+    },
+    "snapshot": {
+      "id": 102399814,
+      "type": "model",
+      "summary": "Partner job pricing cost",
+      "data": "{\"title\":\"PartnerJobCreatePricingCost\",\"type\":\"object\",\"description\":\"Partner job pricing cost\",\"properties\":{\"unit\":{\"type\":[\"string\",\"null\"],\"description\":\"If null, a fixed amount is assumed\"},\"currency\":{\"type\":\"string\",\"default\":\"USD\"},\"value\":{\"type\":\"number\"},\"prepaid\":{\"type\":\"boolean\",\"default\":false,\"description\":\"Specifies whether this job cost was already paid by pro\"}},\"required\":[\"currency\",\"value\",\"prepaid\"],\"$schema\":\"http://json-schema.org/draft-07/schema#\"}",
+      "spec": "oas3"
+    }
+  },
+  {
+    "id": 114454926,
+    "name": "PartnerJobCreatePaymentProcessingTime",
+    "stable_id": "7d547d344e766",
+    "node": {
+      "uri": "/reference/job-inbox.v1.yaml/components/schemas/PartnerJobCreatePaymentProcessingTime"
+    },
+    "snapshot": {
+      "id": 102399815,
+      "type": "model",
+      "summary": "When partner will pay pro. If you don't need this, send null on this object.",
+      "data": "{\"title\":\"PartnerJobCreatePaymentProcessingTime\",\"type\":\"object\",\"description\":\"When partner will pay pro. If you don't need this, send null on this object.\",\"properties\":{\"unit\":{\"type\":[\"string\",\"null\"],\"enum\":[\"hour\",\"day\",\"week\",\"month\",null]},\"value\":{\"type\":\"number\",\"description\":\"Number of `unit`s. Ex: 15 days\"}},\"required\":[\"unit\",\"value\"],\"$schema\":\"http://json-schema.org/draft-07/schema#\"}",
+      "spec": "oas3"
+    }
+  },
+  {
+    "id": 114454923,
+    "name": "PartnerJobCreatePricingEstimatedAmount",
+    "stable_id": "d858f1227f1b1",
+    "node": {
+      "uri": "/reference/job-inbox.v1.yaml/components/schemas/PartnerJobCreatePricingEstimatedAmount"
+    },
+    "snapshot": {
+      "id": 147583171,
+      "type": "model",
+      "summary": "Partner job estimated amount",
+      "data": "{\"title\":\"PartnerJobCreatePricingEstimatedAmount\",\"type\":\"object\",\"description\":\"Partner job estimated amount\",\"properties\":{\"unit\":{\"type\":[\"string\",\"null\"],\"description\":\"If null, a fixed amount is assumed\"},\"currency\":{\"type\":\"string\",\"default\":\"USD\"},\"value\":{\"type\":\"number\"},\"max_value\":{\"type\":\"number\"},\"min_value\":{\"type\":\"number\",\"description\":\"If max_value is present min_value is required\"}},\"required\":[\"currency\",\"value\"],\"$schema\":\"http://json-schema.org/draft-07/schema#\"}",
+      "spec": "oas3"
+    }
+  },
+  {
+    "id": 82399608,
+    "name": "Schedule",
+    "stable_id": "3c8f65314ea89",
+    "node": {
+      "uri": "/reference/job-inbox.v1.yaml/components/schemas/PartnerJobCreateSchedule"
+    },
+    "snapshot": {
+      "id": 140433714,
+      "type": "model",
+      "summary": "Date and time for the pro to arrive at the customer site. This can be exact or flexible. Leave null if no schedule is intended.",
+      "data": "{\"title\":\"Schedule\",\"type\":\"object\",\"description\":\"Date and time for the pro to arrive at the customer site. This can be exact or flexible. Leave null if no schedule is intended.\",\"properties\":{\"time_zone\":{\"type\":\"string\",\"description\":\"Time zone of given day and time ranges (ex: `America/Los_Angeles`). See [Appendix](docs/Appendix.md) for the full list.\"},\"arrival_windows\":{\"type\":\"array\",\"description\":\"If left empty, job will be unscheduled when accepted.\",\"items\":{\"$ref\":\"#/components/schemas/ArrivalWindow\"}}},\"required\":[\"time_zone\"],\"x-examples\":{\"example-1\":{\"time_zone\":\"string\",\"arrival_windows\":[{\"start_date\":\"string\",\"end_date\":\"string\",\"time_ranges\":[{\"start_time\":\"string\",\"end_time\":\"string\"}]}]},\"example-2: 2022/04/22\":{\"time_zone\":\"America/Los_Angeles\",\"arrival_windows\":[{\"start_date\":\"2022-04-22\",\"end_date\":null,\"time_ranges\":null}]},\"example-3: 2022/04/22 between 9am-12pm or 3pm-5pm\":{\"time_zone\":\"America/Los_Angeles\",\"arrival_windows\":[{\"start_date\":\"2022-04-22\",\"end_date\":null,\"time_ranges\":[{\"start_time\":\"9:00\",\"end_time\":\"12:00\"},{\"start_time\":\"15:00\",\"end_time\":\"17:00\"}]}]},\"example-4: 2022/04/22 or 2022/04/23 between 9am-12pm or 3pm-5pm\":{\"time_zone\":\"America/Los_Angeles\",\"arrival_windows\":[{\"start_date\":\"2022-04-22\",\"end_date\":\"2022-04-23\",\"time_ranges\":[{\"start_time\":\"9:00\",\"end_time\":\"12:00\"},{\"start_time\":\"15:00\",\"end_time\":\"17:00\"}]}]}},\"$schema\":\"http://json-schema.org/draft-07/schema#\"}",
+      "spec": "oas3"
+    }
+  },
+  {
+    "id": 59958945,
+    "name": "Schedule",
+    "stable_id": "b99126830fc27",
+    "node": {
+      "uri": "/reference/job-inbox.v1.yaml/components/schemas/Schedule"
+    },
+    "snapshot": {
+      "id": 140433715,
+      "type": "model",
+      "summary": "Date and time for the pro to arrive at the customer site. This can be exact or flexible.",
+      "data": "{\"title\":\"Schedule\",\"type\":\"object\",\"description\":\"Date and time for the pro to arrive at the customer site. This can be exact or flexible.\",\"properties\":{\"time_zone\":{\"type\":\"string\",\"description\":\"Time zone of given day and time ranges (ex: `America/Los_Angeles`). See [Appendix](docs/Appendix.md) for the full list.\"},\"arrival_windows\":{\"type\":\"array\",\"description\":\"If left emtpy, it will be considered that any date is available\",\"items\":{\"$ref\":\"#/components/schemas/ArrivalWindow\"}}},\"required\":[\"time_zone\"],\"x-examples\":{\"example-1\":{\"time_zone\":\"string\",\"arrival_windows\":[{\"start_date\":\"string\",\"end_date\":\"string\",\"time_ranges\":[{\"start_time\":\"string\",\"end_time\":\"string\"}]}]},\"example-2: 2022/04/22\":{\"time_zone\":\"America/Los_Angeles\",\"arrival_windows\":[{\"start_date\":\"2022-04-22\",\"end_date\":null,\"time_ranges\":null}]},\"example-3: 2022/04/22 between 9am-12pm or 3pm-5pm\":{\"time_zone\":\"America/Los_Angeles\",\"arrival_windows\":[{\"start_date\":\"2022-04-22\",\"end_date\":null,\"time_ranges\":[{\"start_time\":\"9:00\",\"end_time\":\"12:00\"},{\"start_time\":\"15:00\",\"end_time\":\"17:00\"}]}]},\"example-4: 2022/04/22 or 2022/04/23 between 9am-12pm or 3pm-5pm\":{\"time_zone\":\"America/Los_Angeles\",\"arrival_windows\":[{\"start_date\":\"2022-04-22\",\"end_date\":\"2022-04-23\",\"time_ranges\":[{\"start_time\":\"9:00\",\"end_time\":\"12:00\"},{\"start_time\":\"15:00\",\"end_time\":\"17:00\"}]}]}},\"$schema\":\"http://json-schema.org/draft-07/schema#\"}",
+      "spec": "oas3"
+    }
+  },
+  {
+    "id": 90879579,
+    "name": "Create Partner Lead",
+    "stable_id": "5eaff5362bb15",
+    "node": {
+      "uri": "/reference/job-inbox.v1.yaml/paths/~1partner_leads/post"
+    },
+    "snapshot": {
+      "id": 153582399,
+      "type": "http_operation",
+      "summary": "Create a partner lead",
+      "data": "{\"id\":\"5eaff5362bb15\",\"method\":\"post\",\"path\":\"/partner_leads\",\"tags\":[{\"id\":\"4f19a21588d2e\",\"name\":\"Partner Leads\"}],\"extensions\":{},\"iid\":\"post-partner-leads-create\",\"description\":\"Create a partner lead\",\"summary\":\"Create Partner Lead\",\"securityDeclarationType\":\"inheritedFromService\",\"responses\":[{\"id\":\"0ad7eda55ef03\",\"code\":\"200\",\"headers\":[],\"contents\":[{\"id\":\"5ddddbf936e4a\",\"mediaType\":\"application/json\",\"examples\":[],\"encodings\":[],\"schema\":{\"title\":\"PartnerLead\",\"x-examples\":{},\"allOf\":[{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"}}},{\"$ref\":\"#/components/schemas/PartnerLeadCreate\"}],\"$schema\":\"http://json-schema.org/draft-07/schema#\",\"x-stoplight\":{\"id\":\"32da7062e85d1\"}}}],\"description\":\"Example response\"}],\"request\":{\"body\":{\"id\":\"d6fe64fdd2d8e\",\"contents\":[{\"id\":\"3203741db3310\",\"mediaType\":\"application/json\",\"examples\":[],\"encodings\":[],\"schema\":{\"title\":\"PartnerLeadCreate\",\"type\":\"object\",\"description\":\"\",\"properties\":{\"external_id\":{\"type\":\"string\",\"description\":\"Your identifier for this job outside of Housecall Pro\"},\"service_category_name\":{\"type\":\"string\",\"description\":\"The industry of the job, below are some examples, more values can be found in [Appendix](docs/Appendix.md) file:\\n * `Carpet Cleaning`\\n * `Heating & Air Conditioning`\\n * `Plumbing`\\n * `Electrical`\\n * `Handyman`\\n * `Appliances`\\n * `Pest Control`\\n * `Garage`\\n * `Water Heater`\\n\"},\"line_items\":{\"type\":\"array\",\"minItems\":1,\"description\":\"The first line item name will be the name of the lead\",\"items\":{\"$ref\":\"#/components/schemas/PartnerLeadLineItem\"}},\"attachment_urls\":{\"type\":\"array\",\"description\":\"URLs of images, videos or files to be attached to the lead\",\"items\":{\"type\":\"string\"}},\"customer\":{\"$ref\":\"#/components/schemas/PartnerLeadCustomerCreate\"},\"notes\":{\"type\":\"string\",\"description\":\"Notes for the pro to see when receiving this lead\"},\"schedule\":{\"$ref\":\"#/components/schemas/Schedule\"},\"fees\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/PartnerFee\"}}},\"required\":[\"line_items\",\"customer\"],\"$schema\":\"http://json-schema.org/draft-07/schema#\",\"x-stoplight\":{\"id\":\"13184447eb0e7\"}}}],\"description\":\"Either `customer` model or `customer.id` is required to create a partner lead\"},\"headers\":[{\"id\":\"7d57c6ccabbc2\",\"name\":\"Authorization: Bearer ACCESS_TOKEN\",\"style\":\"simple\",\"examples\":[],\"description\":\"OAuth ACCESS_TOKEN used for this value\",\"schema\":{\"type\":\"string\",\"$schema\":\"http://json-schema.org/draft-07/schema#\",\"x-stoplight\":{\"id\":\"b8dbae892b4d0\"}},\"explicitProperties\":[\"schema\",\"in\",\"name\",\"description\"]}],\"query\":[],\"cookie\":[],\"path\":[]},\"security\":[],\"servers\":[{\"id\":\"5c4ba325ca6f2\",\"url\":\"https://api.housecallpro.com\",\"name\":\"Job Inbox V1\"}]}",
+      "spec": "oas3"
+    }
+  },
+  {
+    "id": 59958947,
+    "name": "Update Partner Job",
+    "stable_id": "d436575ee382f",
+    "node": {
+      "uri": "/reference/job-inbox.v1.yaml/paths/~1partner_jobs~1{partner_job_id}/put"
+    },
+    "snapshot": {
+      "id": 153582398,
+      "type": "http_operation",
+      "summary": "Updates an existing partner job",
+      "data": "{\"id\":\"d436575ee382f\",\"method\":\"put\",\"path\":\"/partner_jobs/{partner_job_id}\",\"tags\":[{\"id\":\"de71fce6751e6\",\"name\":\"Partner Jobs\"}],\"extensions\":{},\"iid\":\"put-partner-jobs-update\",\"description\":\"Updates an existing partner job\",\"summary\":\"Update Partner Job\",\"securityDeclarationType\":\"inheritedFromService\",\"responses\":[{\"id\":\"01e3ba6a44d4a\",\"code\":\"200\",\"headers\":[],\"contents\":[{\"id\":\"02d1451a77ad0\",\"mediaType\":\"application/json\",\"examples\":[],\"encodings\":[],\"schema\":{\"title\":\"PartnerJob\",\"x-examples\":{},\"allOf\":[{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"}}},{\"$ref\":\"#/components/schemas/PartnerJobCreate\"}],\"$schema\":\"http://json-schema.org/draft-07/schema#\",\"x-stoplight\":{\"id\":\"0e2c1899dad87\"}}},{\"id\":\"9a9ba5b77cfc2\",\"mediaType\":\"application/xml\",\"examples\":[],\"encodings\":[],\"schema\":{\"type\":\"object\",\"properties\":{},\"$schema\":\"http://json-schema.org/draft-07/schema#\",\"x-stoplight\":{\"id\":\"27a5f0f853334\"}}}],\"description\":\"Partner Job Response\"}],\"request\":{\"body\":{\"id\":\"a81e46b9e380b\",\"contents\":[{\"id\":\"112af8a54c5c6\",\"mediaType\":\"application/json\",\"examples\":[],\"encodings\":[],\"schema\":{\"title\":\"PartnerJobCreate\",\"type\":\"object\",\"description\":\"\",\"properties\":{\"external_id\":{\"type\":\"string\",\"description\":\"Your identifier for this job outside of Housecall Pro.\"},\"service_category_name\":{\"type\":\"string\",\"description\":\"The industry of the job, below are some examples, more values can be found in [Appendix](docs/Appendix.md) file:\\n * `Carpet Cleaning`\\n * `Heating & Air Conditioning`\\n * `Plumbing`\\n * `Electrical`\\n * `Handyman`\\n * `Appliances`\\n * `Pest Control`\\n * `Garage`\\n * `Water Heater`\\n\"},\"service_call_amount\":{\"type\":\"number\",\"description\":\"Minimum trip charge amount the Pro will get paid\"},\"estimated_amount\":{\"type\":\"number\",\"description\":\"Amount pro could get based on region and industry standards if he does the job\"},\"name\":{\"type\":\"string\",\"description\":\"The name of this job\"},\"customer\":{\"$ref\":\"#/components/schemas/PartnerJobCustomerCreate\"},\"expires_at\":{\"type\":\"string\",\"description\":\"Indicates the time when this job will no longer be available for distribution. After this time, the job will be auto-declined.\"},\"schedule\":{\"$ref\":\"#/components/schemas/PartnerJobCreateSchedule\"},\"pricing\":{\"$ref\":\"#/components/schemas/PartnerJobCreatePricing\"},\"attachment_urls\":{\"type\":\"array\",\"description\":\"URLs of images, videos or files to be attached to the lead\",\"items\":{\"type\":\"string\"}},\"notes\":{\"type\":\"string\"}},\"required\":[\"external_id\",\"service_category_name\",\"name\",\"customer\"],\"$schema\":\"http://json-schema.org/draft-07/schema#\",\"x-stoplight\":{\"id\":\"0692dbbded265\"}}}]},\"headers\":[{\"id\":\"dd2063fcedbc7\",\"name\":\"Authorization: Token token=API_KEY\",\"style\":\"simple\",\"examples\":[],\"description\":\"Partner API_KEY used for this value\",\"required\":true,\"schema\":{\"type\":\"string\",\"$schema\":\"http://json-schema.org/draft-07/schema#\",\"x-stoplight\":{\"id\":\"a81597032a301\"}},\"explicitProperties\":[\"schema\",\"in\",\"name\",\"description\",\"required\"]}],\"query\":[],\"cookie\":[],\"path\":[{\"id\":\"e4ce2ba367ac9\",\"name\":\"partner_job_id\",\"style\":\"simple\",\"examples\":[],\"description\":\"The id of the partner job to update\",\"required\":true,\"schema\":{\"type\":\"string\",\"$schema\":\"http://json-schema.org/draft-07/schema#\",\"x-stoplight\":{\"id\":\"4420231f1a282\"}},\"explicitProperties\":[\"schema\",\"name\",\"in\",\"required\",\"description\"]}]},\"security\":[],\"servers\":[{\"id\":\"5c4ba325ca6f2\",\"url\":\"https://api.housecallpro.com\",\"name\":\"Job Inbox V1\"}]}",
+      "spec": "oas3"
+    }
+  },
+  {
+    "id": 90879580,
+    "name": "Update Partner Lead",
+    "stable_id": "74dd440a603f6",
+    "node": {
+      "uri": "/reference/job-inbox.v1.yaml/paths/~1partner_leads~1{partner_lead_id}/put"
+    },
+    "snapshot": {
+      "id": 153582400,
+      "type": "http_operation",
+      "summary": "Updates an existing partner lead",
+      "data": "{\"id\":\"74dd440a603f6\",\"method\":\"put\",\"path\":\"/partner_leads/{partner_lead_id}\",\"tags\":[{\"id\":\"4f19a21588d2e\",\"name\":\"Partner Leads\"}],\"extensions\":{},\"iid\":\"put-partner-leads-update\",\"description\":\"Updates an existing partner lead\",\"summary\":\"Update Partner Lead\",\"securityDeclarationType\":\"inheritedFromService\",\"responses\":[{\"id\":\"0ad7eda55ef03\",\"code\":\"200\",\"headers\":[],\"contents\":[{\"id\":\"5ddddbf936e4a\",\"mediaType\":\"application/json\",\"examples\":[],\"encodings\":[],\"schema\":{\"title\":\"PartnerLead\",\"x-examples\":{},\"allOf\":[{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"}}},{\"$ref\":\"#/components/schemas/PartnerLeadCreate\"}],\"$schema\":\"http://json-schema.org/draft-07/schema#\",\"x-stoplight\":{\"id\":\"32da7062e85d1\"}}}],\"description\":\"Example response\"}],\"request\":{\"body\":{\"id\":\"fb72e1998c42d\",\"contents\":[{\"id\":\"da3cb215c6f4e\",\"mediaType\":\"application/json\",\"examples\":[],\"encodings\":[],\"schema\":{\"title\":\"PartnerLeadCreate\",\"type\":\"object\",\"description\":\"\",\"properties\":{\"external_id\":{\"type\":\"string\",\"description\":\"Your identifier for this job outside of Housecall Pro\"},\"service_category_name\":{\"type\":\"string\",\"description\":\"The industry of the job, below are some examples, more values can be found in [Appendix](docs/Appendix.md) file:\\n * `Carpet Cleaning`\\n * `Heating & Air Conditioning`\\n * `Plumbing`\\n * `Electrical`\\n * `Handyman`\\n * `Appliances`\\n * `Pest Control`\\n * `Garage`\\n * `Water Heater`\\n\"},\"line_items\":{\"type\":\"array\",\"minItems\":1,\"description\":\"The first line item name will be the name of the lead\",\"items\":{\"$ref\":\"#/components/schemas/PartnerLeadLineItem\"}},\"attachment_urls\":{\"type\":\"array\",\"description\":\"URLs of images, videos or files to be attached to the lead\",\"items\":{\"type\":\"string\"}},\"customer\":{\"$ref\":\"#/components/schemas/PartnerLeadCustomerCreate\"},\"notes\":{\"type\":\"string\",\"description\":\"Notes for the pro to see when receiving this lead\"},\"schedule\":{\"$ref\":\"#/components/schemas/Schedule\"},\"fees\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/PartnerFee\"}}},\"required\":[\"line_items\",\"customer\"],\"$schema\":\"http://json-schema.org/draft-07/schema#\",\"x-stoplight\":{\"id\":\"13184447eb0e7\"}}}]},\"headers\":[{\"id\":\"4d9177d3237d7\",\"name\":\"Authorization: Bearer ACCESS_TOKEN\",\"style\":\"simple\",\"examples\":[],\"description\":\"OAuth ACCESS_TOKEN used for this value\",\"required\":true,\"schema\":{\"type\":\"string\",\"$schema\":\"http://json-schema.org/draft-07/schema#\",\"x-stoplight\":{\"id\":\"28a56b72b5b78\"}},\"explicitProperties\":[\"schema\",\"in\",\"name\",\"description\",\"required\"]}],\"query\":[],\"cookie\":[],\"path\":[{\"id\":\"ec95a67f6ddde\",\"name\":\"partner_lead_id\",\"style\":\"simple\",\"examples\":[],\"required\":true,\"schema\":{\"type\":\"string\",\"$schema\":\"http://json-schema.org/draft-07/schema#\",\"x-stoplight\":{\"id\":\"defefc82f326b\"}},\"explicitProperties\":[\"schema\",\"name\",\"in\",\"required\"]}]},\"security\":[],\"servers\":[{\"id\":\"5c4ba325ca6f2\",\"url\":\"https://api.housecallpro.com\",\"name\":\"Job Inbox V1\"}]}",
+      "spec": "oas3"
+    }
+  },
+  {
+    "id": 59958940,
+    "name": "Job Inbox V1",
+    "stable_id": "e3f87115c739f",
+    "node": {
+      "uri": "/reference/job-inbox.v1.yaml"
+    },
+    "snapshot": {
+      "id": 153582395,
+      "type": "http_service",
+      "summary": "HousecallPro Job Inbox API V1",
+      "data": "openapi: 3.0.0\ninfo:\n  title: Job Inbox V1\n  version: '1.0'\n  contact:\n    name: Housecall Engineering\n    email: apideveloper@housecallpro.com\n  description: HousecallPro Job Inbox API V1\nservers:\n  - url: 'https://api.housecallpro.com'\npaths:\n  /partner_jobs:\n    post:\n      summary: Create Partner Job\n      operationId: post-partner-jobs-create\n      responses:\n        '200':\n          $ref: '#/components/responses/PartnerJobResponse'\n      description: Create a partner job\n      requestBody:\n        content:\n          application/json:\n            schema:\n              $ref: '#/components/schemas/PartnerJobCreate'\n        description: Either `customer` model or `customer_id` is required to create a partner job\n      tags:\n        - Partner Jobs\n      parameters:\n        - schema:\n            type: string\n          in: header\n          name: 'Authorization: Token token=API_KEY'\n          description: Partner API_KEY used for this value\n    parameters: []\n  '/partner_jobs/{partner_job_id}':\n    put:\n      summary: Update Partner Job\n      operationId: put-partner-jobs-update\n      responses:\n        '200':\n          $ref: '#/components/responses/PartnerJobResponse'\n      description: Updates an existing partner job\n      tags:\n        - Partner Jobs\n      requestBody:\n        content:\n          application/json:\n            schema:\n              $ref: '#/components/schemas/PartnerJobCreate'\n      parameters:\n        - schema:\n            type: string\n          in: header\n          name: 'Authorization: Token token=API_KEY'\n          description: Partner API_KEY used for this value\n          required: true\n    parameters:\n      - schema:\n          type: string\n        name: partner_job_id\n        in: path\n        required: true\n        description: The id of the partner job to update\n  /partner_leads:\n    post:\n      summary: Create Partner Lead\n      operationId: post-partner-leads-create\n      responses:\n        '200':\n          $ref: '#/components/responses/PartnerLeadResponse'\n      description: Create a partner lead\n      requestBody:\n        content:\n          application/json:\n            schema:\n              $ref: '#/components/schemas/PartnerLeadCreate'\n        description: Either `customer` model or `customer.id` is required to create a partner lead\n      tags:\n        - Partner Leads\n      parameters:\n        - schema:\n            type: string\n          in: header\n          name: 'Authorization: Bearer ACCESS_TOKEN'\n          description: OAuth ACCESS_TOKEN used for this value\n    parameters: []\n  '/partner_leads/{partner_lead_id}':\n    put:\n      summary: Update Partner Lead\n      operationId: put-partner-leads-update\n      responses:\n        '200':\n          $ref: '#/components/responses/PartnerLeadResponse'\n      description: Updates an existing partner lead\n      tags:\n        - Partner Leads\n      requestBody:\n        content:\n          application/json:\n            schema:\n              $ref: '#/components/schemas/PartnerLeadCreate'\n      parameters:\n        - schema:\n            type: string\n          in: header\n          name: 'Authorization: Bearer ACCESS_TOKEN'\n          description: OAuth ACCESS_TOKEN used for this value\n          required: true\n    parameters:\n      - schema:\n          type: string\n        name: partner_lead_id\n        in: path\n        required: true\ncomponents:\n  schemas:\n    PartnerJob:\n      title: PartnerJob\n      x-examples: {}\n      allOf:\n        - type: object\n          properties:\n            id:\n              type: string\n        - $ref: '#/components/schemas/PartnerJobCreate'\n    PartnerJobCreate:\n      title: PartnerJobCreate\n      type: object\n      description: ''\n      properties:\n        external_id:\n          type: string\n          description: Your identifier for this job outside of Housecall Pro.\n        service_category_name:\n          type: string\n          description: |\n            The industry of the job, below are some examples, more values can be found in [Appendix](docs/Appendix.md) file:\n             * `Carpet Cleaning`\n             * `Heating & Air Conditioning`\n             * `Plumbing`\n             * `Electrical`\n             * `Handyman`\n             * `Appliances`\n             * `Pest Control`\n             * `Garage`\n             * `Water Heater`\n        service_call_amount:\n          type: number\n          description: Minimum trip charge amount the Pro will get paid\n        estimated_amount:\n          type: number\n          description: Amount pro could get based on region and industry standards if he does the job\n        name:\n          type: string\n          description: The name of this job\n        customer:\n          $ref: '#/components/schemas/PartnerJobCustomerCreate'\n        expires_at:\n          type: string\n          description: Indicates the time when this job will no longer be available for distribution. After this time, the job will be auto-declined.\n        schedule:\n          $ref: '#/components/schemas/PartnerJobCreateSchedule'\n        pricing:\n          $ref: '#/components/schemas/PartnerJobCreatePricing'\n        attachment_urls:\n          type: array\n          description: 'URLs of images, videos or files to be attached to the lead'\n          items:\n            type: string\n        notes:\n          type: string\n      required:\n        - external_id\n        - service_category_name\n        - name\n        - customer\n    PartnerJobCreatePricing:\n      title: PartnerJobCreatePricing\n      type: object\n      description: Partner job pricing structure. If present, at least one field must be present.\n      properties:\n        cost:\n          type: array\n          items:\n            $ref: '#/components/schemas/PartnerJobCreatePricingCost'\n        amount:\n          $ref: '#/components/schemas/PartnerJobCreatePricingAmount'\n        payer:\n          type: string\n        pays_in:\n          $ref: '#/components/schemas/PartnerJobCreatePaymentProcessingTime'\n    PartnerJobCreatePricingAmount:\n      title: PartnerJobCreatePricingAmount\n      type: object\n      description: If not null, at least 1 field must be present\n      properties:\n        estimated_amount:\n          type: array\n          items:\n            $ref: '#/components/schemas/PartnerJobCreatePricingEstimatedAmount'\n        minimum:\n          $ref: '#/components/schemas/PartnerJobCreatePricingLimitedAmount'\n        maximum:\n          $ref: '#/components/schemas/PartnerJobCreatePricingLimitedAmount'\n    PartnerJobCreatePricingEstimatedAmount:\n      title: PartnerJobCreatePricingEstimatedAmount\n      type: object\n      description: Partner job estimated amount\n      properties:\n        unit:\n          type: string\n          nullable: true\n          description: If null, a fixed amount is assumed\n        currency:\n          type: string\n          default: 'USD'\n        value:\n          type: number\n        max_value:\n          type: number\n        min_value:\n          type: number\n          description: If max_value is present min_value is required\n      required:\n        - currency\n        - value\n    PartnerJobCreatePricingLimitedAmount:\n      title: PartnerJobCreatePricingLimitedAmount\n      type: object\n      description: Partner job minimum or maximum amount\n      properties:\n        unit:\n          type: string\n          nullable: true\n          description: If null, a fixed amount is assumed\n        currency:\n          type: string\n          default: 'USD'\n        value:\n          type: number\n        allows_over:\n          type: string\n          enum:\n            - no\n            - yes\n            - upon_approval\n      required:\n        - currency\n        - value\n    PartnerJobCreatePricingCost:\n      title: PartnerJobCreatePricingCost\n      type: object\n      description: Partner job pricing cost\n      properties:\n        unit:\n          type: string\n          nullable: true\n          description: If null, a fixed amount is assumed\n        currency:\n          type: string\n          default: 'USD'\n        value:\n          type: number\n        prepaid:\n          type: boolean\n          default: false\n          description: 'Specifies whether this job cost was already paid by pro'\n      required:\n        - currency\n        - value\n        - prepaid\n    PartnerJobCreatePaymentProcessingTime:\n      title: PartnerJobCreatePaymentProcessingTime\n      type: object\n      description: When partner will pay pro. If you don't need this, send null on this object.\n      properties:\n        unit:\n          type: string\n          nullable: true\n          enum:\n            - hour\n            - day\n            - week\n            - month\n        value:\n          type: number\n          description: 'Number of `unit`s. Ex: 15 days'\n      required:\n        - unit\n        - value\n    PartnerJobCustomerCreate:\n      title: PartnerJobCustomerCreate\n      type: object\n      description: 'If customer fields are not supplied, then `id` is required'\n      properties:\n        first_name:\n          type: string\n        last_name:\n          type: string\n        email:\n          type: string\n        notifications_enabled:\n          type: boolean\n          description: Notify customer when their jobs are updated. We recommend it for the best experience\n          enum:\n            - true\n            - false\n        phone:\n          type: string\n          description: 10 digits\n        address:\n          $ref: '#/components/schemas/PartnerJobAddressCreate'\n        id:\n          type: string\n          description: ID of a known customer. Required if other customer details are not entered\n      required:\n        - first_name\n        - last_name\n        - notifications_enabled\n    PartnerJobAddressCreate:\n      title: PartnerJobAddressCreate\n      type: object\n      properties:\n        street:\n          type: string\n        street_line_2:\n          type: string\n        city:\n          type: string\n        state:\n          type: string\n        zip:\n          type: string\n        country:\n          type: string\n      required:\n        - street\n        - city\n        - state\n        - zip\n    PartnerLead:\n      title: PartnerLead\n      x-examples: {}\n      allOf:\n        - type: object\n          properties:\n            id:\n              type: string\n        - $ref: '#/components/schemas/PartnerLeadCreate'\n    PartnerLeadCreate:\n      title: PartnerLeadCreate\n      type: object\n      description: ''\n      properties:\n        external_id:\n          type: string\n          description: Your identifier for this job outside of Housecall Pro\n        service_category_name:\n          type: string\n          description: |\n            The industry of the job, below are some examples, more values can be found in [Appendix](docs/Appendix.md) file:\n             * `Carpet Cleaning`\n             * `Heating & Air Conditioning`\n             * `Plumbing`\n             * `Electrical`\n             * `Handyman`\n             * `Appliances`\n             * `Pest Control`\n             * `Garage`\n             * `Water Heater`\n        line_items:\n          type: array\n          minItems: 1\n          description: The first line item name will be the name of the lead\n          items:\n            $ref: '#/components/schemas/PartnerLeadLineItem'\n        attachment_urls:\n          type: array\n          description: 'URLs of images, videos or files to be attached to the lead'\n          items:\n            type: string\n        customer:\n          $ref: '#/components/schemas/PartnerLeadCustomerCreate'\n        notes:\n          type: string\n          description: Notes for the pro to see when receiving this lead\n        schedule:\n          $ref: '#/components/schemas/Schedule'\n        fees:\n          type: array\n          items:\n            $ref: '#/components/schemas/PartnerFee'\n      required:\n        - line_items\n        - customer\n    PartnerLeadCustomerCreate:\n      title: PartnerLeadCustomerCreate\n      type: object\n      description: 'If customer fields are not supplied, then `id` is required'\n      properties:\n        first_name:\n          type: string\n        last_name:\n          type: string\n        email:\n          type: string\n        notifications_enabled:\n          type: boolean\n          description: Notify customer when their jobs are updated. We recommend it for the best experience\n        phone:\n          type: string\n          description: 10 digits\n        address:\n          $ref: '#/components/schemas/PartnerLeadAddressCreate'\n        id:\n          type: string\n          description: ID of a known customer. Required if other customer details are not entered\n      required:\n        - first_name\n        - last_name\n        - phone\n    PartnerLeadAddressCreate:\n      title: PartnerLeadAddress\n      type: object\n      properties:\n        street:\n          type: string\n        street_line_2:\n          type: string\n        city:\n          type: string\n        state:\n          type: string\n        zip:\n          type: string\n        country:\n          type: string\n    PartnerLeadLineItem:\n      title: PartnerLeadLineItem\n      x-stoplight:\n        id: 4gwo0c8jc0b7i\n      type: object\n      description: ''\n      properties:\n        name:\n          type: string\n        kind:\n          type: string\n          description: |-\n            Kind of this line item:\n            - `labor`\n            - `materials`\n          default: labor\n        unit_price:\n          type: integer\n          description: |-\n            Amount in cents\n\n            e.g. Value of 500 maps to $5.00\n          default: 0\n        quantity:\n          type: number\n          default: '1,0'\n      required:\n        - name\n    PartnerJobCreateSchedule:\n      title: Schedule\n      type: object\n      description: Date and time for the pro to arrive at the customer site. This can be exact or flexible. Leave null if no schedule is intended.\n      properties:\n        time_zone:\n          type: string\n          description: 'Time zone of given day and time ranges (ex: `America/Los_Angeles`). See [Appendix](docs/Appendix.md) for the full list.'\n        arrival_windows:\n          type: array\n          description: 'If left empty, job will be unscheduled when accepted.'\n          items:\n            $ref: '#/components/schemas/ArrivalWindow'\n      required:\n        - time_zone\n      x-examples:\n        example-1:\n          time_zone: string\n          arrival_windows:\n            - start_date: string\n              end_date: string\n              time_ranges:\n                - start_time: string\n                  end_time: string\n        'example-2: 2022/04/22':\n          time_zone: America/Los_Angeles\n          arrival_windows:\n            - start_date: '2022-04-22'\n              end_date: null\n              time_ranges: null\n        'example-3: 2022/04/22 between 9am-12pm or 3pm-5pm':\n          time_zone: America/Los_Angeles\n          arrival_windows:\n            - start_date: '2022-04-22'\n              end_date: null\n              time_ranges:\n                - start_time: '9:00'\n                  end_time: '12:00'\n                - start_time: '15:00'\n                  end_time: '17:00'\n        'example-4: 2022/04/22 or 2022/04/23 between 9am-12pm or 3pm-5pm':\n          time_zone: America/Los_Angeles\n          arrival_windows:\n            - start_date: '2022-04-22'\n              end_date: '2022-04-23'\n              time_ranges:\n                - start_time: '9:00'\n                  end_time: '12:00'\n                - start_time: '15:00'\n                  end_time: '17:00'\n    Schedule:\n      title: Schedule\n      type: object\n      description: Date and time for the pro to arrive at the customer site. This can be exact or flexible.\n      properties:\n        time_zone:\n          type: string\n          description: 'Time zone of given day and time ranges (ex: `America/Los_Angeles`). See [Appendix](docs/Appendix.md) for the full list.'\n        arrival_windows:\n          type: array\n          description: 'If left emtpy, it will be considered that any date is available'\n          items:\n            $ref: '#/components/schemas/ArrivalWindow'\n      required:\n        - time_zone\n      x-examples:\n        example-1:\n          time_zone: string\n          arrival_windows:\n            - start_date: string\n              end_date: string\n              time_ranges:\n                - start_time: string\n                  end_time: string\n        'example-2: 2022/04/22':\n          time_zone: America/Los_Angeles\n          arrival_windows:\n            - start_date: '2022-04-22'\n              end_date: null\n              time_ranges: null\n        'example-3: 2022/04/22 between 9am-12pm or 3pm-5pm':\n          time_zone: America/Los_Angeles\n          arrival_windows:\n            - start_date: '2022-04-22'\n              end_date: null\n              time_ranges:\n                - start_time: '9:00'\n                  end_time: '12:00'\n                - start_time: '15:00'\n                  end_time: '17:00'\n        'example-4: 2022/04/22 or 2022/04/23 between 9am-12pm or 3pm-5pm':\n          time_zone: America/Los_Angeles\n          arrival_windows:\n            - start_date: '2022-04-22'\n              end_date: '2022-04-23'\n              time_ranges:\n                - start_time: '9:00'\n                  end_time: '12:00'\n                - start_time: '15:00'\n                  end_time: '17:00'\n    ArrivalWindow:\n      title: ArrivalWindow\n      x-stoplight:\n        id: uqxgogy7ifl6e\n      type: object\n      properties:\n        start_date:\n          type: string\n          description: Available start date (ex. `2021-06-29`)\n        end_date:\n          type: string\n          description: 'Available end date (ex. `2021-06-29`). If not supplied, defaults to same value as `start_date`'\n        time_ranges:\n          type: array\n          description: 'If left emtpy, it will be considered that any time during the given date is available'\n          items:\n            $ref: '#/components/schemas/TimeRange'\n      required:\n        - start_date\n    TimeRange:\n      title: TimeRange\n      x-stoplight:\n        id: vo573b6kd3da0\n      type: object\n      properties:\n        start_time:\n          type: string\n          description: |-\n            Start time (ex. `16:30:00`)\n\n            NOTE: Must be before end time\n        end_time:\n          type: string\n          description: |-\n            End time (ex. `17:30:00`)\n\n            NOTE: Must be after start time\n      required:\n        - start_time\n    PartnerFee:\n      title: PartnerFee\n      x-stoplight:\n        id: yregaxwzjm5ak\n      type: object\n      description: ''\n      properties:\n        name:\n          type: string\n        amount:\n          type: integer\n          description: |-\n            Amount in cents\n\n            e.g. Value of 500 maps to $5.00\n  securitySchemes:\n    Company API Key:\n      name: API Key\n      type: apiKey\n      in: header\n      description: |-\n        Company API Key Authentication.\n\n        Authentication Header value format [Token {api-key}]\n    Application API Key:\n      name: API Key\n      type: apiKey\n      in: header\n      description: |-\n        Application API Key Authentication.\n\n        Authentication Header value format [Token {api-key}]\n    Housecall User OAuth Token:\n      type: oauth2\n      flows:\n        clientCredentials:\n          tokenUrl: ''\n          refreshUrl: ''\n          scopes: {}\n  responses:\n    PartnerJobResponse:\n      description: Partner Job Response\n      content:\n        application/json:\n          schema:\n            $ref: '#/components/schemas/PartnerJob'\n        application/xml:\n          schema:\n            type: object\n            properties: {}\n    PartnerLeadResponse:\n      description: Example response\n      content:\n        application/json:\n          schema:\n            $ref: '#/components/schemas/PartnerLead'\n  examples: {}\n  parameters: {}\ntags:\n  - name: Partner Jobs\n",
+      "spec": "oas3"
+    }
+  },
+  {
+    "id": 59958946,
+    "name": "Create Partner Job",
+    "stable_id": "41b2730b72714",
+    "node": {
+      "uri": "/reference/job-inbox.v1.yaml/paths/~1partner_jobs/post"
+    },
+    "snapshot": {
+      "id": 153582397,
+      "type": "http_operation",
+      "summary": "Create a partner job",
+      "data": "{\"id\":\"41b2730b72714\",\"method\":\"post\",\"path\":\"/partner_jobs\",\"tags\":[{\"id\":\"de71fce6751e6\",\"name\":\"Partner Jobs\"}],\"extensions\":{},\"iid\":\"post-partner-jobs-create\",\"description\":\"Create a partner job\",\"summary\":\"Create Partner Job\",\"securityDeclarationType\":\"inheritedFromService\",\"responses\":[{\"id\":\"01e3ba6a44d4a\",\"code\":\"200\",\"headers\":[],\"contents\":[{\"id\":\"02d1451a77ad0\",\"mediaType\":\"application/json\",\"examples\":[],\"encodings\":[],\"schema\":{\"title\":\"PartnerJob\",\"x-examples\":{},\"allOf\":[{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"}}},{\"$ref\":\"#/components/schemas/PartnerJobCreate\"}],\"$schema\":\"http://json-schema.org/draft-07/schema#\",\"x-stoplight\":{\"id\":\"0e2c1899dad87\"}}},{\"id\":\"9a9ba5b77cfc2\",\"mediaType\":\"application/xml\",\"examples\":[],\"encodings\":[],\"schema\":{\"type\":\"object\",\"properties\":{},\"$schema\":\"http://json-schema.org/draft-07/schema#\",\"x-stoplight\":{\"id\":\"27a5f0f853334\"}}}],\"description\":\"Partner Job Response\"}],\"request\":{\"body\":{\"id\":\"a8cfeeb840e9b\",\"contents\":[{\"id\":\"475b48fb10e61\",\"mediaType\":\"application/json\",\"examples\":[],\"encodings\":[],\"schema\":{\"title\":\"PartnerJobCreate\",\"type\":\"object\",\"description\":\"\",\"properties\":{\"external_id\":{\"type\":\"string\",\"description\":\"Your identifier for this job outside of Housecall Pro.\"},\"service_category_name\":{\"type\":\"string\",\"description\":\"The industry of the job, below are some examples, more values can be found in [Appendix](docs/Appendix.md) file:\\n * `Carpet Cleaning`\\n * `Heating & Air Conditioning`\\n * `Plumbing`\\n * `Electrical`\\n * `Handyman`\\n * `Appliances`\\n * `Pest Control`\\n * `Garage`\\n * `Water Heater`\\n\"},\"service_call_amount\":{\"type\":\"number\",\"description\":\"Minimum trip charge amount the Pro will get paid\"},\"estimated_amount\":{\"type\":\"number\",\"description\":\"Amount pro could get based on region and industry standards if he does the job\"},\"name\":{\"type\":\"string\",\"description\":\"The name of this job\"},\"customer\":{\"$ref\":\"#/components/schemas/PartnerJobCustomerCreate\"},\"expires_at\":{\"type\":\"string\",\"description\":\"Indicates the time when this job will no longer be available for distribution. After this time, the job will be auto-declined.\"},\"schedule\":{\"$ref\":\"#/components/schemas/PartnerJobCreateSchedule\"},\"pricing\":{\"$ref\":\"#/components/schemas/PartnerJobCreatePricing\"},\"attachment_urls\":{\"type\":\"array\",\"description\":\"URLs of images, videos or files to be attached to the lead\",\"items\":{\"type\":\"string\"}},\"notes\":{\"type\":\"string\"}},\"required\":[\"external_id\",\"service_category_name\",\"name\",\"customer\"],\"$schema\":\"http://json-schema.org/draft-07/schema#\",\"x-stoplight\":{\"id\":\"0692dbbded265\"}}}],\"description\":\"Either `customer` model or `customer_id` is required to create a partner job\"},\"headers\":[{\"id\":\"024747b2af9d1\",\"name\":\"Authorization: Token token=API_KEY\",\"style\":\"simple\",\"examples\":[],\"description\":\"Partner API_KEY used for this value\",\"schema\":{\"type\":\"string\",\"$schema\":\"http://json-schema.org/draft-07/schema#\",\"x-stoplight\":{\"id\":\"74d5e8162ce2e\"}},\"explicitProperties\":[\"schema\",\"in\",\"name\",\"description\"]}],\"query\":[],\"cookie\":[],\"path\":[]},\"security\":[],\"servers\":[{\"id\":\"5c4ba325ca6f2\",\"url\":\"https://api.housecallpro.com\",\"name\":\"Job Inbox V1\"}]}",
+      "spec": "oas3"
+    }
+  }
+]

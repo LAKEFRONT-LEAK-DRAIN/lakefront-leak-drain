@@ -7,6 +7,7 @@ This folder contains crawl outputs and normalized inventories captured from Hous
 - Use `*_operations.json` for feature planning and endpoint mapping.
 - Use `*_models.txt` for payload/schema design references.
 - Use `*_nodes.json` for full source-of-truth node metadata.
+- Use `*_fullcontent_nodes.json` for node metadata plus snapshot payloads (`data` and `spec`) for offline reference.
 - Keep `*_raw.html` and bundle files for reproducibility/debugging.
 
 ## Key Files
@@ -16,6 +17,9 @@ This folder contains crawl outputs and normalized inventories captured from Hous
 - `hcp_terms_nodes.json`: Terms project nodes.
 - `hcp_housecall-public-api_nodes.json`: Full Public API node inventory.
 - `hcp_partner-jobs_nodes.json`: Full Partner Jobs node inventory.
+- `hcp_housecall-public-api_fullcontent_nodes.json`: Public API nodes including full snapshot payloads.
+- `hcp_partner-jobs_fullcontent_nodes.json`: Partner Jobs nodes including full snapshot payloads.
+- `hcp_terms_fullcontent_nodes.json`: Terms nodes including full snapshot payloads.
 
 ## Folder Convention For Future Captures
 
