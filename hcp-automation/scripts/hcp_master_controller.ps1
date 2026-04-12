@@ -42,16 +42,22 @@ $name = "$($data.first_name) $($data.last_name)"
 Write-Host "--- STARTING AUTOMATION FOR: $name ---"
 
 $companyName = Normalize-OptionalContactValue -Value "$($data.company_name)"
-if (-not [string]::IsNullOrWhiteSpace($companyName) -and $companyName.Trim().ToLowerInvariant() -eq "choice home warranty") {
-    $companyName = "Choice Home Warranty"
+if (-not [string]::IsNullOrWhiteSpace($companyName)) {
+    $companyLower = $companyName.Trim().ToLowerInvariant()
+    if ($companyLower -match "choice") {
+        $companyName = "Choice Home Warranty"
+    }
+    elseif ($companyLower -match "hwa|home warranty of america") {
+        $companyName = "HWA Home Warranty"
+    }
 }
 
 $mobile = Normalize-OptionalContactValue -Value "$($data.phone)"
 $email = Normalize-OptionalContactValue -Value "$($data.email)"
 
 $displayName = ""
-if (-not [string]::IsNullOrWhiteSpace($companyName) -and $companyName.Trim().ToLowerInvariant() -eq "choice home warranty") {
-    $displayName = "$($data.first_name) $($data.last_name) Choice Home Warranty".Trim()
+if (-not [string]::IsNullOrWhiteSpace($companyName)) {
+    $displayName = "$($data.first_name) $($data.last_name) $companyName".Trim()
 }
 
 $searchResult = & "$PSScriptRoot/hcp_search_customer.ps1" -searchTerm $name
@@ -60,10 +66,10 @@ if ($searchResult.matchFound -and -not [string]::IsNullOrWhiteSpace($searchResul
     $customerId = $searchResult.customerId
     Write-Host "Using Existing Customer: $customerId"
 
-    if (-not [string]::IsNullOrWhiteSpace($displayName)) {
+    if (-not [string]::IsNullOrWhiteSpace($companyName) -or -not [string]::IsNullOrWhiteSpace($displayName)) {
         $updateResult = & "$PSScriptRoot/hcp_update_customer.ps1" -customerId $customerId -firstName $data.first_name -lastName $data.last_name -companyName $companyName -mobile $mobile -email $email -displayName $displayName
         if ($updateResult.updated) {
-            Write-Host "Existing customer normalized for Choice Home Warranty: $customerId"
+            Write-Host "Existing customer normalized with company/display name: $customerId"
         }
     }
 }
