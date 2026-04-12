@@ -233,8 +233,6 @@ export default function HistoryPage() {
     </div>
   );
 }
-
-const styles: Record<string, React.CSSProperties> = {
   page: { minHeight: '100%', background: colors.bg, display: 'flex', flexDirection: 'column' },
   header: {
     background: colors.navy,

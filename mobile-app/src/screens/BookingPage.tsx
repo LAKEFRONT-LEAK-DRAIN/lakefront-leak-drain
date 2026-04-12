@@ -94,11 +94,6 @@ const styles: Record<string, CSSProperties> = {
   },
 };
 
-const services = [
-  'Leak Repair', 'Drain Cleaning', 'Clogged Drain', 'Sump Pump', 'Water Heater',
-  'Frozen Pipe', 'Garbage Disposal', 'Toilet Repair', 'Faucet Repair', 'Emergency Service', 'Other',
-];
-
 type LookupPayload = {
   customerId?: string;
   addressId?: string;
