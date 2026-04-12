@@ -1,7 +1,7 @@
 [build]
-  command = "npm run build && cd netlify/functions && npm install"
+  command = "npm run build"
   publish = "dist"
 
 [functions]
   directory = "netlify/functions"
-  node_bundler = "nft"
+
