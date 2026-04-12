@@ -1,0 +1,50 @@
+workflows:
+  ios-capacitor:
+    name: Lakefront Leak & Drain iOS
+    instance_type: mac_mini_m2
+    max_build_duration: 60
+    environment:
+      node: 20
+      xcode: latest
+      vars:
+        WORKING_DIRECTORY: mobile-app
+        BUNDLE_ID: com.lakefrontleakdrain.app
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: $BUNDLE_ID
+      groups:
+        - app_store_credentials
+    scripts:
+      - name: Install npm dependencies
+        script: |
+          cd "$WORKING_DIRECTORY"
+          npm ci
+
+      - name: Build web bundle
+        script: |
+          cd "$WORKING_DIRECTORY"
+          npm run build
+
+      - name: Generate Capacitor iOS project
+        script: |
+          cd "$WORKING_DIRECTORY"
+          if [ ! -d ios ]; then
+            npx cap add ios
+          fi
+          npx cap sync ios
+
+      - name: Apply signing profiles
+        script: |
+          cd "$WORKING_DIRECTORY"
+          xcode-project use-profiles
+
+      - name: Build signed IPA
+        script: |
+          cd "$WORKING_DIRECTORY"
+          xcode-project build-ipa \
+            --workspace ios/App/App.xcworkspace \
+            --scheme App
+
+    artifacts:
+      - mobile-app/build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
