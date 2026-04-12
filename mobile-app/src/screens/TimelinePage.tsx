@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { colors, font, radius, shadow, spacing } from '../tokens';
 
 const styles: Record<string, React.CSSProperties> = {
@@ -11,6 +12,28 @@ const styles: Record<string, React.CSSProperties> = {
   headerSub: { fontSize: font.sizeSm, opacity: 0.75, marginTop: spacing.xs },
   body: { padding: spacing.lg, display: 'flex', flexDirection: 'column', gap: spacing.md },
   card: { background: colors.card, borderRadius: radius.lg, padding: spacing.lg, boxShadow: shadow.card },
+  input: {
+    width: '100%',
+    padding: `${spacing.sm} ${spacing.md}`,
+    borderRadius: radius.md,
+    border: '1.5px solid #e2e8f0',
+    fontSize: font.sizeMd,
+    color: colors.ink,
+    background: colors.bg,
+    boxSizing: 'border-box' as const,
+  },
+  btn: {
+    width: '100%',
+    padding: `${spacing.md} ${spacing.lg}`,
+    background: colors.aqua,
+    color: colors.onDark,
+    fontWeight: font.weightBlack,
+    fontSize: font.sizeMd,
+    borderRadius: radius.md,
+    border: 'none',
+    cursor: 'pointer',
+    marginTop: spacing.sm,
+  },
   timelineWrap: { position: 'relative', paddingLeft: '32px' },
   timelineBar: {
     position: 'absolute',
@@ -44,22 +67,99 @@ const styles: Record<string, React.CSSProperties> = {
   emptyIcon: { fontSize: '48px', marginBottom: spacing.md },
 };
 
-interface TimelineStep {
-  label: string;
-  sub: string;
-  status: 'done' | 'active' | 'pending';
+interface Job {
+  id: string;
+  workStatus: string;
+  invoiceNumber: string | null;
+  scheduledStart: string | null;
+  scheduledEnd: string | null;
+  address: string;
+  services: string[];
+  totalCents: number | null;
+  assignedEmployee: string | null;
 }
 
-const demoSteps: TimelineStep[] = [
-  { label: 'Booking Confirmed', sub: 'Today at 9:14 AM', status: 'done' },
-  { label: 'Technician Assigned', sub: 'Mike R. — Licensed Plumber', status: 'done' },
-  { label: 'En Route', sub: 'ETA: ~15 minutes', status: 'active' },
-  { label: 'Arrived', sub: 'Pending', status: 'pending' },
-  { label: 'Job Complete', sub: 'Pending', status: 'pending' },
-];
+type LookupResult =
+  | { found: false }
+  | { found: true; customerName: string; customerId: string; jobs: Job[] };
+
+type StepStatus = 'done' | 'active' | 'pending';
+interface TimelineStep { label: string; sub: string; status: StepStatus; }
+
+const ACTIVE_STATUSES = new Set([
+  'needs_scheduling', 'needs scheduling', 'scheduled', 'in_progress', 'in progress',
+]);
+
+function norm(s: string) { return s.toLowerCase().replace(/_/g, ' '); }
+
+function getSteps(workStatus: string): TimelineStep[] {
+  const s = norm(workStatus);
+  const steps: TimelineStep[] = [
+    { label: 'Booking Confirmed', sub: 'Request received', status: 'pending' },
+    { label: 'Scheduled', sub: 'Time window set', status: 'pending' },
+    { label: 'Technician En Route', sub: 'On the way', status: 'pending' },
+    { label: 'Job Complete', sub: 'Service finished', status: 'pending' },
+  ];
+  if (s === 'needs scheduling') {
+    steps[0].status = 'active';
+  } else if (s === 'scheduled') {
+    steps[0] = { ...steps[0], sub: 'Confirmed', status: 'done' };
+    steps[1].status = 'active';
+  } else if (s === 'in progress') {
+    steps[0] = { ...steps[0], sub: 'Confirmed', status: 'done' };
+    steps[1] = { ...steps[1], sub: 'Confirmed', status: 'done' };
+    steps[2].status = 'active';
+  } else if (s.includes('complete')) {
+    steps.forEach((step) => { step.status = 'done'; });
+  }
+  return steps;
+}
+
+function formatDate(iso: string | null) {
+  if (!iso) return 'TBD';
+  try {
+    return new Date(iso).toLocaleString('en-US', {
+      weekday: 'short', month: 'short', day: 'numeric',
+      hour: 'numeric', minute: '2-digit',
+    });
+  } catch { return iso; }
+}
+
+function statusBadge(ws: string): { label: string; bg: string; color: string } {
+  const s = norm(ws);
+  if (s.includes('needs scheduling')) return { label: '📋 Awaiting Scheduling', bg: 'rgba(245,158,11,0.12)', color: '#92400e' };
+  if (s === 'scheduled')              return { label: '📅 Scheduled', bg: 'rgba(14,111,190,0.12)', color: '#1e3a5f' };
+  if (s.includes('in progress'))      return { label: '⚡ In Progress', bg: 'rgba(0,173,181,0.12)', color: colors.navy };
+  if (s.includes('complete'))         return { label: '✓ Complete', bg: 'rgba(16,185,129,0.12)', color: '#065f46' };
+  return { label: ws, bg: colors.bg, color: colors.muted };
+}
 
 export default function TimelinePage() {
-  const hasJob = true; // swap to false to see empty state
+  const [phone, setPhone] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState<LookupResult | null>(null);
+  const [looked, setLooked] = useState(false);
+
+  async function handleLookup() {
+    const q = phone.trim();
+    if (!q) return;
+    setLoading(true);
+    setResult(null);
+    setLooked(false);
+    try {
+      const res = await fetch(`/.netlify/functions/hcp-customer-jobs?phone=${encodeURIComponent(q)}`);
+      const data: LookupResult = await res.json();
+      setResult(data);
+      setLooked(true);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const found = result && result.found === true
+    ? result as Extract<LookupResult, { found: true }>
+    : null;
+  const activeJobs = found?.jobs.filter((j) => ACTIVE_STATUSES.has(norm(j.workStatus))) ?? [];
 
   return (
     <div style={styles.page}>
@@ -69,63 +169,113 @@ export default function TimelinePage() {
       </div>
 
       <div style={styles.body}>
-        {hasJob ? (
-          <>
-            <div style={styles.card}>
-              <div style={{ fontSize: font.sizeLg, fontWeight: font.weightBlack, color: colors.navy, marginBottom: spacing.xs }}>
-                🔧 Drain Cleaning
-              </div>
-              <div style={{ fontSize: font.sizeSm, color: colors.muted }}>123 Lakewood Ave, Cleveland OH</div>
-              <div style={{ fontSize: font.sizeSm, color: colors.muted, marginTop: spacing.xs }}>Today · Morning window</div>
-              <div style={{
-                marginTop: spacing.md,
-                display: 'inline-block',
-                background: 'rgba(0,173,181,0.12)',
-                border: `1px solid rgba(0,173,181,0.25)`,
-                color: colors.navy,
-                fontWeight: font.weightBlack,
-                fontSize: font.sizeSm,
-                padding: `${spacing.xs} ${spacing.md}`,
-                borderRadius: radius.pill,
-              }}>⚡ Technician en route</div>
-            </div>
+        {/* Lookup card */}
+        <div style={styles.card}>
+          <div style={{ fontSize: font.sizeMd, fontWeight: font.weightBlack, color: colors.navy, marginBottom: spacing.sm }}>
+            Check Appointment Status
+          </div>
+          <div style={{ fontSize: font.sizeSm, color: colors.muted, marginBottom: spacing.md }}>
+            Enter the phone number on your account
+          </div>
+          <input
+            style={styles.input}
+            type="tel"
+            placeholder="(216) 555-0100"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleLookup()}
+          />
+          <button style={styles.btn} onClick={handleLookup} disabled={loading}>
+            {loading ? 'Looking up…' : 'Check Status'}
+          </button>
+        </div>
 
-            <div style={styles.card}>
-              <div style={{ fontSize: font.sizeLg, fontWeight: font.weightBlack, color: colors.navy, marginBottom: spacing.lg }}>Progress</div>
-              <div style={styles.timelineWrap}>
-                <div style={styles.timelineBar} />
-                {demoSteps.map((step) => (
-                  <div key={step.label} style={styles.step}>
-                    <div style={{ ...styles.dot, ...(step.status === 'done' ? styles.dotDone : step.status === 'active' ? styles.dotActive : styles.dotPending) }}>
-                      {step.status === 'done' ? '✓' : step.status === 'active' ? '●' : '○'}
-                    </div>
-                    <div style={styles.stepTitle}>{step.label}</div>
-                    <div style={styles.stepSub}>{step.sub}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div style={styles.card}>
-              <div style={{ fontSize: font.sizeMd, fontWeight: font.weightBlack, color: colors.navy, marginBottom: spacing.sm }}>Your Technician</div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: spacing.md }}>
-                <div style={{ width: 52, height: 52, borderRadius: '50%', background: colors.navy, color: colors.onDark, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '22px', flexShrink: 0 }}>👷</div>
-                <div>
-                  <div style={{ fontWeight: font.weightBlack, color: colors.ink }}>Mike R.</div>
-                  <div style={{ fontSize: font.sizeSm, color: colors.muted }}>Licensed & Insured · ⭐ 4.9</div>
-                </div>
-              </div>
-            </div>
-          </>
-        ) : (
+        {looked && result && !result.found && (
           <div style={styles.card}>
             <div style={styles.emptyState}>
-              <div style={styles.emptyIcon}>📅</div>
-              <div style={{ fontWeight: font.weightBlack, color: colors.navy, marginBottom: spacing.xs }}>No active appointment</div>
-              <div style={{ fontSize: font.sizeSm }}>Book a service to track your technician in real time.</div>
+              <div style={styles.emptyIcon}>🔍</div>
+              <div style={{ fontWeight: font.weightBlack, color: colors.navy, marginBottom: spacing.xs }}>No account found</div>
+              <div style={{ fontSize: font.sizeSm }}>Try the phone number you used when booking.</div>
             </div>
           </div>
         )}
+
+        {found && activeJobs.length === 0 && (
+          <div style={styles.card}>
+            <div style={styles.emptyState}>
+              <div style={styles.emptyIcon}>📅</div>
+              <div style={{ fontWeight: font.weightBlack, color: colors.navy, marginBottom: spacing.xs }}>No active appointments</div>
+              <div style={{ fontSize: font.sizeSm }}>
+                Hi {found.customerName.split(' ')[0]}! Book a service to track your technician in real time.
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeJobs.map((job) => {
+          const steps = getSteps(job.workStatus);
+          const badge = statusBadge(job.workStatus);
+          const title = job.services.length > 0 ? job.services.join(' + ') : 'Service Request';
+          return (
+            <div key={job.id}>
+              <div style={styles.card}>
+                <div style={{ fontSize: font.sizeLg, fontWeight: font.weightBlack, color: colors.navy, marginBottom: spacing.xs }}>
+                  🔧 {title}
+                </div>
+                {job.address && (
+                  <div style={{ fontSize: font.sizeSm, color: colors.muted }}>{job.address}</div>
+                )}
+                {job.scheduledStart && (
+                  <div style={{ fontSize: font.sizeSm, color: colors.muted, marginTop: spacing.xs }}>
+                    {formatDate(job.scheduledStart)}
+                  </div>
+                )}
+                <div style={{
+                  marginTop: spacing.md,
+                  display: 'inline-block',
+                  background: badge.bg,
+                  color: badge.color,
+                  fontWeight: font.weightBlack,
+                  fontSize: font.sizeSm,
+                  padding: `${spacing.xs} ${spacing.md}`,
+                  borderRadius: radius.pill,
+                }}>{badge.label}</div>
+              </div>
+
+              <div style={styles.card}>
+                <div style={{ fontSize: font.sizeLg, fontWeight: font.weightBlack, color: colors.navy, marginBottom: spacing.lg }}>Progress</div>
+                <div style={styles.timelineWrap}>
+                  <div style={styles.timelineBar} />
+                  {steps.map((step) => (
+                    <div key={step.label} style={styles.step}>
+                      <div style={{
+                        ...styles.dot,
+                        ...(step.status === 'done' ? styles.dotDone : step.status === 'active' ? styles.dotActive : styles.dotPending),
+                      }}>
+                        {step.status === 'done' ? '✓' : step.status === 'active' ? '●' : '○'}
+                      </div>
+                      <div style={styles.stepTitle}>{step.label}</div>
+                      <div style={styles.stepSub}>{step.sub}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {job.assignedEmployee && (
+                <div style={styles.card}>
+                  <div style={{ fontSize: font.sizeMd, fontWeight: font.weightBlack, color: colors.navy, marginBottom: spacing.sm }}>Your Technician</div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: spacing.md }}>
+                    <div style={{ width: 52, height: 52, borderRadius: '50%', background: colors.navy, color: colors.onDark, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '22px', flexShrink: 0 }}>👷</div>
+                    <div>
+                      <div style={{ fontWeight: font.weightBlack, color: colors.ink }}>{job.assignedEmployee}</div>
+                      <div style={{ fontSize: font.sizeSm, color: colors.muted }}>Licensed & Insured</div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
     </div>
   );
