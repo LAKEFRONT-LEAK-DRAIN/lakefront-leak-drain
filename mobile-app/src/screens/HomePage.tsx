@@ -21,9 +21,8 @@ const styles: Record<string, React.CSSProperties> = {
     gap: spacing.md,
   },
   logoImg: {
-    width: '240px',
+    width: '260px',
     height: 'auto',
-    mixBlendMode: 'multiply' as const,
   },
   tagline: {
     fontSize: font.sizeMd,
