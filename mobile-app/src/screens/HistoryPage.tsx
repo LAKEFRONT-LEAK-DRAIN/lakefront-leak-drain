@@ -163,7 +163,7 @@ export default function HistoryPage() {
   const [resendCountdown, setResendCountdown] = useState(0);
   const [sendLoading, setSendLoading] = useState(false);
   const [verifyLoading, setVerifyLoading] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [_loading, setLoading] = useState(false);
   const [verifyFailedAttempts, setVerifyFailedAttempts] = useState(0);
   const [verifyLockCountdown, setVerifyLockCountdown] = useState(0);
   const [statusMsg, setStatusMsg] = useState('');
