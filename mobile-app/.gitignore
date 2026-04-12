@@ -22,3 +22,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Android build artifacts copied to mobile-app root for local testing
+app-debug.apk
+output-metadata.json
