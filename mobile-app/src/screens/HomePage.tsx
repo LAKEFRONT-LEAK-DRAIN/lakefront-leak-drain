@@ -16,11 +16,16 @@ const styles: Record<string, React.CSSProperties> = {
   logoWrap: {
     marginBottom: spacing.lg,
     display: 'flex',
-    justifyContent: 'center',
+    flexDirection: 'column' as const,
+    alignItems: 'center',
+    gap: spacing.md,
   },
   logoImg: {
-    height: '72px',
-    width: 'auto',
+    width: '220px',
+    height: 'auto',
+    borderRadius: radius.lg,
+    padding: spacing.sm,
+    background: 'rgba(255,255,255,0.95)',
   },
   tagline: {
     fontSize: font.sizeMd,
@@ -126,7 +131,6 @@ export default function HomePage() {
         <div style={styles.logoWrap}>
           <div style={styles.badge}>⚡ Fast Local Response</div>
           <img src="/logo.png" alt="Lakefront Leak &amp; Drain" style={styles.logoImg} />
-          <div style={styles.tagline}>Cleveland's trusted plumbing pros</div>
         </div>
       </div>
 
