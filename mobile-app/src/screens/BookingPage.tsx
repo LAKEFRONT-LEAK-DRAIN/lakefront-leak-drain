@@ -233,7 +233,31 @@ export default function BookingPage() {
         <div style={styles.headerSub}>Schedule online in under 2 minutes</div>
       </div>
 
-      <div style={styles.body}>
+      {bookingSuccess ? (
+        <div style={{ ...styles.body, alignItems: 'center', justifyContent: 'center', flex: 1 }}>
+          <div style={{ ...styles.card, textAlign: 'center', maxWidth: 360, width: '100%' }}>
+            <div style={{ fontSize: '3rem', marginBottom: spacing.md }}>✅</div>
+            <div style={{ fontSize: font.sizeLg, fontWeight: font.weightBlack, color: colors.navy, marginBottom: spacing.sm }}>
+              Booking Submitted!
+            </div>
+            <div style={{ fontSize: font.sizeSm, color: colors.muted, marginBottom: spacing.lg }}>
+              {bookingSuccess.invoiceNumber ? `Job #${bookingSuccess.invoiceNumber} created.` : 'Request received.'} We'll call to confirm your appointment.
+            </div>
+            <button
+              type="button"
+              style={styles.btnPrimary}
+              onClick={() => {
+                setBookingSuccess(null);
+                setFirstName(''); setLastName(''); setPhone(''); setEmail('');
+                setAddress(''); setCity(''); setNotes(''); setServices([]);
+                setSelectedWindow(null); setCustomerId(''); setAddressId('');
+              }}
+            >
+              Book Another Service
+            </button>
+          </div>
+        </div>
+      ) : (
         <div style={styles.notice}>
           ⚡ <strong>Same-day service available.</strong> Call <a href={hcpUrls.phone} style={{ color: colors.navy, fontWeight: 700 }}>{hcpUrls.phoneDisplay}</a> for emergencies.
         </div>
@@ -403,22 +427,10 @@ export default function BookingPage() {
           />
         </div>
 
-        {bookingSuccess ? (
-          <div style={{ ...styles.card, textAlign: 'center' }}>
-            <div style={{ fontSize: '2.5rem', marginBottom: spacing.sm }}>✅</div>
-            <div style={{ fontSize: font.sizeLg, fontWeight: font.weightBlack, color: colors.navy, marginBottom: spacing.sm }}>
-              Booking Submitted!
-            </div>
-            <div style={{ fontSize: font.sizeSm, color: colors.muted }}>
-              {bookingSuccess.invoiceNumber ? `Job #${bookingSuccess.invoiceNumber} created.` : 'Request received.'} We'll call to confirm your appointment.
-            </div>
-          </div>
-        ) : (
-          <>
-            {bookingError ? <div style={styles.statusErr}>{bookingError}</div> : null}
-            <button
-              type="button"
-              style={{ ...styles.btnPrimary, opacity: bookingLoading ? 0.7 : 1 }}
+        {bookingError ? <div style={styles.statusErr}>{bookingError}</div> : null}
+        <button
+          type="button"
+          style={{ ...styles.btnPrimary, opacity: bookingLoading ? 0.7 : 1 }}
               disabled={bookingLoading}
               onClick={async () => {
                 if (!customerId || !addressId) {
@@ -463,9 +475,8 @@ export default function BookingPage() {
                 Use "Find My Details" above to book in one tap.
               </div>
             )}
-          </>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }
