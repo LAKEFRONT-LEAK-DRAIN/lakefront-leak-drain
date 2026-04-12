@@ -7,8 +7,8 @@ android {
         applicationId "com.lakefrontleakdrain.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
-        versionName "1.0"
+        versionCode 3
+        versionName "1.2"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
@@ -21,7 +21,22 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
+        debug {
+        }
     }
+
+    applicationVariants.all { variant ->
+        if (variant.buildType.name == "debug") {
+            variant.outputs.all { output ->
+                def copyTask = tasks.create("copy${variant.name}Apk", Copy) {
+                    from output.outputFile
+                    into "I:/My Drive/MOBILE APP"
+                }
+                copyTask.dependsOn(variant.assembleProvider)
+            }
+        }
+    }
+
 }
 
 repositories {
