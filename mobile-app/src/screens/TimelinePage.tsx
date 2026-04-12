@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { colors, font, radius, shadow, spacing } from '../tokens';
 
 const styles: Record<string, React.CSSProperties> = {
@@ -79,9 +79,40 @@ interface Job {
   assignedEmployee: string | null;
 }
 
+interface OtpSession {
+  phone: string;
+  token: string;
+  exp: number;
+}
+
 type LookupResult =
   | { found: false }
   | { found: true; customerName: string; customerId: string; jobs: Job[] };
+
+const SESSION_KEY = 'hcpOtpSession';
+
+function loadSession(): OtpSession | null {
+  try {
+    const raw = localStorage.getItem(SESSION_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as OtpSession;
+    if (!parsed.exp || Date.now() > parsed.exp) {
+      localStorage.removeItem(SESSION_KEY);
+      return null;
+    }
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+function saveSession(session: OtpSession) {
+  localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+}
+
+function clearSession() {
+  localStorage.removeItem(SESSION_KEY);
+}
 
 type StepStatus = 'done' | 'active' | 'pending';
 interface TimelineStep { label: string; sub: string; status: StepStatus; }
@@ -136,24 +167,115 @@ function statusBadge(ws: string): { label: string; bg: string; color: string } {
 
 export default function TimelinePage() {
   const [phone, setPhone] = useState('');
+  const [code, setCode] = useState('');
+  const [codeSent, setCodeSent] = useState(false);
+  const [sendLoading, setSendLoading] = useState(false);
+  const [verifyLoading, setVerifyLoading] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [statusMsg, setStatusMsg] = useState('');
+  const [authError, setAuthError] = useState('');
+  const [session, setSession] = useState<OtpSession | null>(loadSession());
   const [result, setResult] = useState<LookupResult | null>(null);
   const [looked, setLooked] = useState(false);
 
-  async function handleLookup() {
-    const q = phone.trim();
+  async function fetchJobs(activePhone: string, token: string) {
+    const q = activePhone.trim();
     if (!q) return;
     setLoading(true);
+    setAuthError('');
     setResult(null);
     setLooked(false);
     try {
-      const res = await fetch(`/.netlify/functions/hcp-customer-jobs?phone=${encodeURIComponent(q)}`);
+      const res = await fetch(`/.netlify/functions/hcp-customer-jobs?phone=${encodeURIComponent(q)}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       const data: LookupResult = await res.json();
+      if (!res.ok) throw new Error((data as { error?: string }).error || 'Unable to load jobs.');
       setResult(data);
       setLooked(true);
+    } catch (err) {
+      setAuthError(err instanceof Error ? err.message : 'Unable to load jobs.');
     } finally {
       setLoading(false);
     }
+  }
+
+  useEffect(() => {
+    if (session) {
+      setPhone(session.phone);
+      void fetchJobs(session.phone, session.token);
+    }
+  }, []);
+
+  async function handleSendCode() {
+    const q = phone.trim();
+    if (!q) return;
+    setSendLoading(true);
+    setAuthError('');
+    setStatusMsg('');
+    try {
+      const res = await fetch('/.netlify/functions/hcp-send-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone: q }),
+      });
+      const data = await res.json() as { error?: string };
+      if (!res.ok) throw new Error(data.error || 'Unable to send code.');
+      setCodeSent(true);
+      setStatusMsg('Verification code sent by text message.');
+    } catch (err) {
+      setAuthError(err instanceof Error ? err.message : 'Unable to send code.');
+    } finally {
+      setSendLoading(false);
+    }
+  }
+
+  async function handleVerifyCode() {
+    const q = phone.trim();
+    if (!q || !code.trim()) return;
+    setVerifyLoading(true);
+    setAuthError('');
+    setStatusMsg('');
+    try {
+      const res = await fetch('/.netlify/functions/hcp-verify-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone: q, code: code.trim() }),
+      });
+      const data = await res.json() as {
+        error?: string;
+        sessionToken?: string;
+        expiresInSec?: number;
+      };
+      if (!res.ok || !data.sessionToken || !data.expiresInSec) {
+        throw new Error(data.error || 'Verification failed.');
+      }
+      const nextSession: OtpSession = {
+        phone: q,
+        token: data.sessionToken,
+        exp: Date.now() + (data.expiresInSec * 1000),
+      };
+      saveSession(nextSession);
+      setSession(nextSession);
+      setCode('');
+      setStatusMsg('Phone verified. Loading your status...');
+      await fetchJobs(q, nextSession.token);
+    } catch (err) {
+      setAuthError(err instanceof Error ? err.message : 'Verification failed.');
+    } finally {
+      setVerifyLoading(false);
+    }
+  }
+
+  function handleSignOut() {
+    clearSession();
+    setSession(null);
+    setCodeSent(false);
+    setCode('');
+    setResult(null);
+    setLooked(false);
+    setStatusMsg('');
+    setAuthError('');
   }
 
   const found = result && result.found === true
@@ -169,13 +291,13 @@ export default function TimelinePage() {
       </div>
 
       <div style={styles.body}>
-        {/* Lookup card */}
+        {/* OTP auth card */}
         <div style={styles.card}>
           <div style={{ fontSize: font.sizeMd, fontWeight: font.weightBlack, color: colors.navy, marginBottom: spacing.sm }}>
-            Check Appointment Status
+            Verify Your Phone
           </div>
           <div style={{ fontSize: font.sizeSm, color: colors.muted, marginBottom: spacing.md }}>
-            Enter the phone number on your account
+            Enter your phone and verify by text message to view your status
           </div>
           <input
             style={styles.input}
@@ -183,14 +305,50 @@ export default function TimelinePage() {
             placeholder="(216) 555-0100"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleLookup()}
+            disabled={!!session}
           />
-          <button style={styles.btn} onClick={handleLookup} disabled={loading}>
-            {loading ? 'Looking up…' : 'Check Status'}
-          </button>
+
+          {!session ? (
+            <>
+              <button style={styles.btn} onClick={handleSendCode} disabled={sendLoading}>
+                {sendLoading ? 'Sending code…' : 'Send Verification Code'}
+              </button>
+
+              {codeSent && (
+                <>
+                  <input
+                    style={{ ...styles.input, marginTop: spacing.sm }}
+                    type="text"
+                    placeholder="Enter 6-digit code"
+                    value={code}
+                    onChange={(e) => setCode(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleVerifyCode()}
+                  />
+                  <button style={styles.btn} onClick={handleVerifyCode} disabled={verifyLoading}>
+                    {verifyLoading ? 'Verifying…' : 'Verify & View Status'}
+                  </button>
+                </>
+              )}
+            </>
+          ) : (
+            <>
+              <div style={{ fontSize: font.sizeSm, color: colors.success, marginTop: spacing.sm }}>
+                Phone verified. You can now view your status.
+              </div>
+              <button
+                style={{ ...styles.btn, background: colors.navy }}
+                onClick={handleSignOut}
+              >
+                Verify Different Phone
+              </button>
+            </>
+          )}
+
+          {statusMsg ? <div style={{ fontSize: font.sizeSm, color: colors.success, marginTop: spacing.sm }}>{statusMsg}</div> : null}
+          {authError ? <div style={{ fontSize: font.sizeSm, color: colors.error, marginTop: spacing.sm }}>{authError}</div> : null}
         </div>
 
-        {looked && result && !result.found && (
+        {session && looked && result && !result.found && (
           <div style={styles.card}>
             <div style={styles.emptyState}>
               <div style={styles.emptyIcon}>🔍</div>
@@ -200,7 +358,7 @@ export default function TimelinePage() {
           </div>
         )}
 
-        {found && activeJobs.length === 0 && (
+        {session && found && activeJobs.length === 0 && (
           <div style={styles.card}>
             <div style={styles.emptyState}>
               <div style={styles.emptyIcon}>📅</div>
@@ -212,7 +370,7 @@ export default function TimelinePage() {
           </div>
         )}
 
-        {activeJobs.map((job) => {
+        {session && activeJobs.map((job) => {
           const steps = getSteps(job.workStatus);
           const badge = statusBadge(job.workStatus);
           const title = job.services.length > 0 ? job.services.join(' + ') : 'Service Request';

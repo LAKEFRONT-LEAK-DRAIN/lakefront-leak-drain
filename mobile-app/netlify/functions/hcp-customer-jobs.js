@@ -1,9 +1,31 @@
 'use strict';
 
+const crypto = require('crypto');
+
+function verifySessionToken(authHeader, secret) {
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    throw new Error('Missing authorization token.');
+  }
+  const token = authHeader.slice('Bearer '.length).trim();
+  const parts = token.split('.');
+  if (parts.length !== 3) throw new Error('Invalid authorization token.');
+
+  const [encodedHeader, encodedPayload, signature] = parts;
+  const unsigned = `${encodedHeader}.${encodedPayload}`;
+  const expected = crypto.createHmac('sha256', secret).update(unsigned).digest('base64url');
+  if (signature !== expected) throw new Error('Invalid authorization token.');
+
+  const payload = JSON.parse(Buffer.from(encodedPayload, 'base64url').toString('utf8'));
+  if (!payload.exp || Math.floor(Date.now() / 1000) > payload.exp) {
+    throw new Error('Session expired. Please verify again.');
+  }
+  return payload;
+}
+
 exports.handler = async (event) => {
   const CORS = {
     'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'Content-Type',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
   };
 
   if (event.httpMethod === 'OPTIONS') {
@@ -11,6 +33,26 @@ exports.handler = async (event) => {
   }
 
   try {
+    const sessionSecret = process.env.OTP_SESSION_SECRET;
+    if (!sessionSecret) {
+      return {
+        statusCode: 500,
+        headers: { ...CORS, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ error: 'Session auth is not configured. Missing OTP_SESSION_SECRET.' }),
+      };
+    }
+
+    let session;
+    try {
+      session = verifySessionToken(event.headers.authorization || event.headers.Authorization, sessionSecret);
+    } catch (tokenErr) {
+      return {
+        statusCode: 401,
+        headers: { ...CORS, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ error: tokenErr.message }),
+      };
+    }
+
     const { phone } = event.queryStringParameters || {};
     if (!phone) {
       return {
@@ -27,6 +69,14 @@ exports.handler = async (event) => {
     };
     const base = 'https://api.housecallpro.com';
     const clean = phone.replace(/\D/g, '');
+
+    if (String(session.phone || '') !== clean) {
+      return {
+        statusCode: 401,
+        headers: { ...CORS, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ error: 'Verified phone does not match request phone.' }),
+      };
+    }
 
     // Search customer by phone
     const searchRes = await fetch(
