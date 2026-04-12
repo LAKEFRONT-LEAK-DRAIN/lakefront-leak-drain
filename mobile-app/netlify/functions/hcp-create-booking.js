@@ -33,7 +33,7 @@ exports.handler = async function handler(event) {
   try { body = JSON.parse(event.body || '{}'); }
   catch { return json(400, { error: 'Invalid JSON body.' }); }
 
-  const { customerId, addressId, scheduledStart, scheduledEnd, service, notes } = body;
+  const { customerId, addressId, scheduledStart, scheduledEnd, services, notes } = body;
 
   if (!customerId || !addressId) {
     return json(400, { error: 'customer_id and address_id are required.' });
@@ -45,15 +45,12 @@ exports.handler = async function handler(event) {
     notes: notes || undefined,
   };
 
-  const lineItem = service ? SERVICE_LINE_ITEMS[service] : null;
-  if (lineItem) {
-    jobPayload.line_items = [{
-      name: lineItem.name,
-      description: lineItem.description,
-      unit_price: 0,
-      quantity: 1,
-    }];
-  }
+  const selectedServices = Array.isArray(services) ? services : (services ? [services] : []);
+  const lineItems = selectedServices
+    .map(s => SERVICE_LINE_ITEMS[s])
+    .filter(Boolean)
+    .map(li => ({ name: li.name, description: li.description, unit_price: 0, quantity: 1 }));
+  if (lineItems.length) jobPayload.line_items = lineItems;
 
   if (scheduledStart && scheduledEnd) {
     jobPayload.schedule = {

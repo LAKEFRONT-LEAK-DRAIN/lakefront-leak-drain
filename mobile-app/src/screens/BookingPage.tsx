@@ -25,15 +25,22 @@ const styles: Record<string, CSSProperties> = {
     outline: 'none',
     marginBottom: spacing.md,
   },
-  select: {
-    width: '100%',
-    padding: `${spacing.sm} ${spacing.md}`,
-    borderRadius: radius.sm,
-    border: `1.5px solid rgba(7,27,50,0.15)`,
-    fontSize: font.sizeMd,
-    color: colors.ink,
-    background: colors.bg,
+  serviceChipGrid: {
+    display: 'grid',
+    gridTemplateColumns: '1fr 1fr',
+    gap: spacing.sm,
     marginBottom: spacing.md,
+  },
+  serviceChip: {
+    padding: `${spacing.sm} ${spacing.sm}`,
+    borderRadius: radius.sm,
+    border: `1.5px solid rgba(7,27,50,0.2)`,
+    background: colors.bg,
+    color: colors.navy,
+    fontSize: font.sizeSm,
+    fontWeight: font.weightBold,
+    cursor: 'pointer',
+    textAlign: 'center' as const,
   },
   btnPrimary: {
     display: 'block',
@@ -114,7 +121,7 @@ export default function BookingPage() {
   const [lastName, setLastName] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
-  const [service, setService] = useState('');
+  const [services, setServices] = useState<string[]>([]);
   const [address, setAddress] = useState('');
   const [city, setCity] = useState('');
   const [bestTime, setBestTime] = useState('');
@@ -142,11 +149,11 @@ export default function BookingPage() {
     if (email) url.searchParams.set('email', email);
     if (address) url.searchParams.set('address', address);
     if (city) url.searchParams.set('city', city);
-    if (service) url.searchParams.set('service', service);
+    if (services.length) url.searchParams.set('service', services.join(', '));
     if (bestTime) url.searchParams.set('best_time', bestTime);
     if (notes) url.searchParams.set('notes', notes);
     return url.toString();
-  }, [address, bestTime, city, email, firstName, lastName, notes, phone, service]);
+  }, [address, bestTime, city, email, firstName, lastName, notes, phone, services]);
 
   async function handleLookup() {
     setLookupError('');
@@ -311,11 +318,31 @@ export default function BookingPage() {
         <div style={styles.card}>
           <div style={{ fontSize: font.sizeLg, fontWeight: font.weightBlack, color: colors.navy, marginBottom: spacing.md }}>Service Details</div>
 
-          <label style={styles.label}>Service Needed</label>
-          <select style={styles.select} value={service} onChange={(e) => setService(e.target.value)}>
-            <option value="">Select a service…</option>
-            {services.map(s => <option key={s} value={s}>{s}</option>)}
-          </select>
+          <label style={styles.label}>Services Needed <span style={{ fontWeight: 400, opacity: 0.6 }}>(select all that apply)</span></label>
+          <div style={styles.serviceChipGrid}>
+            {['Leak Repair', 'Drain Cleaning', 'Clogged Drain', 'Sump Pump', 'Water Heater',
+              'Frozen Pipe', 'Garbage Disposal', 'Toilet Repair', 'Faucet Repair', 'Emergency Service', 'Other'
+            ].map(s => {
+              const selected = services.includes(s);
+              return (
+                <button
+                  key={s}
+                  type="button"
+                  style={{
+                    ...styles.serviceChip,
+                    background: selected ? colors.aqua : colors.bg,
+                    color: selected ? colors.onAqua : colors.navy,
+                    border: selected ? `1.5px solid ${colors.aqua}` : `1.5px solid rgba(7,27,50,0.2)`,
+                  }}
+                  onClick={() => setServices(prev =>
+                    prev.includes(s) ? prev.filter(x => x !== s) : [...prev, s]
+                  )}
+                >
+                  {s}
+                </button>
+              );
+            })}
+          </div>
 
           <label style={styles.label}>Service Address</label>
           <input
@@ -412,7 +439,7 @@ export default function BookingPage() {
                     body: JSON.stringify({
                       customerId,
                       addressId,
-                      service,
+                      services,
                       notes,
                       scheduledStart: selectedWindow?.start_time,
                       scheduledEnd: selectedWindow?.end_time,
