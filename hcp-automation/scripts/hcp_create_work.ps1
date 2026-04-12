@@ -164,6 +164,105 @@ function Parse-RequestedStartTime {
     return $start
 }
 
+function Parse-RequestedTimeWindow {
+    param(
+        [Parameter()]
+        [AllowEmptyString()]
+        [string]$RequestedSchedule
+    )
+
+    if ([string]::IsNullOrWhiteSpace($RequestedSchedule)) {
+        return $null
+    }
+
+    $raw = $RequestedSchedule.Trim()
+
+    # Remove common labels emitted by warranty emails.
+    $raw = $raw -replace '(?i)Appointment\s*:\s*', ''
+    $raw = $raw -replace '(?i)Time\s*Slot\s*:\s*', ' '
+
+    # Normalize separators and collapse whitespace.
+    $raw = $raw -replace '\s*[–—]\s*', '-'
+    $raw = ($raw -replace '\s+', ' ').Trim()
+
+    # Remove ordinal suffixes from day numbers (14th -> 14) for reliable parsing.
+    $raw = [regex]::Replace($raw, '(?i)\b(\d{1,2})(st|nd|rd|th)\b', '$1')
+
+    $windowRegexes = @(
+        # Tuesday April 14, 2026 07:00 AM-11:00 AM
+        '^(?<datePart>.+?),\s*(?<year>\d{4})\s+(?<start>\d{1,2}:\d{2}\s*(?:AM|PM))\s*-\s*(?<end>\d{1,2}:\d{2}\s*(?:AM|PM))$'
+        # Tuesday April 14, 2026 7 AM-11 AM
+        '^(?<datePart>.+?),\s*(?<year>\d{4})\s+(?<start>\d{1,2}\s*(?:AM|PM))\s*-\s*(?<end>\d{1,2}\s*(?:AM|PM))$'
+        # Tuesday 4/14/2026 07:00 AM-11:00 AM
+        '^(?<datePart>.+?)\s+(?<start>\d{1,2}:\d{2}\s*(?:AM|PM))\s*-\s*(?<end>\d{1,2}:\d{2}\s*(?:AM|PM))$'
+        # Tuesday 4/14/2026 11-3 PM (single meridiem at end)
+        '^(?<datePart>.+?)\s+(?<startHour>\d{1,2})(?::(?<startMinute>\d{2}))?\s*-\s*(?<endHour>\d{1,2})(?::(?<endMinute>\d{2}))?\s*(?<ampm>AM|PM)$'
+    )
+
+    foreach ($pattern in $windowRegexes) {
+        $m = [regex]::Match($raw, $pattern, [System.Text.RegularExpressions.RegexOptions]::IgnoreCase)
+        if (-not $m.Success) {
+            continue
+        }
+
+        if ($m.Groups['datePart'].Success -and $m.Groups['year'].Success) {
+            $datePart = ($m.Groups['datePart'].Value.Trim() + ', ' + $m.Groups['year'].Value.Trim()).Trim()
+        }
+        else {
+            $datePart = $m.Groups['datePart'].Value.Trim()
+        }
+
+        $startToken = ''
+        $endToken = ''
+
+        if ($m.Groups['start'].Success -and $m.Groups['end'].Success) {
+            $startToken = $m.Groups['start'].Value.Trim().ToUpperInvariant()
+            $endToken = $m.Groups['end'].Value.Trim().ToUpperInvariant()
+        }
+        elseif ($m.Groups['startHour'].Success -and $m.Groups['endHour'].Success -and $m.Groups['ampm'].Success) {
+            $ampm = $m.Groups['ampm'].Value.Trim().ToUpperInvariant()
+
+            $startToken = if ($m.Groups['startMinute'].Success -and -not [string]::IsNullOrWhiteSpace($m.Groups['startMinute'].Value)) {
+                "$($m.Groups['startHour'].Value):$($m.Groups['startMinute'].Value) $ampm"
+            }
+            else {
+                "$($m.Groups['startHour'].Value) $ampm"
+            }
+
+            $endToken = if ($m.Groups['endMinute'].Success -and -not [string]::IsNullOrWhiteSpace($m.Groups['endMinute'].Value)) {
+                "$($m.Groups['endHour'].Value):$($m.Groups['endMinute'].Value) $ampm"
+            }
+            else {
+                "$($m.Groups['endHour'].Value) $ampm"
+            }
+        }
+
+        $start = Parse-RequestedStartTime -RequestedSchedule "$datePart $startToken"
+        $end = Parse-RequestedStartTime -RequestedSchedule "$datePart $endToken"
+
+        if ($null -ne $start -and $null -ne $end) {
+            if ($end -le $start) {
+                $end = $end.AddDays(1)
+            }
+
+            return [pscustomobject]@{
+                Start = $start
+                End   = $end
+            }
+        }
+    }
+
+    $singleStart = Parse-RequestedStartTime -RequestedSchedule $raw
+    if ($null -ne $singleStart) {
+        return [pscustomobject]@{
+            Start = $singleStart
+            End   = $singleStart.AddHours(2)
+        }
+    }
+
+    return $null
+}
+
 function Get-HttpErrorBody {
     param(
         [Parameter(Mandatory = $true)]
@@ -275,9 +374,9 @@ if (-not [string]::IsNullOrWhiteSpace($requestedTechnician)) {
     $shieldNote += "`nIV. REQUESTED TECHNICIAN: $requestedTechnician"
 }
 
-$requestedStart = Parse-RequestedStartTime -RequestedSchedule $requestedSchedule
-if ($null -ne $requestedStart) {
-    Write-Host "Schedule assignment: source=requested requested='$requestedSchedule' scheduled_start='$($requestedStart.ToString("yyyy-MM-ddTHH:mm:ss"))'"
+$requestedWindow = Parse-RequestedTimeWindow -RequestedSchedule $requestedSchedule
+if ($null -ne $requestedWindow -and $null -ne $requestedWindow.Start) {
+    Write-Host "Schedule assignment: source=requested requested='$requestedSchedule' scheduled_start='$($requestedWindow.Start.ToString("yyyy-MM-ddTHH:mm:ss"))' scheduled_end='$($requestedWindow.End.ToString("yyyy-MM-ddTHH:mm:ss"))'"
 }
 else {
     Write-Host "Schedule assignment: source=default-anytime requested='$requestedSchedule'"
@@ -291,7 +390,7 @@ $jobPayload = @{
     line_items = $jobLineItems
 }
 
-if ($null -eq $requestedStart) {
+if ($null -eq $requestedWindow -or $null -eq $requestedWindow.Start) {
     $jobPayload.schedule = @{
         anytime = $true
         anytime_start_date = (Get-Date).ToString("yyyy-MM-dd")
@@ -302,8 +401,9 @@ $body = $jobPayload | ConvertTo-Json -Depth 10
 
 $response = Invoke-RestMethod -Uri "https://api.housecallpro.com/jobs" -Method Post -Headers $headers -Body $body
 
-if ($null -ne $requestedStart -and -not [string]::IsNullOrWhiteSpace("$($response.id)")) {
-    $requestedEnd = $requestedStart.AddHours(2)
+if ($null -ne $requestedWindow -and $null -ne $requestedWindow.Start -and -not [string]::IsNullOrWhiteSpace("$($response.id)")) {
+    $requestedStart = $requestedWindow.Start
+    $requestedEnd = $requestedWindow.End
     $appointmentUrl = "https://api.housecallpro.com/jobs/$($response.id)/appointments"
 
     $startOffset = [datetimeoffset]::new($requestedStart, [System.TimeZoneInfo]::Local.GetUtcOffset($requestedStart))
