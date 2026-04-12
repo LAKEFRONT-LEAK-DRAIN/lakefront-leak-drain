@@ -258,6 +258,7 @@ export default function BookingPage() {
           </div>
         </div>
       ) : (
+        <>
         <div style={styles.notice}>
           ⚡ <strong>Same-day service available.</strong> Call <a href={hcpUrls.phone} style={{ color: colors.navy, fontWeight: 700 }}>{hcpUrls.phoneDisplay}</a> for emergencies.
         </div>
@@ -476,6 +477,7 @@ export default function BookingPage() {
               </div>
             )}
         </div>
+        </>
       )}
     </div>
   );
