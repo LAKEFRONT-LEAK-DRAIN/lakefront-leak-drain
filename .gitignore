@@ -11,3 +11,6 @@ Lakefront-Automation/credentials.json
 Lakefront-Automation/token.json
 Lakefront-Automation/.env
 Lakefront-Automation/.env.*
+
+# Local Node lockfile from app packaging tests
+package-lock.json
