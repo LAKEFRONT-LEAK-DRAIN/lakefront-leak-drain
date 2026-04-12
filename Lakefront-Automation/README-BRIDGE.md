@@ -82,6 +82,12 @@ Invoke-RestMethod `
   - Required: first_name, last_name, street, city, job_title
   - Recommended: state, zip, phone, email, requested_technician, requested_schedule, service_summary, price_cents
   - Optional: line_items (array of { name, unit_price, quantity })
+  - Optional: claim_number (used for idempotent filename mapping)
+
+Idempotency behavior:
+
+- If claim_number is present, the bridge writes to hcp-automation/pending-tasks/claim_<claim_number>.json.
+- Re-sending the same claim_number updates that same file instead of creating a new customer task file.
 
 ## 5) Email intake endpoint (Gemini-assisted extraction)
 

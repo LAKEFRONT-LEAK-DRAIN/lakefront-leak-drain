@@ -41,6 +41,16 @@ def first_present(payload: Dict[str, Any], keys: list[str], default: Any = "") -
     return default
 
 
+def normalize_claim_number(value: Any) -> str:
+    text = normalize_optional_text(value)
+    if not text:
+        return ""
+
+    # Keep only letters, digits, dash, underscore for deterministic filenames and matching.
+    cleaned = re.sub(r"[^A-Za-z0-9_-]", "", text)
+    return cleaned[:64]
+
+
 def derive_job_title(payload: Dict[str, Any]) -> str:
     explicit_title = normalize_optional_text(payload.get("job_title", ""))
     if explicit_title:
@@ -192,7 +202,7 @@ def extract_choice_email_fields(raw_text: str, email_subject: str, email_from: s
         result["email"] = email_match.group(1).strip()
 
     claim_match = re.search(r"(?im)^\s*Claim\s*Number\s*:\s*(.+)$", text)
-    claim_number = claim_match.group(1).strip() if claim_match else ""
+    claim_number = normalize_claim_number(claim_match.group(1).strip() if claim_match else "")
 
     issue_match = re.search(r"(?is)\bIssue\s*:\s*(.+)$", text)
     issue = issue_match.group(1).strip() if issue_match else ""
@@ -216,6 +226,7 @@ def extract_choice_email_fields(raw_text: str, email_subject: str, email_from: s
         result["requested_schedule"] = time_slot
 
     if claim_number:
+        result["claim_number"] = claim_number
         existing_summary = normalize_optional_text(result.get("service_summary", ""))
         if existing_summary:
             result["service_summary"] = f"Claim #{claim_number}. {existing_summary}"
@@ -285,6 +296,9 @@ def parse_request_payload(payload: Dict[str, Any]) -> Dict[str, Any]:
             payload.get("service_summary", payload.get("scope", derive_job_title(payload)))
         ),
         "source": str(payload.get("source", "gemini_bridge_api")).strip(),
+        "claim_number": normalize_claim_number(
+            first_present(payload, ["claim_number", "claimNumber", "claim_no", "claim"])
+        ),
     }
 
     if result["price_cents"] < 0:
@@ -306,6 +320,8 @@ def parse_request_payload(payload: Dict[str, Any]) -> Dict[str, Any]:
 def choose_filename(data: Dict[str, Any], requested_name: str = "") -> str:
     if requested_name.strip():
         base = sanitize_filename(requested_name)
+    elif normalize_optional_text(data.get("claim_number", "")):
+        base = sanitize_filename(f"claim_{data['claim_number']}")
     else:
         base = sanitize_filename(f"{data['first_name']}_{data['last_name']}")
 
