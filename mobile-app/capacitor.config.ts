@@ -5,7 +5,8 @@ const config: CapacitorConfig = {
   appName: 'Lakefront Leak & Drain',
   webDir: 'dist',
   server: {
-    androidScheme: 'https',
+    url: 'https://lakefront-mobile-app.netlify.app',
+    cleartext: false,
   },
 };
 
