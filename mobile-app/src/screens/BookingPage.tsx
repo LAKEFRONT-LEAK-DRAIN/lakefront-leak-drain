@@ -476,7 +476,6 @@ export default function BookingPage() {
                 Use "Find My Details" above to book in one tap.
               </div>
             )}
-        </div>
         </>
       )}
     </div>
