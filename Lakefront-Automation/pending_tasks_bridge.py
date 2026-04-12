@@ -86,6 +86,28 @@ def parse_price_cents(value: Any) -> int:
         raise ValueError(f"Invalid price_cents value: {value}") from exc
 
 
+def parse_payload_price_cents(payload: Dict[str, Any]) -> int:
+    # Preferred explicit cents fields.
+    cents_raw = first_present(
+        payload,
+        ["price_cents", "service_call_fee_cents", "service_fee_cents"],
+        default="",
+    )
+    if str(cents_raw).strip():
+        return parse_price_cents(cents_raw)
+
+    # Dollar-style fee fields (e.g. "$75", "75", "85.00").
+    dollars_raw = first_present(
+        payload,
+        ["service_call_fee", "service_fee", "fee", "price"],
+        default="",
+    )
+    if str(dollars_raw).strip():
+        return parse_dollars_to_cents(str(dollars_raw))
+
+    return 0
+
+
 def normalize_line_items(payload: Dict[str, Any], fallback_job_title: str, fallback_price_cents: int) -> list[Dict[str, Any]]:
     raw_items = payload.get("line_items", payload.get("lineItems", []))
     normalized: list[Dict[str, Any]] = []
@@ -289,7 +311,7 @@ def parse_request_payload(payload: Dict[str, Any]) -> Dict[str, Any]:
         "phone": normalize_optional_text(payload.get("phone", payload.get("mobile", ""))),
         "email": normalize_optional_text(payload.get("email", "")),
         "job_title": derive_job_title(payload),
-        "price_cents": parse_price_cents(payload.get("price_cents", 0)),
+        "price_cents": parse_payload_price_cents(payload),
         "requested_technician": normalize_optional_text(payload.get("requested_technician", "")),
         "requested_schedule": normalize_optional_text(payload.get("requested_schedule", "")),
         "service_summary": normalize_optional_text(
