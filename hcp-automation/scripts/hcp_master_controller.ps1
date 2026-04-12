@@ -51,7 +51,12 @@ else {
     $companyName = Normalize-OptionalContactValue -Value "$($data.company_name)"
     $mobile = Normalize-OptionalContactValue -Value "$($data.phone)"
     $email = Normalize-OptionalContactValue -Value "$($data.email)"
-    $createResult = & "$PSScriptRoot/hcp_create_customer.ps1" -firstName $data.first_name -lastName $data.last_name -companyName $companyName -mobile $mobile -email $email
+    $displayName = ""
+    if (-not [string]::IsNullOrWhiteSpace($companyName) -and $companyName.Trim().ToLowerInvariant() -eq "choice home warranty") {
+        $displayName = "$($data.first_name) $($data.last_name) Choice Home Warranty".Trim()
+    }
+
+    $createResult = & "$PSScriptRoot/hcp_create_customer.ps1" -firstName $data.first_name -lastName $data.last_name -companyName $companyName -mobile $mobile -email $email -displayName $displayName
     $customerId = $createResult.customerId
 
     if ([string]::IsNullOrWhiteSpace($customerId)) {
@@ -93,7 +98,14 @@ $serviceSummary = Normalize-OptionalContactValue -Value "$($data.service_summary
 $requestedSchedule = Normalize-OptionalContactValue -Value "$($data.requested_schedule)"
 $requestedTechnician = Normalize-OptionalContactValue -Value "$($data.requested_technician)"
 
-$jobResult = & "$PSScriptRoot/hcp_create_work.ps1" -customerId $customerId -addressId $addressId -jobTitle $data.job_title -priceCents $priceCents -serviceSummary $serviceSummary -requestedSchedule $requestedSchedule -requestedTechnician $requestedTechnician
+$lineItemsJson = ""
+if ($data.PSObject.Properties.Name.Contains("line_items") -and $null -ne $data.line_items) {
+    if ($data.line_items -is [System.Collections.IEnumerable] -and -not ($data.line_items -is [string])) {
+        $lineItemsJson = ($data.line_items | ConvertTo-Json -Depth 10 -Compress)
+    }
+}
+
+$jobResult = & "$PSScriptRoot/hcp_create_work.ps1" -customerId $customerId -addressId $addressId -jobTitle $data.job_title -priceCents $priceCents -serviceSummary $serviceSummary -requestedSchedule $requestedSchedule -requestedTechnician $requestedTechnician -lineItemsJson $lineItemsJson
 
 if ([string]::IsNullOrWhiteSpace($jobResult.jobId)) {
     throw "Job creation returned no jobId."

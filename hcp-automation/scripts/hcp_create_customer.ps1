@@ -8,6 +8,7 @@ param(
     [string]$companyName,
     [string]$mobile,
     [string]$email,
+    [string]$displayName,
     [string]$note = "Created via Lakefront Automation Engine."
 )
 
@@ -40,6 +41,10 @@ if (-not [string]::IsNullOrWhiteSpace($email)) {
 
 if (-not [string]::IsNullOrWhiteSpace($companyName)) {
     $body.company = $companyName
+}
+
+if (-not [string]::IsNullOrWhiteSpace($displayName)) {
+    $body.display_name = $displayName
 }
 
 $response = Invoke-RestMethod -Uri "https://api.housecallpro.com/customers" -Method Post -Headers $headers -Body ($body | ConvertTo-Json)

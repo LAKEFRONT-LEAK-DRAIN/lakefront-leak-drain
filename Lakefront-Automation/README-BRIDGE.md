@@ -81,8 +81,40 @@ Invoke-RestMethod `
 - Body keys:
   - Required: first_name, last_name, street, city, job_title
   - Recommended: state, zip, phone, email, requested_technician, requested_schedule, service_summary, price_cents
+  - Optional: line_items (array of { name, unit_price, quantity })
 
-## 5) Security notes
+## 5) Email intake endpoint (Gemini-assisted extraction)
+
+If Gemini already has email access, you can send raw email text to the bridge and let the server-side Gemini extraction normalize it.
+
+- Method: POST
+- URL: https://<your-cloud-run-url>/intake
+- Header: x-bridge-key: <your BRIDGE_API_KEY>
+- Body keys:
+  - text or email_body (required)
+  - email_subject (optional)
+  - email_from (optional)
+  - email_received_at (optional)
+
+Example:
+
+```powershell
+$body = @{
+  email_from = "dispatch@warranty-company.example"
+  email_subject = "Accepted Work Order #12345"
+  email_received_at = "2026-04-12T09:10:00-04:00"
+  email_body = "<paste full accepted work-order email text here>"
+} | ConvertTo-Json
+
+Invoke-RestMethod `
+  -Uri "$URL/intake" `
+  -Method Post `
+  -Headers @{ "x-bridge-key" = $BRIDGE_KEY } `
+  -ContentType "application/json" `
+  -Body $body
+```
+
+## 6) Security notes
 
 - Never put GITHUB_TOKEN in Gemini prompts.
 - Keep BRIDGE_API_KEY private.

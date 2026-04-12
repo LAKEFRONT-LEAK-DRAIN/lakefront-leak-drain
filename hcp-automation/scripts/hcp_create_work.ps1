@@ -11,6 +11,7 @@ param(
     [Parameter(Mandatory = $true)]
     [long]$priceCents,
 
+    [string]$lineItemsJson,
     [string]$serviceSummary,
     [string]$requestedSchedule,
     [string]$requestedTechnician,
@@ -188,6 +189,66 @@ function Get-HttpErrorBody {
 
 $costCents = [long][math]::Round(([decimal]$priceCents) * 0.50, 0)
 
+$jobLineItems = @(
+    @{
+        name       = $jobTitle
+        unit_price = $priceCents
+        unit_cost  = $costCents
+        quantity   = 1
+    }
+)
+
+if (-not [string]::IsNullOrWhiteSpace($lineItemsJson)) {
+    try {
+        $parsedLineItems = ConvertFrom-Json -InputObject $lineItemsJson
+        $candidateItems = @($parsedLineItems)
+
+        if ($candidateItems.Count -gt 0) {
+            $validated = @()
+
+            foreach ($item in $candidateItems) {
+                $name = "$($item.name)".Trim()
+                if ([string]::IsNullOrWhiteSpace($name)) {
+                    continue
+                }
+
+                $unitPrice = 0L
+                if (-not [long]::TryParse("$($item.unit_price)", [ref]$unitPrice)) {
+                    throw "line_items contains invalid unit_price: '$($item.unit_price)'"
+                }
+
+                if ($unitPrice -lt 0) {
+                    throw "line_items contains negative unit_price: '$($item.unit_price)'"
+                }
+
+                $quantity = 1
+                if (-not [int]::TryParse("$($item.quantity)", [ref]$quantity)) {
+                    $quantity = 1
+                }
+                if ($quantity -lt 1) {
+                    $quantity = 1
+                }
+
+                $unitCost = [long][math]::Round(([decimal]$unitPrice) * 0.50, 0)
+
+                $validated += @{
+                    name       = $name
+                    unit_price = $unitPrice
+                    unit_cost  = $unitCost
+                    quantity   = $quantity
+                }
+            }
+
+            if ($validated.Count -gt 0) {
+                $jobLineItems = $validated
+            }
+        }
+    }
+    catch {
+        throw "Invalid lineItemsJson payload. $($_.Exception.Message)"
+    }
+}
+
 $assignedTechId = $houseTech
 $assignmentSource = "default"
 if (-not [string]::IsNullOrWhiteSpace($requestedTechnician)) {
@@ -227,14 +288,7 @@ $jobPayload = @{
     address_id  = $addressId
     assigned_employee_ids = @($assignedTechId)
     notes = $shieldNote
-    line_items = @(
-        @{
-            name       = $jobTitle
-            unit_price = $priceCents
-            unit_cost  = $costCents
-            quantity   = 1
-        }
-    )
+    line_items = $jobLineItems
 }
 
 if ($null -eq $requestedStart) {
