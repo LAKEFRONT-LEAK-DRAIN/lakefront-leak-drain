@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import BottomNav from './components/BottomNav';
+import TopNav from './components/TopNav';
 import HomePage from './screens/HomePage';
 import BookingPage from './screens/BookingPage';
 import TimelinePage from './screens/TimelinePage';
@@ -9,6 +9,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100dvh' }}>
+        <TopNav />
         <main style={{ flex: 1, overflowY: 'auto' }}>
           <Routes>
             <Route path="/" element={<HomePage />} />
@@ -17,7 +18,6 @@ export default function App() {
             <Route path="/history" element={<HistoryPage />} />
           </Routes>
         </main>
-        <BottomNav />
       </div>
     </BrowserRouter>
   );

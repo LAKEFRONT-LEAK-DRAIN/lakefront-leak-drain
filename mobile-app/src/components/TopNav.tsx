@@ -8,7 +8,7 @@ const tabs = [
   { path: '/history', icon: '🗂️', label: 'History' },
 ];
 
-export default function BottomNav() {
+export default function TopNav() {
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -17,11 +17,11 @@ export default function BottomNav() {
       display: 'flex',
       background: 'rgba(7,27,50,0.97)',
       backdropFilter: 'blur(12px)',
-      borderTop: '1px solid rgba(255,255,255,0.08)',
+      borderBottom: '1px solid rgba(255,255,255,0.08)',
       position: 'sticky',
-      bottom: 0,
+      top: 0,
       zIndex: 100,
-      paddingBottom: 'env(safe-area-inset-bottom)',
+      paddingTop: 'env(safe-area-inset-top)',
     }}>
       {tabs.map(tab => {
         const active = location.pathname === tab.path;
@@ -56,7 +56,7 @@ export default function BottomNav() {
             {active && (
               <span style={{
                 position: 'absolute',
-                bottom: 'calc(100% + 2px)',
+                bottom: 0,
                 width: '32px',
                 height: '2px',
                 background: colors.aqua,
