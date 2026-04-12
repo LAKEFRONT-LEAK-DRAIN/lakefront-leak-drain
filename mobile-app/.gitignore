@@ -26,3 +26,6 @@ dist-ssr
 # Android build artifacts copied to mobile-app root for local testing
 app-debug.apk
 output-metadata.json
+
+# Local design export copy (do not sync)
+Copy of updated logo.png
