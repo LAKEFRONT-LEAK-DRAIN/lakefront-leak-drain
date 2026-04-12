@@ -20,7 +20,14 @@ async function sendNotificationEmail({ invoiceNumber, jobId, firstName, lastName
     const toEmail = process.env.NOTIFICATION_EMAIL;
     const fromEmail = process.env.NOTIFICATION_FROM || smtpUser;
 
-    if (!smtpHost || !smtpUser || !smtpPass || !toEmail) return;
+    console.log('[email] SMTP_HOST:', smtpHost || 'NOT SET');
+    console.log('[email] SMTP_USER:', smtpUser ? 'SET' : 'NOT SET');
+    console.log('[email] SMTP_PASS:', smtpPass ? 'SET' : 'NOT SET');
+    console.log('[email] NOTIFICATION_EMAIL:', toEmail || 'NOT SET');
+    if (!smtpHost || !smtpUser || !smtpPass || !toEmail) {
+      console.log('[email] Skipping — one or more env vars missing');
+      return;
+    }
 
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const nodemailer = require('nodemailer');
