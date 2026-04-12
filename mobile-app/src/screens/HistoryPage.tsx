@@ -119,6 +119,13 @@ function clearSession() {
   localStorage.removeItem(SESSION_KEY);
 }
 
+function formatMaskedPhone(input: string) {
+  const digits = input.replace(/\D/g, '');
+  if (digits.length < 4) return '***-***-****';
+  const last4 = digits.slice(-4);
+  return `***-***-${last4}`;
+}
+
 const PAST_STATUSES = new Set([
   'complete_rated', 'complete rated',
   'complete_unrated', 'complete unrated',
@@ -151,6 +158,7 @@ export default function HistoryPage() {
   const [phone, setPhone] = useState('');
   const [code, setCode] = useState('');
   const [codeSent, setCodeSent] = useState(false);
+  const [resendCountdown, setResendCountdown] = useState(0);
   const [sendLoading, setSendLoading] = useState(false);
   const [verifyLoading, setVerifyLoading] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -189,6 +197,14 @@ export default function HistoryPage() {
     }
   }, []);
 
+  useEffect(() => {
+    if (resendCountdown <= 0) return;
+    const timer = window.setInterval(() => {
+      setResendCountdown((prev) => (prev > 1 ? prev - 1 : 0));
+    }, 1000);
+    return () => window.clearInterval(timer);
+  }, [resendCountdown]);
+
   async function handleSendCode() {
     const q = phone.trim();
     if (!q) return;
@@ -204,6 +220,8 @@ export default function HistoryPage() {
       const data = await res.json() as { error?: string };
       if (!res.ok) throw new Error(data.error || 'Unable to send code.');
       setCodeSent(true);
+      const retryAfter = Number((data as { retryAfterSec?: number }).retryAfterSec || 45);
+      setResendCountdown(retryAfter);
       setStatusMsg('Verification code sent by text message.');
     } catch (err) {
       setAuthError(err instanceof Error ? err.message : 'Unable to send code.');
@@ -292,8 +310,12 @@ export default function HistoryPage() {
 
           {!session ? (
             <>
-              <button style={styles.btn} onClick={handleSendCode} disabled={sendLoading}>
-                {sendLoading ? 'Sending code…' : 'Send Verification Code'}
+              <button style={styles.btn} onClick={handleSendCode} disabled={sendLoading || resendCountdown > 0}>
+                {sendLoading
+                  ? 'Sending code...'
+                  : resendCountdown > 0
+                  ? `Resend in ${resendCountdown}s`
+                  : 'Send Verification Code'}
               </button>
 
               {codeSent && (
@@ -315,7 +337,7 @@ export default function HistoryPage() {
           ) : (
             <>
               <div style={{ fontSize: font.sizeSm, color: colors.success, marginTop: spacing.sm }}>
-                Phone verified. You can now view your history.
+                Phone verified for {formatMaskedPhone(session.phone)}. You can now view your history.
               </div>
               <button
                 style={{ ...styles.btn, background: colors.navy }}

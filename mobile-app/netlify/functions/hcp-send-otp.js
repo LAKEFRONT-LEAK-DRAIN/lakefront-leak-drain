@@ -1,5 +1,8 @@
 'use strict';
 
+const SEND_COOLDOWN_SEC = 45;
+const recentSendByKey = new Map();
+
 function normalizePhone(input) {
   const digits = String(input || '').replace(/\D/g, '');
   if (digits.length === 10) return `+1${digits}`;
@@ -49,6 +52,23 @@ exports.handler = async (event) => {
       };
     }
 
+    const ip = event.headers['x-forwarded-for'] || event.headers['client-ip'] || 'unknown';
+    const key = `${normalizedPhone}:${String(ip).split(',')[0].trim()}`;
+    const now = Date.now();
+    const lastSentAt = recentSendByKey.get(key) || 0;
+    const msSinceLast = now - lastSentAt;
+    if (msSinceLast < SEND_COOLDOWN_SEC * 1000) {
+      const retryAfterSec = Math.ceil((SEND_COOLDOWN_SEC * 1000 - msSinceLast) / 1000);
+      return {
+        statusCode: 429,
+        headers: { ...CORS, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          error: `Please wait ${retryAfterSec}s before requesting another code.`,
+          retryAfterSec,
+        }),
+      };
+    }
+
     const endpoint = `https://verify.twilio.com/v2/Services/${verifySid}/Verifications`;
     const auth = Buffer.from(`${accountSid}:${authToken}`).toString('base64');
     const payload = new URLSearchParams({ To: normalizedPhone, Channel: 'sms' });
@@ -71,10 +91,12 @@ exports.handler = async (event) => {
       };
     }
 
+    recentSendByKey.set(key, now);
+
     return {
       statusCode: 200,
       headers: { ...CORS, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ sent: true, phone: normalizedPhone }),
+      body: JSON.stringify({ sent: true, phone: normalizedPhone, retryAfterSec: SEND_COOLDOWN_SEC }),
     };
   } catch (err) {
     return {
