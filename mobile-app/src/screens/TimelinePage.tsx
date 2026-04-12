@@ -90,6 +90,8 @@ type LookupResult =
   | { found: true; customerName: string; customerId: string; jobs: Job[] };
 
 const SESSION_KEY = 'hcpOtpSession';
+const MAX_VERIFY_ATTEMPTS = 5;
+const VERIFY_LOCKOUT_SEC = 15 * 60;
 
 function loadSession(): OtpSession | null {
   try {
@@ -180,6 +182,8 @@ export default function TimelinePage() {
   const [sendLoading, setSendLoading] = useState(false);
   const [verifyLoading, setVerifyLoading] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [verifyFailedAttempts, setVerifyFailedAttempts] = useState(0);
+  const [verifyLockCountdown, setVerifyLockCountdown] = useState(0);
   const [statusMsg, setStatusMsg] = useState('');
   const [authError, setAuthError] = useState('');
   const [session, setSession] = useState<OtpSession | null>(loadSession());
@@ -223,6 +227,14 @@ export default function TimelinePage() {
     return () => window.clearInterval(timer);
   }, [resendCountdown]);
 
+  useEffect(() => {
+    if (verifyLockCountdown <= 0) return;
+    const timer = window.setInterval(() => {
+      setVerifyLockCountdown((prev) => (prev > 1 ? prev - 1 : 0));
+    }, 1000);
+    return () => window.clearInterval(timer);
+  }, [verifyLockCountdown]);
+
   async function handleSendCode() {
     const q = phone.trim();
     if (!q) return;
@@ -250,7 +262,7 @@ export default function TimelinePage() {
 
   async function handleVerifyCode() {
     const q = phone.trim();
-    if (!q || !code.trim()) return;
+    if (!q || !code.trim() || verifyLockCountdown > 0) return;
     setVerifyLoading(true);
     setAuthError('');
     setStatusMsg('');
@@ -276,10 +288,19 @@ export default function TimelinePage() {
       saveSession(nextSession);
       setSession(nextSession);
       setCode('');
+      setVerifyFailedAttempts(0);
+      setVerifyLockCountdown(0);
       setStatusMsg('Phone verified. Loading your status...');
       await fetchJobs(q, nextSession.token);
     } catch (err) {
-      setAuthError(err instanceof Error ? err.message : 'Verification failed.');
+      const nextAttempts = verifyFailedAttempts + 1;
+      setVerifyFailedAttempts(nextAttempts);
+      if (nextAttempts >= MAX_VERIFY_ATTEMPTS) {
+        setVerifyLockCountdown(VERIFY_LOCKOUT_SEC);
+        setAuthError(`Too many failed attempts. Try again in ${VERIFY_LOCKOUT_SEC / 60} minutes.`);
+      } else {
+        setAuthError(err instanceof Error ? err.message : 'Verification failed.');
+      }
     } finally {
       setVerifyLoading(false);
     }
@@ -294,6 +315,8 @@ export default function TimelinePage() {
     setLooked(false);
     setStatusMsg('');
     setAuthError('');
+    setVerifyFailedAttempts(0);
+    setVerifyLockCountdown(0);
   }
 
   const found = result && result.found === true
@@ -345,9 +368,14 @@ export default function TimelinePage() {
                     value={code}
                     onChange={(e) => setCode(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && handleVerifyCode()}
+                    disabled={verifyLockCountdown > 0}
                   />
-                  <button style={styles.btn} onClick={handleVerifyCode} disabled={verifyLoading}>
-                    {verifyLoading ? 'Verifying…' : 'Verify & View Status'}
+                  <button style={styles.btn} onClick={handleVerifyCode} disabled={verifyLoading || verifyLockCountdown > 0}>
+                    {verifyLoading
+                      ? 'Verifying...'
+                      : verifyLockCountdown > 0
+                      ? `Locked (${verifyLockCountdown}s)`
+                      : 'Verify & View Status'}
                   </button>
                 </>
               )}
