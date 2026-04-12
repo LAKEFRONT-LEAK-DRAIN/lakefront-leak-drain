@@ -2,6 +2,13 @@
 
 const crypto = require('crypto');
 
+function normalizePhoneDigits(input) {
+  const digits = String(input || '').replace(/\D/g, '');
+  if (digits.length === 10) return `1${digits}`;
+  if (digits.length === 11 && digits.startsWith('1')) return digits;
+  return null;
+}
+
 function verifySessionToken(authHeader, secret) {
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     throw new Error('Missing authorization token.');
@@ -68,9 +75,18 @@ exports.handler = async (event) => {
       'Content-Type': 'application/json',
     };
     const base = 'https://api.housecallpro.com';
-    const clean = phone.replace(/\D/g, '');
+    const clean = normalizePhoneDigits(phone);
+    const sessionPhone = normalizePhoneDigits(session.phone);
 
-    if (String(session.phone || '') !== clean) {
+    if (!clean || !sessionPhone) {
+      return {
+        statusCode: 400,
+        headers: { ...CORS, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ error: 'Phone must be a valid US number.' }),
+      };
+    }
+
+    if (sessionPhone !== clean) {
       return {
         statusCode: 401,
         headers: { ...CORS, 'Content-Type': 'application/json' },
@@ -92,12 +108,13 @@ exports.handler = async (event) => {
     }
     const { customers = [] } = await searchRes.json();
 
-    // Find customer whose phone matches exactly
+    // Find customer whose phone matches exactly (same normalization as token check)
     let customer = null;
     for (const c of customers) {
       const phones = [c.mobile_number, c.home_number, c.work_number]
         .filter(Boolean)
-        .map((p) => p.replace(/\D/g, ''));
+        .map((p) => normalizePhoneDigits(p))
+        .filter(Boolean);
       if (phones.includes(clean)) {
         customer = c;
         break;

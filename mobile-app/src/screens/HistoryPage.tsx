@@ -123,9 +123,9 @@ function clearSession() {
 
 function formatMaskedPhone(input: string) {
   const digits = input.replace(/\D/g, '');
-  if (digits.length < 4) return '***-***-****';
+  if (digits.length < 4) return '**********';
   const last4 = digits.slice(-4);
-  return `***-***-${last4}`;
+  return `******${last4}`;
 }
 
 const PAST_STATUSES = new Set([
