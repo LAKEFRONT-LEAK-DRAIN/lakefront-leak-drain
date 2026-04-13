@@ -1,0 +1,26 @@
+{
+  "first_name": "Bill and June",
+  "last_name": "Nowacki",
+  "company_name": "Rely Home Warranty",
+  "street": "4276 Edgewater Dr.",
+  "city": "Vermilion",
+  "state": "OH",
+  "zip": "",
+  "phone": "4402250027",
+  "email": "bjnowacki@yahoo.com",
+  "job_title": "General plumbing service",
+  "price_cents": 6500,
+  "requested_technician": "",
+  "requested_schedule": "",
+  "service_summary": "General plumbing service",
+  "source": "gemini_bridge_api",
+  "claim_number": "327428912",
+  "line_items": [
+    {
+      "name": "General plumbing service",
+      "unit_price": 6500,
+      "quantity": 1
+    }
+  ],
+  "created_at_utc": "2026-04-13T21:34:37+00:00"
+}
