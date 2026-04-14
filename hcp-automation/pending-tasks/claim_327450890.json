@@ -1,0 +1,26 @@
+{
+  "first_name": "Sarah",
+  "last_name": "Thomas",
+  "company_name": "Rely Home Warranty",
+  "street": "4707 Hillary Ln",
+  "city": "Richmond Heights",
+  "state": "OH",
+  "zip": "",
+  "phone": "2167026139",
+  "email": "iamclothedingrace1@gmail.com",
+  "job_title": "General plumbing service",
+  "price_cents": 10000,
+  "requested_technician": "",
+  "requested_schedule": "Tuesday April 14th, 2026 03:00 PM-08:00 PM",
+  "service_summary": "General plumbing service",
+  "source": "gemini_bridge_api",
+  "claim_number": "327450890",
+  "line_items": [
+    {
+      "name": "General plumbing service",
+      "unit_price": 10000,
+      "quantity": 1
+    }
+  ],
+  "created_at_utc": "2026-04-14T14:03:33+00:00"
+}
