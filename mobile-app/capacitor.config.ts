@@ -1,7 +1,7 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.lakefrontleakdrain.app',
+  appId: 'com.lakefrontleakdrain.customerportal',
   appName: 'Lakefront Leak & Drain',
   webDir: 'dist',
   server: {
