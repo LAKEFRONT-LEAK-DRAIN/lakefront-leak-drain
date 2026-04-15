@@ -1,0 +1,26 @@
+{
+  "first_name": "Dale",
+  "last_name": "Richardson",
+  "company_name": "Rely Home Warranty",
+  "street": "879 Clarence Rd",
+  "city": "Cleveland",
+  "state": "OH",
+  "zip": "",
+  "phone": "2163440974",
+  "email": "eladrichardson879@gmail.com",
+  "job_title": "General plumbing service",
+  "price_cents": 10000,
+  "requested_technician": "",
+  "requested_schedule": "Wednesday April 15th, 2026 03:00 PM-08:00 PM",
+  "service_summary": "General plumbing service",
+  "source": "gemini_bridge_api",
+  "claim_number": "327584210",
+  "line_items": [
+    {
+      "name": "General plumbing service",
+      "unit_price": 10000,
+      "quantity": 1
+    }
+  ],
+  "created_at_utc": "2026-04-15T13:23:35+00:00"
+}
