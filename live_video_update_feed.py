@@ -32,7 +32,8 @@ RECENT_VIDEO_LOOKBACK = 12
 ALLOW_PEXELS_FALLBACK = os.environ.get("ALLOW_PEXELS_FALLBACK", "false").strip().lower() == "true"
 ENFORCE_TEXT_VIDEO_ALIGNMENT = os.environ.get("ENFORCE_TEXT_VIDEO_ALIGNMENT", "true").strip().lower() == "true"
 ALIGNMENT_MAX_CANDIDATES = 18
-PEXELS_REFERENCE_QUERY = os.environ.get("PEXELS_REFERENCE_QUERY", "plumbing").strip() or "plumbing"
+PEXELS_REFERENCE_QUERY = os.environ.get("PEXELS_REFERENCE_QUERY", "apartment plumbing").strip() or "apartment plumbing"
+MULTIFAMILY_STRICT_STOCK_FILTER = os.environ.get("MULTIFAMILY_STRICT_STOCK_FILTER", "true").strip().lower() == "true"
 MAX_VIDEO_WIDTH = int(os.environ.get("MAX_VIDEO_WIDTH", "1920"))
 REQUIRE_VERTICAL_VIDEO = os.environ.get("REQUIRE_VERTICAL_VIDEO", "true").strip().lower() == "true"
 USE_GEMINI_GENERATED_VIDEO = os.environ.get("USE_GEMINI_GENERATED_VIDEO", "false").strip().lower() == "true"
@@ -173,6 +174,25 @@ DISALLOWED_MULTIFAMILY_TITLE_TERMS = {
     "warehouse",
     "commercial",
     "lifestyle",
+}
+
+MULTIFAMILY_VISUAL_HINTS = {
+    "apartment",
+    "apartments",
+    "multifamily",
+    "multi family",
+    "condo",
+    "condominium",
+    "tenant",
+    "unit turn",
+    "turnover",
+    "make ready",
+    "corridor",
+    "hallway",
+    "laundry room",
+    "leasing",
+    "property management",
+    "residential building",
 }
 
 
@@ -434,6 +454,17 @@ def contains_disallowed_multifamily_terms(text):
     return False
 
 
+def has_multifamily_visual_hint(text):
+    normalized = normalize_text(text)
+    if not normalized:
+        return False
+
+    for hint in MULTIFAMILY_VISUAL_HINTS:
+        if hint in normalized:
+            return True
+    return False
+
+
 def build_video_queries(title, search_keyword):
     title_norm = normalize_text(title)
     hook = normalize_text(search_keyword) or "multifamily plumbing repair"
@@ -533,6 +564,10 @@ def fetch_pexels_video_candidates(query):
         if not is_plumbing_relevant(tags):
             continue
 
+        multifamily_score = 1 if has_multifamily_visual_hint(f"{tags} {query}") else 0
+        if MULTIFAMILY_STRICT_STOCK_FILTER and multifamily_score == 0:
+            continue
+
         thumb_url = (v.get("image") or "").strip()
         
         for vf in v.get("video_files") or []:
@@ -547,6 +582,7 @@ def fetch_pexels_video_candidates(query):
                         "provider": "pexels",
                         "tags": str(tags or ""),
                         "source_query": query,
+                        "multifamily_score": multifamily_score,
                     }
                 )
     return candidates
@@ -582,6 +618,10 @@ def fetch_pixabay_video_candidates(query):
         if is_likely_non_plumbing(tags):
             continue
 
+        multifamily_score = 1 if has_multifamily_visual_hint(f"{tags} {query}") else 0
+        if MULTIFAMILY_STRICT_STOCK_FILTER and multifamily_score == 0:
+            continue
+
         # Pixabay tags can be sparse. For primary-source mode, allow neutral tags
         # and rely on bad-keyword rejection plus query quality.
         videos_obj = v.get("videos") or {}
@@ -598,6 +638,7 @@ def fetch_pixabay_video_candidates(query):
                         "provider": "pixabay",
                         "tags": str(tags or ""),
                         "source_query": query,
+                        "multifamily_score": multifamily_score,
                     }
                 )
                 break
@@ -728,13 +769,19 @@ def choose_best_aligned_candidate(title, description, cta, candidates):
     if not candidates:
         return None
 
-    shortlist = candidates[:ALIGNMENT_MAX_CANDIDATES]
+    ranked_candidates = sorted(
+        candidates,
+        key=lambda c: int(c.get("multifamily_score", 0)),
+        reverse=True,
+    )
+    shortlist = ranked_candidates[:ALIGNMENT_MAX_CANDIDATES]
     candidate_lines = []
     for idx, c in enumerate(shortlist, start=1):
         provider = c.get("provider", "unknown")
         tags = (c.get("tags") or "").strip() or "none"
         query = (c.get("source_query") or "").strip() or "none"
-        candidate_lines.append(f"{idx}. provider={provider}; tags={tags}; query={query}")
+        mf_score = int(c.get("multifamily_score", 0))
+        candidate_lines.append(f"{idx}. provider={provider}; multifamily_score={mf_score}; tags={tags}; query={query}")
 
     prompt = f"""
 Pick the one best stock video candidate for this post.
@@ -749,6 +796,8 @@ Candidates:
 
 Return ONLY JSON: {{"choice": <number>, "reason": "short reason"}}
 Use the candidate number only.
+Prefer candidates with multifamily_score=1 and apartment-community context.
+Reject any candidate that appears generic facilities-maintenance or office/retail focused.
 """.strip()
 
     try:
@@ -812,6 +861,8 @@ def build_gemini_video_prompt(title, description, cta):
         f"Message: {description} {cta}".strip(),
         "The scene must be 100% multifamily plumbing only and must never imply single-family homeowner service.",
         "The environment must clearly read as an apartment community: unit turnover interiors, apartment corridors, laundry/common plumbing spaces, or multifamily mechanical rooms.",
+        "Storyboard requirement: include at least one exterior apartment-building establishing shot and at least one in-unit apartment plumbing shot (kitchen, bathroom, or laundry).",
+        "The building must look like apartments/condos, not office, retail, or industrial warehouse properties.",
         f"Primary scene direction: {visual_scene}",
         "Direction: use B-roll style scene coverage and environment shots, not a talking-head format.",
         "No on-camera speaking people. No visible lip-syncing, interviews, or direct-to-camera presenters.",
@@ -823,6 +874,7 @@ def build_gemini_video_prompt(title, description, cta):
         "Uniform constraints: all uniforms, safety vests, and hard hats must be completely blank, with no names, no name tags, no identifying logos, and no company branding.",
         "Negative constraints: forbid text overlays, floating words, subtitles, watermarks, company logos, and brand marks anywhere in scene elements, walls, tools, clothing, or equipment.",
         "Scene exclusions: do NOT show office towers, retail storefronts, restaurants, hospitals, warehouses, or generic facilities-maintenance scenes unrelated to apartment communities.",
+        "Scene exclusions: do NOT show detached single-family homes, suburban houses, or private homeowner interiors.",
         "Style exclusions: forbid cartoonish, illustrated, or animated styles.",
         "Style: realistic, clean, professional, multifamily B2B, vertical short-form social media clip.",
         "Composition: portrait framing, clear subject, smooth camera movement, no split screen.",
