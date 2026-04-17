@@ -70,6 +70,10 @@ def get_env_float(name, default):
 
 
 MIN_GEMINI_VIDEO_SECONDS = get_env_float("MIN_GEMINI_VIDEO_SECONDS", 14)
+if GEMINI_VIDEO_DURATION_SECONDS > 0:
+    # Veo currently accepts durationSeconds values from 4 to 8 seconds.
+    GEMINI_VIDEO_DURATION_SECONDS = max(4, min(8, GEMINI_VIDEO_DURATION_SECONDS))
+MIN_GEMINI_VIDEO_SECONDS = min(MIN_GEMINI_VIDEO_SECONDS, 8.0)
 
 
 ETHNICITY_BLEND_WEIGHTS = {
@@ -934,7 +938,7 @@ def build_gemini_video_prompt(title, description, cta):
         f"Topic: {title}.",
         f"Message: {description} {cta}".strip(),
         "Pacing requirement: create a fast, practical short-form clip with high energy, clear problem identification, and fix outcome.",
-        "Duration target: 15 to 20 seconds.",
+        "Duration target: 7 to 8 seconds (platform maximum for this generation path).",
         "EQUIPMENT FOCUS: This video must showcase ONLY plumbing equipment, pipes, fixtures, water flow, leaks, and problem conditions. NO PEOPLE VISIBLE IN ANY SHOT.",
         "The entire video must be 100% equipment-focused with extreme close-ups and macro shots of: pipes, drains, clogged toilets, active leaks, water backing up, drain cleaning equipment at work, and plumbing repairs.",
         "The scene must be 100% multifamily plumbing only and must never imply single-family homeowner service.",
@@ -947,7 +951,7 @@ def build_gemini_video_prompt(title, description, cta):
         "Toilet physics rule: toilets must drain through the bowl trapway and outlet path, never out of the front of the toilet. No front-face discharge visuals.",
         "Coverage exclusion: do NOT show people's hands, faces, torsos, or any human body parts. Only show equipment, pipes, fixtures, and water conditions.",
         "Editing requirement: frequent cut cadence (about every 1.0 to 1.5 seconds), with clear visual progression from issue to fix to confirmed result.",
-        "Shot count requirement: for the 15 to 20 second runtime, include about 10 to 14 distinct shots.",
+        "Shot count requirement: for the 7 to 8 second runtime, include about 5 to 7 distinct shots.",
         "Camera language: extreme close-up/macro focus with smooth push-ins on problem areas and equipment details.",
         "Narration: voice-over only in clear English with a neutral United States accent. Narration must describe the problem and solution but voices must NOT be on-camera.",
         "Audio direction: narration should be calm, professional, and instructional—not sales-y or hype-driven.",
@@ -963,7 +967,7 @@ def build_gemini_video_prompt(title, description, cta):
         "Scene exclusions: do NOT use generic industrial mechanical rooms or plant-like equipment spaces unless apartment context is unmistakable in the same shot.",
         "Scene exclusions: do NOT show oversized commercial rigs, construction-site trenching setups, or heavy industrial machinery that overpowers apartment-service realism.",
         "Scene exclusions: avoid long static establishing shots that do not include visible plumbing task context.",
-        "Resolution proof requirement: final 2 to 3 seconds must show clear before/after evidence, such as steady drain flow, a dry floor around a repaired leak, or a toilet flush that clears completely.",
+        "Resolution proof requirement: final 1 to 2 seconds must show clear before/after evidence, such as steady drain flow, a dry floor around a repaired leak, or a toilet flush that clears completely.",
         "Style exclusions: forbid cartoonish, illustrated, or animated styles.",
         "Style: realistic, clean, professional, multifamily B2B, vertical short-form social media clip, technical/educational tone.",
         "Composition: portrait framing, clear subject, smooth camera movement, no split screen.",
@@ -1011,6 +1015,7 @@ def generate_gemini_video_asset(title, description, cta, slug):
         "resolution": GEMINI_VIDEO_RESOLUTION,
     }
     if GEMINI_VIDEO_DURATION_SECONDS > 0:
+        print(f"Requesting Gemini video durationSeconds={GEMINI_VIDEO_DURATION_SECONDS}")
         config_kwargs["duration_seconds"] = GEMINI_VIDEO_DURATION_SECONDS
 
     try:
@@ -1045,15 +1050,19 @@ def generate_gemini_video_asset(title, description, cta, slug):
     generated_video.video.save(str(output_path))
 
     duration_seconds = get_video_duration_seconds(output_path)
+    effective_min_seconds = MIN_GEMINI_VIDEO_SECONDS
+    if GEMINI_VIDEO_DURATION_SECONDS > 0:
+        effective_min_seconds = min(effective_min_seconds, float(GEMINI_VIDEO_DURATION_SECONDS))
+
     if duration_seconds is None:
         print("Could not verify Gemini video duration (ffprobe unavailable or failed); accepting generated clip")
-    elif duration_seconds < MIN_GEMINI_VIDEO_SECONDS:
+    elif duration_seconds < effective_min_seconds:
         try:
             output_path.unlink(missing_ok=True)
         except Exception:
             pass
         raise RuntimeError(
-            f"Gemini video too short ({duration_seconds:.1f}s); minimum {MIN_GEMINI_VIDEO_SECONDS:.1f}s required"
+            f"Gemini video too short ({duration_seconds:.1f}s); minimum {effective_min_seconds:.1f}s required"
         )
 
     return f"{GENERATED_VIDEO_URL_PREFIX}/{filename}", ""
@@ -1227,7 +1236,7 @@ def get_video_url(title, search_keyword, recent_video_ids=None, description="", 
 
     print("Using default video fallback")
     if gemini_failed:
-        raise RuntimeError("Gemini failed and no stock candidate video was found")
+        print("Gemini failed and no stock candidate video was found; continuing with default video fallback")
     return video_url, thumb_url
 
 
