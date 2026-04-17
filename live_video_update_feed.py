@@ -110,6 +110,7 @@ BLACKLIST_PEXELS_IDS = {
     "4482373",
     "18104090",
     "36543596",
+    "778906872",  # Pixabay: kitchen/stove content, not plumbing
 }
 
 BAD_VIDEO_KEYWORDS = {
@@ -135,6 +136,32 @@ BAD_VIDEO_KEYWORDS = {
     "boiler",
     "heating",
     "furnace",
+    "kitchen",
+    "cooking",
+    "food",
+    "stove",
+    "oven",
+    "appliance",
+    "recipe",
+    "chef",
+    "restaurant",
+}
+
+# Core plumbing-specific keywords that must be present for video to qualify
+PLUMBING_SPECIFIC_KEYWORDS = {
+    "plumb",
+    "drain",
+    "sewer",
+    "leak",
+    "pipe",
+    "jetting",
+    "cleanout",
+    "water",
+    "repair",
+    "hydro",
+    "jet",
+    "grease",
+    "trap",
 }
 
 GOOD_VIDEO_KEYWORDS = {
@@ -532,7 +559,9 @@ def is_plumbing_relevant(video_tags):
     if any(bad in tags_lower for bad in BAD_VIDEO_KEYWORDS):
         return False
 
-    return any(good in tags_lower for good in GOOD_VIDEO_KEYWORDS)
+    # Require at least one plumbing-specific keyword for strict relevance
+    has_plumbing_keyword = any(keyword in tags_lower for keyword in PLUMBING_SPECIFIC_KEYWORDS)
+    return has_plumbing_keyword
 
 
 def is_likely_non_plumbing(video_tags):
