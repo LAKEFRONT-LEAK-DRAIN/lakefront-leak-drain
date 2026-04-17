@@ -929,7 +929,7 @@ def build_gemini_video_prompt(title, description, cta):
         f"Topic: {title}.",
         f"Message: {description} {cta}".strip(),
         "Pacing requirement: create a fast, practical short-form clip with high energy, clear problem identification, and fix outcome.",
-        "Duration target: 15 to 25 seconds.",
+        "Duration target: 15 to 20 seconds.",
         "EQUIPMENT FOCUS: This video must showcase ONLY plumbing equipment, pipes, fixtures, water flow, leaks, and problem conditions. NO PEOPLE VISIBLE IN ANY SHOT.",
         "The entire video must be 100% equipment-focused with extreme close-ups and macro shots of: pipes, drains, clogged toilets, active leaks, water backing up, drain cleaning equipment at work, and plumbing repairs.",
         "The scene must be 100% multifamily plumbing only and must never imply single-family homeowner service.",
