@@ -40,6 +40,12 @@ USE_GEMINI_GENERATED_VIDEO = os.environ.get("USE_GEMINI_GENERATED_VIDEO", "false
 GEMINI_VIDEO_MODEL = os.environ.get("GEMINI_VIDEO_MODEL", "veo-3.1-generate-preview").strip() or "veo-3.1-generate-preview"
 GEMINI_VIDEO_ASPECT_RATIO = os.environ.get("GEMINI_VIDEO_ASPECT_RATIO", "9:16").strip() or "9:16"
 GEMINI_VIDEO_RESOLUTION = os.environ.get("GEMINI_VIDEO_RESOLUTION", "720p").strip() or "720p"
+GEMINI_TEXT_MODEL = os.environ.get("GEMINI_TEXT_MODEL", "gemini-3-flash").strip() or "gemini-3-flash"
+GEMINI_TEXT_FALLBACK_MODELS = [
+    m.strip()
+    for m in os.environ.get("GEMINI_TEXT_FALLBACK_MODELS", "gemini-2.5-flash").split(",")
+    if m.strip()
+]
 GENERATED_VIDEO_SUBDIR = os.environ.get("GENERATED_VIDEO_SUBDIR", "generated").strip() or "generated"
 
 CLEVELAND_LAT = 41.4993
@@ -351,17 +357,24 @@ def build_forecast_context_block():
     )
 
 
-def safe_generate_content_text(prompt, model="gemini-2.5-flash", attempts=3):
+def safe_generate_content_text(prompt, model=None, attempts=3):
+    preferred_model = (model or "").strip() or GEMINI_TEXT_MODEL
+    model_chain = [preferred_model]
+    for fallback_model in GEMINI_TEXT_FALLBACK_MODELS:
+        if fallback_model not in model_chain:
+            model_chain.append(fallback_model)
+
     last_error = None
-    for attempt in range(1, attempts + 1):
-        try:
-            resp = client.models.generate_content(model=model, contents=prompt)
-            return (resp.text or "").strip()
-        except Exception as e:
-            last_error = e
-            print(f"Gemini generate_content failed (attempt {attempt}/{attempts}): {e}")
-            if attempt < attempts:
-                time.sleep(min(2 * attempt, 6))
+    for active_model in model_chain:
+        for attempt in range(1, attempts + 1):
+            try:
+                resp = client.models.generate_content(model=active_model, contents=prompt)
+                return (resp.text or "").strip()
+            except Exception as e:
+                last_error = e
+                print(f"Gemini generate_content failed (model={active_model}, attempt {attempt}/{attempts}): {e}")
+                if attempt < attempts:
+                    time.sleep(min(2 * attempt, 6))
 
     print(f"Gemini generate_content exhausted retries: {last_error}")
     return ""
@@ -417,7 +430,7 @@ Title | video keyword
 - video keyword should be 2 to 4 words describing a plumbing visual.
 """.strip()
 
-    text = safe_generate_content_text(prompt, model="gemini-2.5-flash")
+    text = safe_generate_content_text(prompt)
 
     try:
         title, search_keyword = [x.strip() for x in text.split("|", 1)]
@@ -734,7 +747,7 @@ Rules:
 """.strip()
 
     try:
-        text = safe_generate_content_text(prompt, model="gemini-2.5-flash")
+        text = safe_generate_content_text(prompt)
         data = safe_json_object(text)
         queries = data.get("queries") if isinstance(data, dict) else None
         if isinstance(queries, list):
@@ -801,7 +814,7 @@ Reject any candidate that appears generic facilities-maintenance or office/retai
 """.strip()
 
     try:
-        text = safe_generate_content_text(prompt, model="gemini-2.5-flash")
+        text = safe_generate_content_text(prompt)
         data = safe_json_object(text)
         choice = int(data.get("choice", 0))
         if 1 <= choice <= len(shortlist):
@@ -1147,7 +1160,7 @@ Rules:
 - No markdown.
 """.strip()
 
-    text = safe_generate_content_text(prompt, model="gemini-2.5-flash")
+    text = safe_generate_content_text(prompt)
 
     try:
         data = safe_json_object(text)
