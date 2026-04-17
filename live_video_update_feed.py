@@ -42,6 +42,7 @@ USE_GEMINI_GENERATED_VIDEO = os.environ.get("USE_GEMINI_GENERATED_VIDEO", "false
 GEMINI_VIDEO_MODEL = os.environ.get("GEMINI_VIDEO_MODEL", "veo-3.1-generate-preview").strip() or "veo-3.1-generate-preview"
 GEMINI_VIDEO_ASPECT_RATIO = os.environ.get("GEMINI_VIDEO_ASPECT_RATIO", "9:16").strip() or "9:16"
 GEMINI_VIDEO_RESOLUTION = os.environ.get("GEMINI_VIDEO_RESOLUTION", "720p").strip() or "720p"
+GEMINI_VIDEO_DURATION_SECONDS = int((os.environ.get("GEMINI_VIDEO_DURATION_SECONDS", "16") or "16").strip() or "16")
 GEMINI_TEXT_MODEL = os.environ.get("GEMINI_TEXT_MODEL", "gemini-2.5-flash").strip() or "gemini-2.5-flash"
 GEMINI_TEXT_FALLBACK_MODELS = [
     m.strip()
@@ -1005,10 +1006,20 @@ def generate_gemini_video_asset(title, description, cta, slug):
     GENERATED_VIDEO_DIR.mkdir(parents=True, exist_ok=True)
     prompt = build_gemini_video_prompt(title, description, cta)
 
-    config = types.GenerateVideosConfig(
-        aspect_ratio=GEMINI_VIDEO_ASPECT_RATIO,
-        resolution=GEMINI_VIDEO_RESOLUTION,
-    )
+    config_kwargs = {
+        "aspect_ratio": GEMINI_VIDEO_ASPECT_RATIO,
+        "resolution": GEMINI_VIDEO_RESOLUTION,
+    }
+    if GEMINI_VIDEO_DURATION_SECONDS > 0:
+        config_kwargs["duration_seconds"] = GEMINI_VIDEO_DURATION_SECONDS
+
+    try:
+        config = types.GenerateVideosConfig(**config_kwargs)
+    except TypeError:
+        # Some SDK/model combinations may not support duration_seconds yet.
+        print("GenerateVideosConfig rejected duration_seconds; retrying without explicit duration")
+        config_kwargs.pop("duration_seconds", None)
+        config = types.GenerateVideosConfig(**config_kwargs)
 
     operation = client.models.generate_videos(
         model=GEMINI_VIDEO_MODEL,
