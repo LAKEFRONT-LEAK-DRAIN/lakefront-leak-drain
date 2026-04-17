@@ -855,11 +855,11 @@ def pick_on_screen_ethnicity_guidance():
 
 def pick_commercial_visual_scene():
     scenes = [
-        "A cinematic establishing shot of a multifamily apartment mechanical room with exposed main water lines, pressure gauges, and meter assemblies under clean lighting.",
         "A wide shot of an apartment building exterior focusing on an access point for an underground main sewer cleanout near a multifamily entrance.",
-        "A detailed close-up of high-pressure hydro-jetting equipment and hoses flushing a multifamily main drain line on a concrete service floor.",
-        "A smooth tracking shot through a multifamily mechanical corridor with labeled plumbing manifolds, shutoff valves, and insulated pipe runs.",
+        "A detailed close-up of high-pressure hydro-jetting equipment and hoses flushing a multifamily main drain line near apartment service access points.",
+        "A smooth tracking shot down an apartment corridor with visible unit doors while a plumbing tech moves toward an active service call.",
         "A wide shot of a clean apartment common-area restroom highlighting sinks, flush valves, and drain performance with no people in frame.",
+        "A medium-close shot in an apartment laundry room where a technician clears a floor drain and verifies flow.",
         "A close-up of an apartment kitchen sink drain and shutoff inspection during a unit turnover walkthrough.",
         "A unit-turnover bathroom inspection scene where a plumbing tech checks shutoffs, trap arms, and drain flow in an empty apartment.",
     ]
@@ -875,7 +875,7 @@ def build_gemini_video_prompt(title, description, cta):
         "Pacing requirement: create a fast, practical short-form clip with high energy and clear problem-to-fix progression.",
         "Duration target: 15 to 25 seconds.",
         "The scene must be 100% multifamily plumbing only and must never imply single-family homeowner service.",
-        "The environment must clearly read as an apartment community: unit turnover interiors, apartment corridors, laundry/common plumbing spaces, or multifamily mechanical rooms.",
+        "The environment must clearly read as an apartment community: unit turnover interiors, apartment corridors with unit doors, laundry/common plumbing spaces, and exterior apartment building access points.",
         "Continuity rule: EVERY shot from start to finish must stay inside the same apartment-community context and never drift into generic facilities-maintenance visuals.",
         "Continuity rule: maintain one consistent property type (multifamily apartments/condos) across the entire clip with no mid-video scene-type switching.",
         "Storyboard requirement: include at least one exterior apartment-building establishing shot and at least one in-unit apartment plumbing shot (kitchen, bathroom, or laundry).",
@@ -884,7 +884,7 @@ def build_gemini_video_prompt(title, description, cta):
         "Coverage requirement: use mostly close-up and medium-close shots of real plumbing actions: snaking, hydro-jet hose positioning, trap removal, shutoff checks, drain flow testing, and cleanup verification.",
         "Editing requirement: frequent cut cadence (about every 1 to 2 seconds), with clear visual progression from issue to fix to confirmed result.",
         "Camera language: practical handheld or shoulder-level movement preferred over cinematic sweeping shots.",
-        "The building must look like apartments/condos, not office, retail, or industrial warehouse properties.",
+        "The property must clearly look like apartments/condos with residential-style unit context, not office, retail, hospital, or warehouse properties.",
         f"Primary scene direction: {visual_scene}",
         "Direction: use hands-on B-roll of actual plumbing work and environment context, not a talking-head format.",
         "No on-camera speaking people. No visible lip-syncing, interviews, or direct-to-camera presenters.",
@@ -898,6 +898,7 @@ def build_gemini_video_prompt(title, description, cta):
         "Scene exclusions: do NOT show office towers, retail storefronts, restaurants, hospitals, warehouses, or generic facilities-maintenance scenes unrelated to apartment communities.",
         "Scene exclusions: do NOT show detached single-family homes, suburban houses, or private homeowner interiors.",
         "Scene exclusions: do NOT transition to institutional maintenance environments, utility plants, or abstract industrial settings with no apartment cues.",
+        "Scene exclusions: do NOT use generic industrial mechanical rooms or plant-like equipment spaces unless apartment context is unmistakable in the same shot.",
         "Scene exclusions: avoid long static establishing shots that do not include visible plumbing task context.",
         "Style exclusions: forbid cartoonish, illustrated, or animated styles.",
         "Style: realistic, clean, professional, multifamily B2B, vertical short-form social media clip.",
