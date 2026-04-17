@@ -2,6 +2,8 @@
 import random
 import re
 import json
+import shutil
+import subprocess
 import time
 from datetime import datetime, timezone
 from email.utils import parsedate_to_datetime
@@ -64,6 +66,9 @@ def get_env_float(name, default):
         return float(raw)
     except ValueError:
         return float(default)
+
+
+MIN_GEMINI_VIDEO_SECONDS = get_env_float("MIN_GEMINI_VIDEO_SECONDS", 14)
 
 
 ETHNICITY_BLEND_WEIGHTS = {
@@ -923,7 +928,6 @@ def pick_commercial_visual_scene():
 
 
 def build_gemini_video_prompt(title, description, cta):
-    visual_scene = pick_commercial_visual_scene()
     prompt_parts = [
         "Create a realistic short social video for a Cleveland plumbing company serving multifamily property operations teams.",
         f"Topic: {title}.",
@@ -939,6 +943,7 @@ def build_gemini_video_prompt(title, description, cta):
         "Hook requirement: CRITICAL: first 1 to 2 seconds must show an EXTREME CLOSE-UP of one real plumbing emergency only: active leak stream, drain backup overflow, clogged toilet overflow, or sewer cleanout backup, with no people visible.",
         "Shot sequence: opening = close-up of the problem itself; middle shots = equipment and pipes involved in the issue; closing = close-up of cleared drain, fixed leak, or flowing water confirming resolution.",
         "Coverage requirement: use ONLY extreme close-ups and macro shots of plumbing elements: pipe threads, drain traps, toilet mechanics, faucet internals, clogged debris, water flow, drain snake in action, auger working, shutoff valves, pressure gauges, and leak detection.",
+        "Toilet physics rule: toilets must drain through the bowl trapway and outlet path, never out of the front of the toilet. No front-face discharge visuals.",
         "Coverage exclusion: do NOT show people's hands, faces, torsos, or any human body parts. Only show equipment, pipes, fixtures, and water conditions.",
         "Editing requirement: frequent cut cadence (about every 1.0 to 1.5 seconds), with clear visual progression from issue to fix to confirmed result.",
         "Shot count requirement: for the 15 to 20 second runtime, include about 10 to 14 distinct shots.",
@@ -964,6 +969,36 @@ def build_gemini_video_prompt(title, description, cta):
         "Do not include UI elements or on-screen interface chrome.",
     ]
     return " ".join(part for part in prompt_parts if part)
+
+
+def get_video_duration_seconds(video_path):
+    ffprobe_path = shutil.which("ffprobe")
+    if not ffprobe_path:
+        return None
+
+    try:
+        result = subprocess.run(
+            [
+                ffprobe_path,
+                "-v",
+                "error",
+                "-show_entries",
+                "format=duration",
+                "-of",
+                "default=noprint_wrappers=1:nokey=1",
+                str(video_path),
+            ],
+            capture_output=True,
+            text=True,
+            check=True,
+            timeout=20,
+        )
+        duration_raw = (result.stdout or "").strip()
+        if not duration_raw:
+            return None
+        return float(duration_raw)
+    except Exception:
+        return None
 
 
 def generate_gemini_video_asset(title, description, cta, slug):
@@ -997,6 +1032,18 @@ def generate_gemini_video_asset(title, description, cta, slug):
     filename = f"{slug}-{datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S')}.mp4"
     output_path = GENERATED_VIDEO_DIR / filename
     generated_video.video.save(str(output_path))
+
+    duration_seconds = get_video_duration_seconds(output_path)
+    if duration_seconds is None:
+        print("Could not verify Gemini video duration (ffprobe unavailable or failed); accepting generated clip")
+    elif duration_seconds < MIN_GEMINI_VIDEO_SECONDS:
+        try:
+            output_path.unlink(missing_ok=True)
+        except Exception:
+            pass
+        raise RuntimeError(
+            f"Gemini video too short ({duration_seconds:.1f}s); minimum {MIN_GEMINI_VIDEO_SECONDS:.1f}s required"
+        )
 
     return f"{GENERATED_VIDEO_URL_PREFIX}/{filename}", ""
 
