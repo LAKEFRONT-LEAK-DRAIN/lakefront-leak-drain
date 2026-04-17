@@ -40,10 +40,10 @@ USE_GEMINI_GENERATED_VIDEO = os.environ.get("USE_GEMINI_GENERATED_VIDEO", "false
 GEMINI_VIDEO_MODEL = os.environ.get("GEMINI_VIDEO_MODEL", "veo-3.1-generate-preview").strip() or "veo-3.1-generate-preview"
 GEMINI_VIDEO_ASPECT_RATIO = os.environ.get("GEMINI_VIDEO_ASPECT_RATIO", "9:16").strip() or "9:16"
 GEMINI_VIDEO_RESOLUTION = os.environ.get("GEMINI_VIDEO_RESOLUTION", "720p").strip() or "720p"
-GEMINI_TEXT_MODEL = os.environ.get("GEMINI_TEXT_MODEL", "gemini-3-flash").strip() or "gemini-3-flash"
+GEMINI_TEXT_MODEL = os.environ.get("GEMINI_TEXT_MODEL", "gemini-2.5-flash").strip() or "gemini-2.5-flash"
 GEMINI_TEXT_FALLBACK_MODELS = [
     m.strip()
-    for m in os.environ.get("GEMINI_TEXT_FALLBACK_MODELS", "gemini-2.5-flash").split(",")
+    for m in os.environ.get("GEMINI_TEXT_FALLBACK_MODELS", "gemini-3-flash").split(",")
     if m.strip()
 ]
 GENERATED_VIDEO_SUBDIR = os.environ.get("GENERATED_VIDEO_SUBDIR", "generated").strip() or "generated"
@@ -373,6 +373,10 @@ def safe_generate_content_text(prompt, model=None, attempts=3):
             except Exception as e:
                 last_error = e
                 print(f"Gemini generate_content failed (model={active_model}, attempt {attempt}/{attempts}): {e}")
+                err_text = str(e).lower()
+                # Model-not-found errors are not transient; move to next fallback model immediately.
+                if "not_found" in err_text or "not found" in err_text or "not supported for generatecontent" in err_text:
+                    break
                 if attempt < attempts:
                     time.sleep(min(2 * attempt, 6))
 
@@ -555,7 +559,25 @@ def is_platform_safe_video(width, height):
     return True
 
 
-def fetch_pexels_video_candidates(query):
+def sanitize_pixabay_query(query):
+    raw = normalize_text(query)
+    if not raw:
+        return ""
+
+    tokens = []
+    for token in raw.split():
+        if token.startswith("-"):
+            continue
+        token = re.sub(r"[^a-z0-9]", "", token)
+        if token:
+            tokens.append(token)
+
+    # Pixabay can reject overlong or noisy queries; keep it short and clean.
+    return " ".join(tokens[:8]).strip()
+
+
+def fetch_pexels_video_candidates(query, strict_filter=None):
+    use_strict_filter = MULTIFAMILY_STRICT_STOCK_FILTER if strict_filter is None else bool(strict_filter)
     headers = {"Authorization": os.environ["PEXELS_API_KEY"]}
     resp = requests.get(
         "https://api.pexels.com/videos/search",
@@ -578,7 +600,7 @@ def fetch_pexels_video_candidates(query):
             continue
 
         multifamily_score = 1 if has_multifamily_visual_hint(f"{tags} {query}") else 0
-        if MULTIFAMILY_STRICT_STOCK_FILTER and multifamily_score == 0:
+        if use_strict_filter and multifamily_score == 0:
             continue
 
         thumb_url = (v.get("image") or "").strip()
@@ -601,9 +623,14 @@ def fetch_pexels_video_candidates(query):
     return candidates
 
 
-def fetch_pixabay_video_candidates(query):
+def fetch_pixabay_video_candidates(query, strict_filter=None):
+    use_strict_filter = MULTIFAMILY_STRICT_STOCK_FILTER if strict_filter is None else bool(strict_filter)
+    clean_query = sanitize_pixabay_query(query)
+    if not clean_query:
+        return []
+
     params = {
-        "q": query,
+        "q": clean_query,
         "video_type": "all",
         "per_page": 20,
         "safesearch": "true",
@@ -631,8 +658,8 @@ def fetch_pixabay_video_candidates(query):
         if is_likely_non_plumbing(tags):
             continue
 
-        multifamily_score = 1 if has_multifamily_visual_hint(f"{tags} {query}") else 0
-        if MULTIFAMILY_STRICT_STOCK_FILTER and multifamily_score == 0:
+        multifamily_score = 1 if has_multifamily_visual_hint(f"{tags} {clean_query}") else 0
+        if use_strict_filter and multifamily_score == 0:
             continue
 
         # Pixabay tags can be sparse. For primary-source mode, allow neutral tags
@@ -1080,6 +1107,36 @@ def get_video_url(title, search_keyword, recent_video_ids=None, description="", 
                 return video_url, thumb_url
         except Exception as e:
             print(f"Pexels search failed for '{query}': {e}")
+
+    print("Trying relaxed fallback search (broader stock queries)...")
+    relaxed_queries = [
+        "apartment plumbing",
+        "apartment drain",
+        "laundry room drain",
+        "plumbing repair",
+        "drain cleaning",
+    ]
+
+    for query in relaxed_queries:
+        try:
+            pexels_candidates = fetch_pexels_video_candidates(query, strict_filter=False)
+            if pexels_candidates:
+                fresh_candidates = [c for c in pexels_candidates if canonical_video_id(c.get("video_url")) not in recent_video_ids]
+                chosen_pool = fresh_candidates if fresh_candidates else pexels_candidates
+                selected = random.choice(chosen_pool)
+                return selected.get("video_url") or DEFAULT_VIDEO, selected.get("thumb_url") or ""
+        except Exception as e:
+            print(f"Relaxed Pexels search failed for '{query}': {e}")
+
+        try:
+            pixabay_candidates = fetch_pixabay_video_candidates(query, strict_filter=False)
+            if pixabay_candidates:
+                fresh_candidates = [c for c in pixabay_candidates if canonical_video_id(c.get("video_url")) not in recent_video_ids]
+                chosen_pool = fresh_candidates if fresh_candidates else pixabay_candidates
+                selected = random.choice(chosen_pool)
+                return selected.get("video_url") or DEFAULT_VIDEO, selected.get("thumb_url") or ""
+        except Exception as e:
+            print(f"Relaxed Pixabay search failed for '{query}': {e}")
 
     print("Using default video fallback")
     if gemini_failed:
