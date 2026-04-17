@@ -76,10 +76,10 @@ PLUMBING_TERMS = [
     "multifamily plumbing",
     "apartment plumbing",
     "property management plumbing",
-    "retail plumbing",
     "apartment building pipes",
     "tenant turnover plumbing",
-    "commercial restroom",
+    "apartment restroom",
+    "apartment kitchen sink",
     "apartment bathroom",
     "laundry room drain",
     "hydro jetting",
@@ -139,16 +139,14 @@ GOOD_VIDEO_KEYWORDS = {
     "water",
     "repair",
     "fix",
-    "commercial",
     "multifamily",
     "apartment",
     "tenant",
+    "unit turn",
+    "unit turnover",
     "turnover",
     "make ready",
     "property manager",
-    "facility",
-    "retail",
-    "office",
     "restroom",
     "hydro",
     "jet",
@@ -162,6 +160,19 @@ GOOD_VIDEO_KEYWORDS = {
     "sink",
     "toilet",
     "faucet",
+}
+
+DISALLOWED_MULTIFAMILY_TITLE_TERMS = {
+    "facility",
+    "facilities",
+    "fms",
+    "office",
+    "retail",
+    "restaurant",
+    "hospital",
+    "warehouse",
+    "commercial",
+    "lifestyle",
 }
 
 
@@ -264,7 +275,7 @@ def analyze_forecast_for_plumbing(days):
     if heavy_rain_days:
         event_notes.append("Heavy rain risk: prioritize exterior cleanouts, main sewer line capacity, hydro jetting readiness, and overflow prevention.")
     elif moderate_rain_days:
-        event_notes.append("Moderate rain risk: prioritize facility drain flow, exterior cleanout inspections, and commercial restroom uptime.")
+        event_notes.append("Moderate rain risk: prioritize multifamily drain flow, exterior cleanout inspections, and common-area restroom uptime.")
 
     if freezing_days:
         event_notes.append("Freeze risk: prioritize exposed commercial water lines, meter assemblies, valves, and burst-pipe prevention.")
@@ -273,7 +284,7 @@ def analyze_forecast_for_plumbing(days):
         event_notes.append("Freeze-thaw swing: emphasize main water line stress checks, leak detection, and utility-room inspections.")
 
     if high_wind_days:
-        event_notes.append("High wind risk: include outage-prep messaging for facility pumping systems, critical drains, and restroom continuity.")
+        event_notes.append("High wind risk: include outage-prep messaging for multifamily pumping systems, critical drains, and restroom continuity.")
 
     day_lines = []
     for d in days:
@@ -380,6 +391,7 @@ Rules:
 - If forecast indicates a substantial plumbing-relevant weather event, prioritize that event and create a prevention-focused topic tied to it.
 - If no substantial weather event is present, use a strong evergreen seasonal plumbing prevention topic.
 - Keep title concise and hooky for TikTok/Shorts.
+- NEVER use these words in Title or video keyword: facility, facilities, FMS, office, retail, commercial.
 - Output ONLY this format:
 Title | video keyword
 - video keyword should be 2 to 4 words describing a plumbing visual.
@@ -393,6 +405,10 @@ Title | video keyword
         title = text or "Cleveland Multifamily Main Line Service Alert"
         search_keyword = "multifamily plumbing"
 
+    if contains_disallowed_multifamily_terms(title):
+        print(f"Rejected topic title due to disallowed terminology: {title}")
+        return "", ""
+
     return title, search_keyword
 
 
@@ -405,6 +421,17 @@ def create_slug(title):
 
 def normalize_text(text):
     return re.sub(r"\s+", " ", (text or "").strip().lower())
+
+
+def contains_disallowed_multifamily_terms(text):
+    normalized = normalize_text(text)
+    if not normalized:
+        return False
+
+    for term in DISALLOWED_MULTIFAMILY_TITLE_TERMS:
+        if re.search(rf"\b{re.escape(term)}\b", normalized):
+            return True
+    return False
 
 
 def build_video_queries(title, search_keyword):
@@ -429,10 +456,11 @@ def build_video_queries(title, search_keyword):
             f"apartment stack drain backup {neg_keywords}",
             f"unit turnover plumbing {neg_keywords}",
             f"laundry room drain plumbing {neg_keywords}",
-            f"commercial restroom plumbing {neg_keywords}",
+            f"apartment bathroom plumbing {neg_keywords}",
+            f"apartment kitchen drain plumbing {neg_keywords}",
             f"main sewer line jetting {neg_keywords}",
             f"multifamily main water line repair {neg_keywords}",
-            f"grease trap plumbing service {neg_keywords}",
+            f"apartment common area drain service {neg_keywords}",
             f"exterior cleanout plumbing {neg_keywords}",
             f"{hook} {neg_keywords}",
         ]
@@ -659,7 +687,7 @@ Return ONLY JSON:
 Rules:
 - 5 to 8 queries
 - each query 2 to 6 words
-- ALL queries must describe multifamily or commercial plumbing visuals only: apartment stack lines, main sewer lines, main water lines, hydro jetting, common-area/laundry drains, exterior cleanouts, utility rooms, plumbing contractor activity
+- ALL queries must describe multifamily plumbing visuals only: apartment stack lines, main sewer lines, main water lines, hydro jetting, common-area/laundry drains, exterior cleanouts, utility rooms, apartment unit plumbing activity
 - STRICTLY FORBIDDEN terms or themes: single-family homeowner tips, HVAC, boiler, heating, electrical, janitorial, landscaping, roofing, lifestyle, or home decor visuals
 - no punctuation except spaces
 """.strip()
@@ -690,8 +718,8 @@ Rules:
         "unit turnover plumbing",
         "main sewer line",
         "hydro jetting drain",
-        "commercial restroom plumbing",
-        "grease trap service",
+        "apartment bathroom plumbing",
+        "laundry room drain service",
     ]
     return [q for q in fallback if q]
 
@@ -765,11 +793,12 @@ def pick_on_screen_ethnicity_guidance():
 
 def pick_commercial_visual_scene():
     scenes = [
-        "A cinematic establishing shot of a multifamily apartment utility room with exposed main water lines, pressure gauges, and meter assemblies under clean industrial lighting.",
+        "A cinematic establishing shot of a multifamily apartment mechanical room with exposed main water lines, pressure gauges, and meter assemblies under clean lighting.",
         "A wide shot of an apartment building exterior focusing on an access point for an underground main sewer cleanout near a multifamily entrance.",
         "A detailed close-up of high-pressure hydro-jetting equipment and hoses flushing a multifamily main drain line on a concrete service floor.",
         "A smooth tracking shot through a multifamily mechanical corridor with labeled plumbing manifolds, shutoff valves, and insulated pipe runs.",
-        "A wide shot of a clean apartment common-area restroom highlighting commercial-grade sinks, flush valves, and drain performance with no people in frame.",
+        "A wide shot of a clean apartment common-area restroom highlighting sinks, flush valves, and drain performance with no people in frame.",
+        "A close-up of an apartment kitchen sink drain and shutoff inspection during a unit turnover walkthrough.",
         "A unit-turnover bathroom inspection scene where a plumbing tech checks shutoffs, trap arms, and drain flow in an empty apartment.",
     ]
     return random.choice(scenes)
@@ -781,17 +810,19 @@ def build_gemini_video_prompt(title, description, cta):
         "Create a realistic short social video for a Cleveland plumbing company serving multifamily property operations teams.",
         f"Topic: {title}.",
         f"Message: {description} {cta}".strip(),
-        "The scene must be 100% multifamily/commercial plumbing only and must never imply single-family homeowner service.",
+        "The scene must be 100% multifamily plumbing only and must never imply single-family homeowner service.",
+        "The environment must clearly read as an apartment community: unit turnover interiors, apartment corridors, laundry/common plumbing spaces, or multifamily mechanical rooms.",
         f"Primary scene direction: {visual_scene}",
         "Direction: use B-roll style scene coverage and environment shots, not a talking-head format.",
         "No on-camera speaking people. No visible lip-syncing, interviews, or direct-to-camera presenters.",
         "Audio direction: narration must be voice-over only in clear English with a neutral United States accent.",
         "If any people appear incidentally, they must remain in the background and never speak on camera.",
-        "Plumbing standards: all equipment, pipes, fixtures, and utility setups MUST strictly reflect United States commercial plumbing codes and visual norms, with standard U.S. commercial pipe sizing and OSHA-compliant environments.",
+        "Plumbing standards: all equipment, pipes, fixtures, and utility setups MUST strictly reflect United States multifamily plumbing norms and code-compliant service practices.",
         "Plumbing standards exclusions: absolutely no European-style plumbing fixtures and no boilers.",
-        "Technician appearance: if a person is shown, they must appear as a certified commercial plumbing contractor using professional PPE.",
+        "Technician appearance: if a person is shown, they must appear as a certified multifamily plumbing technician using professional PPE.",
         "Uniform constraints: all uniforms, safety vests, and hard hats must be completely blank, with no names, no name tags, no identifying logos, and no company branding.",
         "Negative constraints: forbid text overlays, floating words, subtitles, watermarks, company logos, and brand marks anywhere in scene elements, walls, tools, clothing, or equipment.",
+        "Scene exclusions: do NOT show office towers, retail storefronts, restaurants, hospitals, warehouses, or generic facilities-maintenance scenes unrelated to apartment communities.",
         "Style exclusions: forbid cartoonish, illustrated, or animated styles.",
         "Style: realistic, clean, professional, multifamily B2B, vertical short-form social media clip.",
         "Composition: portrait framing, clear subject, smooth camera movement, no split screen.",
@@ -1052,14 +1083,15 @@ cta
 hashtags
 
 Rules:
-- ALL content MUST directly relate to multifamily/commercial plumbing only: apartment stack drains, main sewer lines, main water lines, hydro jetting, common-area fixture maintenance, exterior cleanouts, or plumbing-specific service level agreements.
+- ALL content MUST directly relate to multifamily plumbing only: apartment stack drains, main sewer lines, main water lines, hydro jetting, common-area fixture maintenance, exterior cleanouts, or plumbing-specific service level agreements.
 - Audience: Cleveland Multifamily Property Managers, Regional Managers, and Maintenance Supervisors hiring plumbing vendors.
 - STRICTLY FORBIDDEN topics: single-family homeowner concerns, boilers, heating, HVAC, electrical, janitorial, landscaping, roofing, or any general facility maintenance not specific to plumbing.
 - Tone: professional B2B, local, clear, accountable, urgent without hype.
-- Value propositions must be present across description and/or cta: tech-forward dispatching with real-time updates, strict adherence to Not-To-Exceed (NTE) limits, and commercial liability coverage.
+- Value propositions must be present across description and/or cta: tech-forward dispatching with real-time updates, strict adherence to Not-To-Exceed (NTE) limits, and documented liability coverage.
 - description must be exactly 2 short sentences grounded in the specific plumbing topic above. If there is a severe weather event, tie the description to the weather.
 - cta must be one short, dynamic sentence for commercial decision-makers and should reinforce risk control, uptime, or SLA accountability.
 - hashtags must be a single string of 3 to 5 relevant hashtags and MUST include #MultifamilyPlumbing #PropertyManagement #Cleveland.
+- NEVER use these words in headline, description, or cta: facility, facilities, FMS, office, retail.
 - No markdown.
 """.strip()
 
@@ -1073,12 +1105,12 @@ Rules:
         hashtags = (data.get("hashtags") or "").strip()
     except Exception:
         headline = title
-        description = "Multifamily plumbing emergencies in Cleveland can escalate quickly and disrupt tenants across multiple units. Get tech-forward dispatch with real-time updates, strict NTE control, and documented commercial liability coverage."
+        description = "Multifamily plumbing emergencies in Cleveland can escalate quickly and disrupt tenants across multiple units. Get tech-forward dispatch with real-time updates, strict NTE control, and documented liability coverage."
         cta = "Protect your portfolio NTE limits and uptime with a multifamily plumbing partner built for property operations."
         hashtags = "#MultifamilyPlumbing #PropertyManagement #Cleveland #ApartmentMaintenance"
 
     if not description:
-        description = "Multifamily plumbing emergencies in Cleveland can escalate quickly and disrupt tenants across multiple units. Get tech-forward dispatch with real-time updates, strict NTE control, and documented commercial liability coverage."
+        description = "Multifamily plumbing emergencies in Cleveland can escalate quickly and disrupt tenants across multiple units. Get tech-forward dispatch with real-time updates, strict NTE control, and documented liability coverage."
 
     if not hashtags:
         hashtags = "#MultifamilyPlumbing #PropertyManagement #Cleveland #ApartmentMaintenance"
@@ -1090,6 +1122,15 @@ Rules:
         if req.lower() not in normalized:
             hashtag_tokens.append(req)
     hashtags = " ".join(hashtag_tokens[:5]).strip() or "#MultifamilyPlumbing #PropertyManagement #Cleveland"
+
+    if contains_disallowed_multifamily_terms(headline):
+        headline = title
+
+    if contains_disallowed_multifamily_terms(description):
+        description = "Multifamily plumbing emergencies in Cleveland can escalate quickly and disrupt tenants across multiple units. Get tech-forward dispatch with real-time updates, strict NTE control, and documented liability coverage."
+
+    if contains_disallowed_multifamily_terms(cta):
+        cta = "Protect your portfolio NTE limits and uptime with a multifamily plumbing partner built for property operations."
 
     return headline, description, cta, hashtags
 
@@ -1408,6 +1449,9 @@ def main():
         candidate_title, candidate_keyword = generate_topic(existing_titles)
         last_candidate_title = (candidate_title or "").strip()
         last_candidate_keyword = (candidate_keyword or "").strip()
+        if not candidate_title:
+            print(f"Rejected candidate title on attempt {attempt}: disallowed terminology")
+            continue
         if candidate_title and not title_exists(feed, candidate_title):
             title, search_keyword = candidate_title, candidate_keyword
             break
@@ -1445,6 +1489,10 @@ def main():
         headline, description, cta, hashtags = generate_post_copy(title)
 
     final_title = headline.strip() or title.strip()
+    if contains_disallowed_multifamily_terms(final_title):
+        final_title = title.strip()
+        print(f"Final headline reset to topic title due to disallowed terminology: {final_title}")
+
     if title_exists(feed, final_title):
         # Keep the run productive even when Gemini copy generation collides.
         suffix = datetime.now(timezone.utc).strftime(" %Y-%m-%d %H%M UTC")
