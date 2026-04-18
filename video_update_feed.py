@@ -54,13 +54,19 @@ BLACKLIST_PEXELS_IDS = {
     "36543596",
 }
 
+BLACKLIST_PIXABAY_IDS = {
+    "25047",   # nebula/galaxy/space — not plumbing
+}
+
 BAD_VIDEO_KEYWORDS = {
+    # vehicles
     "car",
     "auto",
     "mechanic",
     "vehicle",
     "motorcycle",
     "truck",
+    # fitness / entertainment
     "workout",
     "exercise",
     "sports",
@@ -69,6 +75,34 @@ BAD_VIDEO_KEYWORDS = {
     "music",
     "dj",
     "concert",
+    # space / astronomy
+    "space",
+    "nebula",
+    "galaxy",
+    "cosmos",
+    "astronomy",
+    "planet",
+    "star",
+    # nature / travel
+    "wildlife",
+    "animal",
+    "nature",
+    "forest",
+    "mountain",
+    "beach",
+    "ocean",
+    "sunset",
+    "landscape",
+    "travel",
+    # food / cooking
+    "food",
+    "cooking",
+    "recipe",
+    "restaurant",
+    "chef",
+    "kitchen appliance",
+    "stove",
+    "oven",
 }
 
 GOOD_VIDEO_KEYWORDS = {
@@ -427,33 +461,37 @@ def fetch_pixabay_video_candidates(query):
     data = resp.json()
     videos = data.get("hits") or []
 
-    candidates = []
+    strict_candidates = []
+    neutral_candidates = []
     for v in videos:
         video_id = str(v.get("id", ""))
-        if video_id in BLACKLIST_PEXELS_IDS:
+        if video_id in BLACKLIST_PIXABAY_IDS:
             continue
 
         tags = v.get("tags", "")
         if is_likely_non_plumbing(tags):
             continue
 
-        # Pixabay tags can be sparse. For primary-source mode, allow neutral tags
-        # and rely on bad-keyword rejection plus query quality.
+        is_strict_match = is_plumbing_relevant(tags)
+
         videos_obj = v.get("videos") or {}
         for quality_key in ["medium", "small", "large"]:
             video_data = videos_obj.get(quality_key)
             if video_data and video_data.get("url"):
                 if not is_platform_safe_video(video_data.get("width"), video_data.get("height")):
                     continue
-                candidates.append(
-                    {
-                        "video_url": video_data.get("url"),
-                        "thumb_url": (video_data.get("thumbnail") or "").strip(),
-                        "id": f"pixabay:{video_id}" if video_id else "",
-                    }
-                )
+                entry = {
+                    "video_url": video_data.get("url"),
+                    "thumb_url": (video_data.get("thumbnail") or "").strip(),
+                    "id": f"pixabay:{video_id}" if video_id else "",
+                }
+                if is_strict_match:
+                    strict_candidates.append(entry)
+                else:
+                    neutral_candidates.append(entry)
                 break
-    return candidates
+    # Prefer videos with confirmed plumbing tags; fall back to non-blocked neutrals.
+    return strict_candidates or neutral_candidates
 
 
 def canonical_video_id(video_url):
