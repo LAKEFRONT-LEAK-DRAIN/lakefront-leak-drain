@@ -586,9 +586,6 @@ def generate_video_page(title, slug, description_text, video_url, thumb_url):
 
     og_image_tag = f'<meta property="og:image" content="{safe_thumb}">' if safe_thumb else ""
     twitter_image_tag = f'<meta name="twitter:image" content="{safe_thumb}">' if safe_thumb else ""
-    
-    # Build featured image tag for body
-    img_tag = f'<img src="{safe_thumb}" alt="{safe_title}" style="max-width: 100%; height: auto;">' if safe_thumb else ""
 
     html_content = f"""<!doctype html>
 <html lang=\"en\">
@@ -614,7 +611,6 @@ def generate_video_page(title, slug, description_text, video_url, thumb_url):
     <main>
         <h1>{safe_title}</h1>
         <p>{safe_desc}</p>
-        {img_tag}
         <video controls playsinline preload=\"metadata\" style=\"max-width:100%;height:auto;\">
             <source src=\"{safe_video}\" type=\"video/mp4\">
         </video>
