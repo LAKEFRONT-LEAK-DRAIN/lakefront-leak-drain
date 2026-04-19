@@ -288,14 +288,16 @@ function Get-HttpErrorBody {
 
 $costCents = [long][math]::Round(([decimal]$priceCents) * 0.50, 0)
 
-$jobLineItems = @(
-    @{
-        name       = $jobTitle
-        unit_price = $priceCents
-        unit_cost  = $costCents
-        quantity   = 1
-    }
-)
+$defaultLineItem = @{
+    name       = $jobTitle
+    unit_price = $priceCents
+    unit_cost  = $costCents
+    quantity   = 1
+}
+if (-not [string]::IsNullOrWhiteSpace($serviceSummary)) {
+    $defaultLineItem.description = $serviceSummary
+}
+$jobLineItems = @($defaultLineItem)
 
 if (-not [string]::IsNullOrWhiteSpace($lineItemsJson)) {
     try {
@@ -330,12 +332,21 @@ if (-not [string]::IsNullOrWhiteSpace($lineItemsJson)) {
 
                 $unitCost = [long][math]::Round(([decimal]$unitPrice) * 0.50, 0)
 
-                $validated += @{
+                $lineItemDescription = "$($item.description)".Trim()
+                if ([string]::IsNullOrWhiteSpace($lineItemDescription)) {
+                    $lineItemDescription = $serviceSummary
+                }
+
+                $validatedItem = @{
                     name       = $name
                     unit_price = $unitPrice
                     unit_cost  = $unitCost
                     quantity   = $quantity
                 }
+                if (-not [string]::IsNullOrWhiteSpace($lineItemDescription)) {
+                    $validatedItem.description = $lineItemDescription
+                }
+                $validated += $validatedItem
             }
 
             if ($validated.Count -gt 0) {

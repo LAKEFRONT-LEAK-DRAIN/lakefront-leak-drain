@@ -111,6 +111,7 @@ def parse_payload_price_cents(payload: Dict[str, Any]) -> int:
 def normalize_line_items(payload: Dict[str, Any], fallback_job_title: str, fallback_price_cents: int) -> list[Dict[str, Any]]:
     raw_items = payload.get("line_items", payload.get("lineItems", []))
     normalized: list[Dict[str, Any]] = []
+    fallback_description = normalize_optional_text(payload.get("service_summary", payload.get("scope", "")))
 
     if isinstance(raw_items, list):
         for item in raw_items:
@@ -134,24 +135,28 @@ def normalize_line_items(payload: Dict[str, Any], fallback_job_title: str, fallb
             if quantity <= 0:
                 raise ValueError("line_items quantity must be at least 1")
 
-            normalized.append(
-                {
-                    "name": name[:160],
-                    "unit_price": unit_price,
-                    "quantity": quantity,
-                }
-            )
+            description = normalize_optional_text(item.get("description", "")) or fallback_description
+
+            entry: Dict[str, Any] = {
+                "name": name[:160],
+                "unit_price": unit_price,
+                "quantity": quantity,
+            }
+            if description:
+                entry["description"] = description[:2000]
+            normalized.append(entry)
 
     if normalized:
         return normalized
 
-    return [
-        {
-            "name": fallback_job_title,
-            "unit_price": fallback_price_cents,
-            "quantity": 1,
-        }
-    ]
+    entry: Dict[str, Any] = {
+        "name": fallback_job_title,
+        "unit_price": fallback_price_cents,
+        "quantity": 1,
+    }
+    if fallback_description:
+        entry["description"] = fallback_description[:2000]
+    return [entry]
 
 
 def parse_dollars_to_cents(value: str) -> int:
