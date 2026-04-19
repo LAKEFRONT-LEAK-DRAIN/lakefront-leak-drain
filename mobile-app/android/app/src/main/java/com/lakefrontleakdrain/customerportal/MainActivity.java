@@ -1,4 +1,4 @@
-package com.lakefrontleakdrain.app;
+package com.lakefrontleakdrain.customerportal;
 
 import com.getcapacitor.BridgeActivity;
 
