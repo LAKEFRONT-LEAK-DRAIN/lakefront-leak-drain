@@ -111,7 +111,9 @@ def parse_payload_price_cents(payload: Dict[str, Any]) -> int:
 def normalize_line_items(payload: Dict[str, Any], fallback_job_title: str, fallback_price_cents: int) -> list[Dict[str, Any]]:
     raw_items = payload.get("line_items", payload.get("lineItems", []))
     normalized: list[Dict[str, Any]] = []
-    fallback_description = normalize_optional_text(payload.get("service_summary", payload.get("scope", "")))
+    fallback_description = normalize_optional_text(
+        first_present(payload, ["service_summary", "issue", "scope"])
+    )
 
     if isinstance(raw_items, list):
         for item in raw_items:
@@ -320,7 +322,7 @@ def parse_request_payload(payload: Dict[str, Any]) -> Dict[str, Any]:
         "requested_technician": normalize_optional_text(payload.get("requested_technician", "")),
         "requested_schedule": normalize_optional_text(payload.get("requested_schedule", "")),
         "service_summary": normalize_optional_text(
-            payload.get("service_summary", payload.get("scope", derive_job_title(payload)))
+            first_present(payload, ["service_summary", "issue", "scope"], derive_job_title(payload))
         ),
         "source": str(payload.get("source", "gemini_bridge_api")).strip(),
         "claim_number": normalize_claim_number(
