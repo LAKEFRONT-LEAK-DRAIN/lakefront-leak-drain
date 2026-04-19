@@ -1,0 +1,26 @@
+{
+  "first_name": "Erica",
+  "last_name": "Collier",
+  "company_name": "Rely Home Warranty",
+  "street": "4139 Woodmere Dr",
+  "city": "Youngstown",
+  "state": "OH",
+  "zip": "",
+  "phone": "3308346611",
+  "email": "ecollier1605@gmail.com",
+  "job_title": "General plumbing service",
+  "price_cents": 8500,
+  "requested_technician": "",
+  "requested_schedule": "Monday April 20th, 2026 11:00 AM-03:00 PM",
+  "service_summary": "General plumbing service",
+  "source": "gemini_bridge_api",
+  "claim_number": "328077110",
+  "line_items": [
+    {
+      "name": "General plumbing service",
+      "unit_price": 8500,
+      "quantity": 1
+    }
+  ],
+  "created_at_utc": "2026-04-19T11:17:45+00:00"
+}
